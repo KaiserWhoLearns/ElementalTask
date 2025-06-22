@@ -43,7 +43,7 @@ class FRCT_CV2_WordSearch(Task):
                     for i in range(1, 6)
                     if row.get(f"Answer{i}") and row[f"Answer{i}"].strip()
                 ]
-                prompt = f"Find all the words hidden in: {question}. Separate all words with a comma (','). Answers:"
+                prompt = f"Find all the four-letter words hidden in: {question}. Separate all words with a comma (','). Answers:"
                 yield {
                     "input":      prompt,
                     "output":     refs[0] if refs else "",
