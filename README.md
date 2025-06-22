@@ -33,9 +33,7 @@
 * Model Inference
   * Pass model name, checkpoint
   * Run inference (write to `outputs`) / evaluation
+* Data Saving
+  * Kaiser made in save directory somewhere
 
-* minor TODO: current version of VLLM is incompatible, need to search backward until we find a good one? (speculative, not sure but seems like the issue is recent)
-
-
-## Documents
-* Create a `.env` in the base directory.
+* minor TODO: current version of VLLM is incompatible, need to search backward until we find a good one? (speculative, not sure but seems like the issue is recent) - maybe fix VLLM later for faster generation... (Millicent)
