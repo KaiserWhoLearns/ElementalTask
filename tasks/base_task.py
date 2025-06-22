@@ -9,6 +9,8 @@ def register_task(cls: Type["Task"]) -> Type["Task"]:
     Register a task class in the global task registry.
     """
     _TASK_REGISTRY[cls.__name__] = cls
+    key = getattr(cls, "name", cls.__name__)
+    _TASK_REGISTRY[key] = cls
     return cls
 
 def get_task(task_name: str, **kwargs) -> "Task":
@@ -26,14 +28,13 @@ class Task(ABC):
     """
     name: str # unique identifier for the task
 
-
-    @abstractmethod
-    def prepare_data(self) -> None:
+    def __init__(self, **config: Any):
         """
-        Prepare the data for the task.
-        This method should be implemented by subclasses.
+        Initialize the task with configuration parameters.
+        Subclasses can define their own parameters.
         """
-        pass
+        for k, v in config.items():
+            setattr(self, k, v)
 
     @abstractmethod
     def get_split(self, split: str) -> Dataset:
@@ -43,10 +44,33 @@ class Task(ABC):
         """
         pass
 
-    @abstractmethod
-    def evaluate(self, model: Any) -> Dict[str, Any]:
+    def evaluate(
+        self,
+        outputs: List[str],
+        split: str = "test",
+        normalize: bool = True
+    ) -> Dict[str, float]:
         """
-        Evaluate the model on the task.
-        This method should be implemented by subclasses.
+        Default evaluation: compares `outputs` against
+        either `ex["output"]` or membership in `ex.get("references")`.
+        Returns a dict of metrics (e.g. {"accuracy": 0.85}).
         """
-        pass
+        examples = list(self.get_split(split))
+        if len(outputs) != len(examples):
+            raise ValueError("Number of outputs != number of examples")
+
+        correct = 0
+        for pred, ex in zip(outputs, examples):
+            p = pred.strip()
+            # if task provides multiple valid answers
+            refs = ex.get("references", None)
+            if refs:
+                valid = {r.strip() for r in refs}
+                if p in valid:
+                    correct += 1
+            else:
+                if p == ex[self.output_key].strip():
+                    correct += 1
+
+        acc = correct / len(examples)
+        return {"accuracy": acc}
