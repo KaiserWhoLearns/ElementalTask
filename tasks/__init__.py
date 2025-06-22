@@ -1,1 +1,2 @@
 from .frct_cv1_scrambled_words.frct_cv1 import FRCT_CV1_ScrambledWords
+from .frct_cv2_word_search.frct_cv2 import FRCT_CV2_WordSearch
