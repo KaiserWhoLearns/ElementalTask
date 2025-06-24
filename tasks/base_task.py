@@ -48,6 +48,7 @@ class Task(ABC):
         self,
         outputs: List[str],
         split: str = "test",
+        updated_dataset: List[Dict[str, Any]] = None,
         normalize: bool = True
     ) -> Dict[str, float]:
         """
@@ -55,9 +56,12 @@ class Task(ABC):
         either `ex["output"]` or membership in `ex.get("references")`.
         Returns a dict of metrics (e.g. {"accuracy": 0.85}).
         """
-        examples = list(self.get_split(split))
-        if len(outputs) != len(examples):
-            raise ValueError("Number of outputs != number of examples")
+        if updated_dataset is not None:
+            examples = updated_dataset
+        else:
+            examples = list(self.get_split(split))
+            if len(outputs) != len(examples):
+                raise ValueError("Number of outputs != number of examples")
 
         correct = 0
         for pred, ex in zip(outputs, examples):
