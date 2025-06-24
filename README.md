@@ -37,3 +37,12 @@
   * Kaiser made in save directory somewhere
 
 * minor TODO: current version of VLLM is incompatible, need to search backward until we find a good one? (speculative, not sure but seems like the issue is recent) - maybe fix VLLM later for faster generation... (Millicent)
+
+#
+Test
+```
+python models/evaluate_models.py \
+  --model_id LLM360/Crystal \
+  --max_new_tokens 5 \
+  --chkpt main 
+```

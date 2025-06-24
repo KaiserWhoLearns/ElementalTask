@@ -22,6 +22,7 @@ def load_model_revision(model_id: str, ckpt: Optional[str], use_vllm=False) -> T
             revision=ckpt,
             trust_remote_code=True
         )
+        tokenizer.pad_token = tokenizer.eos_token
     else:
         tokenizer = AutoTokenizer.from_pretrained(model_id, revision=ckpt, trust_remote_code=True)
         model = AutoModelForCausalLM.from_pretrained(model_id, revision=ckpt, device_map="auto", trust_remote_code=True)
