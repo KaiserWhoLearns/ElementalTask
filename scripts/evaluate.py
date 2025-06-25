@@ -24,10 +24,9 @@ def evaluate_model(
     else:
         data = load_dataset(dataset_path, subset, split="validation")
     
-    # TODO: this is the format from kilt that probably needs to be generalized
+    # # TODO: this is the format from kilt that probably needs to be generalized
     prompts = [item["input"] for item in data]
     answers = [item["output"][0]["answer"] for item in data]
-
     if use_vllm:
         model = vllm.LLM(
             model=model_id,
@@ -77,13 +76,17 @@ def main():
     parser.add_argument("--output_path", type=str, required=True, help="Path to save the evaluation results.")
     parser.add_argument("--subset", type=str, required=True, help="The split from the datasets to use.")
     parser.add_argument("--local_dataset", action="store_true", help="Use a local dataset instead of downloading from Hugging Face.")
-    parser.add_argument("--no_load_vllm", action="store_false")
+    parser.add_argument("--load_vllm", action="store_true", help="True if using vllm for inference, else False; defaults to False.")
     parser.add_argument("--max_new_tokens", type=int, default=100, help="Max tokens for generation.")
     
     args = parser.parse_args()
-    
+
     # Placeholder for evaluation logic
     print(f"Evaluating model {args.model_id} on dataset {args.dataset_path}...")
+
+    # Need to enable multiprocessing for VLLM, disabled by default
+    if args.load_vllm:
+        os.environ["LLM_WORKER_MULTIPROC_METHOD"] = "spawn"
 
     evaluate_model(
         args.model_id,
@@ -92,7 +95,7 @@ def main():
         args.output_path,
         args.local_dataset,
         args.subset,
-        args.no_load_vllm,
+        args.load_vllm,
         args.max_new_tokens,
     )
     
