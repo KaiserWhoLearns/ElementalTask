@@ -4,9 +4,9 @@ from typing import Iterator, Dict, Any
 from tasks.base_task import register_task, Task
 
 @register_task
-class FRCT_FA2_FiguresOfSpeech(Task):
+class FRCT_FA3_FiguresOfSpeech(Task):
     """
-    Find a word that means the opposite of the given word.
+    Find words or phrases that could be used in making figures of speech.
     """
 
     name = "frct_fa3_figures_of_speech"
@@ -22,10 +22,10 @@ class FRCT_FA2_FiguresOfSpeech(Task):
         """
         Only a single 'test' split.
         Yields:
-          {
+          {i hate
             "input":      "Think of words or phrases that could be used in making figures of speech which compare one object with another given this word: {Question}. Answer:",
-            "output":     <first opposite>,       # legacy
-            "references": [ant1, ant2, …]        # all valid opposites
+            "output":     <first word related to the question>,       # legacy
+            "references": [ant1, ant2, …]        # all valid words or phrases
           }
         """
         if split != "test":
@@ -35,10 +35,10 @@ class FRCT_FA2_FiguresOfSpeech(Task):
             reader = csv.DictReader(f)
             for row in reader:
                 question = row["Question"].strip()
-                # collect every non-empty Answer{i} up to 6
+                # collect every non-empty Answer{i}
                 refs = [
                     row[f"Answer{i}"].strip()
-                    for i in range(1, 7)
+                    for i in range(1, 8)
                     if row.get(f"Answer{i}") and row[f"Answer{i}"].strip()
                 ]
                 prompt = f"Think of words or phrases that could be used in making figures of speech which compare one object with another given this word: {question}. Answer:"
