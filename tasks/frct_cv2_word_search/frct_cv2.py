@@ -45,15 +45,19 @@ class FRCT_CV2_WordSearch(Task):
         self,
         outputs: List[str],
         split: str = "test",
+        updated_dataset: List[Dict[str, Any]] = None,
         normalize: bool = True
     ) -> Dict[str, float]:
         """
         Override: accuracy == 1 iff the set of comma-split predictions
         exactly equals the set of references.
         """
-        examples = list(self.get_split(split))
-        if len(outputs) != len(examples):
-            raise ValueError("Number of outputs != number of examples")
+        if updated_dataset is not None:
+            examples = updated_dataset
+        else:
+            examples = list(self.get_split(split))
+            if len(outputs) != len(examples):
+                raise ValueError("Number of outputs != number of examples")
 
         correct = 0
         for pred, ex in zip(outputs, examples):
