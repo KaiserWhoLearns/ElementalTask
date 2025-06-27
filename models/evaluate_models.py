@@ -78,7 +78,7 @@ def evaluate_model(
     dataset = dataset.add_column("predictions", generated_texts)
     # Save the predictions if output_path is provided
     if output_path:
-        file_name = os.path.join(output_path, f"{model_id.replace('/', '_')}_{chkpt}.jsonl")
+        file_name = os.path.join(output_path, f"{model_id.replace('/', '_')}_{chkpt}_{task_name}.jsonl")
         os.makedirs(output_path, exist_ok=True)
         dataset.to_json(file_name, orient="records", lines=True)
         print(f"Predictions saved to {output_path}")

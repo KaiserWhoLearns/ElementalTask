@@ -45,4 +45,11 @@ python models/evaluate_models.py \
   --model_id LLM360/Crystal \
   --max_new_tokens 5 \
   --chkpt main 
+
+python models/evaluate_models.py \
+  --task_name FRCT_CV1_ScrambledWords \
+  --max_new_tokens 5 \
+  --chkpt main 
+
 ```
+
