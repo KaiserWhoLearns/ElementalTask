@@ -1,0 +1,182 @@
+import csv
+import os
+import copy
+import json
+from dotenv import load_dotenv
+from openai import OpenAI
+
+
+class TextFRCT:
+    def __init__(self, data_path, eval_llm='gpt-4o-mini-2024-07-18'):
+        load_dotenv()
+        openai.api_key = os.getenv("OPENAI_API_KEY")
+        self.eval_client = OpenAI()
+        self.eval_llm = eval_llm
+        
+        self.data = []
+        with open(data_path, newline='', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                self.data.append(row)
+        self.test_ids = sorted(set([i['category_id'] for i in self.data]))
+
+    def replace_choice_tags(self, text, choices):
+        def replacer(match):
+            index = int(match.group(1))
+            if 0 <= index < len(additional):
+                return additional[index]
+            else:
+                return match.group(0)
+        return re.sub(r"<CHOICE_(\d+)>", replacer, text)
+
+    def extract_last_json_answer(self, s):
+        pattern = r'\{\s*"answer"\s*:\s*(.+?)\s*\}'
+        matches = list(re.finditer(pattern, s))
+        if not matches:
+            return s
+
+        raw_value = matches[-1].group(1).strip()
+
+        if (raw_value.startswith('"') and raw_value.endswith('"')) or \
+           (raw_value.startswith("'") and raw_value.endswith("'")):
+            raw_value = raw_value[1:-1]
+        return raw_value
+    
+    def match_FE1(self, pattern, sentence):
+        pattern_parts = pattern.strip("_").split("_")
+        words = sentence.strip().split()
+        if len(pattern_parts) != len(words):
+            return False
+        for pat, word in zip(pattern_parts, words):
+            if pat != "*":
+                if not word or word[0].lower() != pat.lower():
+                    return False
+        return True
+    
+    def match_FE2(self, words, sentence):
+        sentence_words = set(sentence.lower().split())
+        return all(word.lower() in sentence_words for word in words.split())
+    
+    def match_FW1(self, pattern, word):
+        return word.lower().endswith(pattern)
+    
+    def match_FW2(self, pattern, word):
+        return word.lower().startswith(pattern)
+    
+    def match_FW3(self, pattern, word):
+        s, e = pattern.split(';;')
+        return word.lower().startswith(s) and word.lower().endswith(e)
+
+    def build_prompt(self, questions, demonstrations):
+        for row in self.data:
+            if row['category_id'] == 'FW3':
+                s, e = row['question'].split(';;')
+                question = questions[row['category_id']].replace('<QUESTION_0>', s).replace('<QUESTION_1>', e)
+            else:
+                question = questions[row['category_id']].replace('<ADDITIONAL>', row['additional'].replace('<br>', '\n')).replace('<QUESTION>', row['question'].replace('<br>', '\n'))
+            if row['choice'] != '':
+                question = self.replace_choice_tags(question, row['choice'].split(';;'))
+            prompt = ' '.join(question, demonstrations[row['category_id']])
+            yield prompt
+    
+    def evaluate(self, raw_predictions, save_file='results.csv'):
+        save_data = copy.deepcopy(self.data)
+        assert len(raw_predictions) == len(save_data)
+        predictions = [self.extract_last_json_answer(i) for i in raw_predictions]
+        accuracy = {key: [] for key in self.test_ids}
+        
+        for idx in range(len(save_data)):
+            single_count = []
+            answers = save_data[idx]['answer'].split(';;')
+            preds = predictions[idx].lower().split('\n')
+            preds = list(set(preds))
+            
+            if save_data[idx]['category_id'] in ['CV1', 'CV2', 'CV3', 'FA1', 'FA2', 'I1', 'I2', 'MA2', 'MA3', 'RG1', 'RG2', 'RG3', 'RL1', 'RL3', 'RL4', 'V1', 'V2', 'V3', 'V4', 'V5']:
+                for pred in preds:
+                    single_count.append(pred in [i.lower() for i in answers])
+            
+            elif save_data[idx]['category_id'] in ['FA3', 'FE1', 'FE3', 'FI1', 'FI2', 'FI3', 'FW1', 'FW2', 'FW3', 'XU1', 'XU2', 'XU4']:
+                for pred in preds:
+                    query = answers[0].replace('<LLMEval>', f'You need to decide whether {pred} is an acceptable answer. ')
+                    query += ' Respond with only one letter: Y if the answer is acceptable, N if it is not, in JSON format as follows: {"answer": YOUR_ANSWER_HERE}.'
+                    response = self.eval_client.responses.create(
+                        model=eval_llm,
+                        input=query
+                    )
+                    decision = self.extract_last_json_answer(response.output_text.lower())
+                    if save_data[idx]['category_id'] == 'FE1':
+                        single_count.append((decision == 'y') and self.match_FE1(save_data[idx]['question'], pred))
+                    elif save_data[idx]['category_id'] == 'FW1':
+                        single_count.append((decision == 'y') and self.match_FW1(save_data[idx]['question'], pred))
+                    elif save_data[idx]['category_id'] == 'FW2':
+                        single_count.append((decision == 'y') and self.match_FW2(save_data[idx]['question'], pred))
+                    elif save_data[idx]['category_id'] == 'FW3':
+                        single_count.append((decision == 'y') and self.match_FW3(save_data[idx]['question'], pred))
+                    else:
+                        single_count.append(decision == 'y')
+            
+            elif save_data[idx]['category_id'] == 'XU3':
+                groups = [pred.split(';')[0].strip().split(',') for pred in preds]
+                groups = [[j.strip() for j in i] for i in groups]
+                
+                lenth_check = [len(i) >= 3 for i in groups]
+                
+                repeat_check = []
+                seen = set()
+                for i in groups:
+                    if i in seen:
+                        repeat_check.append(False)
+                    else:
+                        repeat_check.append(True)
+                        seen.add(i)
+
+                llm_check = []
+                for pred in preds:
+                    query = answers[0].replace('<LLMEval>', f'You need to decide whether {pred} is an acceptable answer. ')
+                    query += ' Respond with only one letter: Y if the answer is acceptable, N if it is not, in JSON format as follows: {"answer": YOUR_ANSWER_HERE}.'
+                    response = self.eval_client.responses.create(
+                        model=eval_llm,
+                        input=query
+                    )
+                    decision = self.extract_last_json_answer(response.output_text.lower())
+                    llm_check.append(decision == 'y')
+                single_count = [(i and j and k) for i, j, k in zip(lenth_check, repeat_check, llm_check)]
+            
+            elif save_data[idx]['category_id'] == 'FE2':
+                qualified = [self.match_FE2(save_data[idx]['question'], pred) for pred in preds]
+                pred = '\n'.join(preds)
+                
+                query = answers[0].replace('<LLMEval>', f'You need to decide whether each row in:\n{pred}\nis an acceptable answer. ')
+                query += ' Respond with only one list of single letters, Y if the row is acceptable, N if it is not, in JSON format as follows: {"answer": [YOUR_ANSWER_HERE]}'
+                response = self.eval_client.responses.create(
+                    model=eval_llm,
+                    input=query
+                )
+                decision = self.extract_last_json_answer(response.output_text.lower())
+                decision = [i == 'y' for i in decision]
+                single_count = [i and j for i, j in zip(decision, qualified)]
+            
+            save_data[idx]['predictions'] = raw_predictions[idx]
+            save_data[idx]['processed_preds'] = preds
+            save_data[idx]['pred_num'] = len(single_count)
+            save_data[idx]['pred_correct'] = sum(single_count)
+            
+        with open(save_file, mode='w', newline='', encoding='utf-8') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=save_data[0].keys())
+            writer.writeheader()
+            writer.writerows(save_data)
+        
+        for row in save_data:
+            cid = str(row['category_id'])
+            accuracy[cid].append(row['pred_correct'] / row['pred_num'])
+        
+        for subtest in accuracy:
+            accuracy[subtest] = sum(accuracy[subtest]) / len(accuracy[subtest])
+
+        accuracy['ALL'] = sum([accuracy[s] for s in accuracy]) / len([accuracy[s] for s in accuracy])
+        with open(save_file.replace('.csv', '_acc.csv'), 'w') as f:
+            for key in accuracy:
+                f.write(f'{key},{accuracy[key]}\n')
+
+        print(accuracy)
+        return accuracy
