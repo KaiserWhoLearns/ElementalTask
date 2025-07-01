@@ -1,4 +1,0 @@
-from .frct_cv1_scrambled_words.frct_cv1 import FRCT_CV1_ScrambledWords
-from .frct_cv2_word_search.frct_cv2 import FRCT_CV2_WordSearch
-from .frct_cv3_word_completion.frct_cv3 import FRCT_CV3_WordCompletion
-from .frct_fa1_controlled_associations.frct_fa1 import FRCT_FA1_ControlledAssociations
