@@ -5,6 +5,7 @@ import json
 import re
 from dotenv import load_dotenv
 from openai import OpenAI
+from tqdm import tqdm
 
 
 class TextFRCT:
@@ -54,18 +55,19 @@ class TextFRCT:
         return True
     
     def match_FE2(self, words, sentence):
-        sentence_words = set(sentence.lower().split())
+        sentence = sentence.lower().replace(',', ' ').replace('.', ' ').replace('\'', ' ')
+        sentence_words = set(sentence.split())
         return all(word.lower() in sentence_words for word in words.split())
     
     def match_FW1(self, pattern, word):
-        return word.lower().endswith(pattern)
+        return word.lower().endswith(pattern.lower())
     
     def match_FW2(self, pattern, word):
-        return word.lower().startswith(pattern)
+        return word.lower().startswith(pattern.lower())
     
     def match_FW3(self, pattern, word):
         s, e = pattern.split(';;')
-        return word.lower().startswith(s) and word.lower().endswith(e)
+        return word.lower().startswith(s.lower()) and word.lower().endswith(e.lower())
 
     def build_prompt(self, questions, demonstrations):
         for row in self.data:
@@ -94,77 +96,68 @@ class TextFRCT:
         assert len(raw_predictions) == len(save_data)
         predictions = [self.extract_last_json_answer(i) for i in raw_predictions]
         accuracy = {key: [] for key in self.test_ids}
-        
-        for idx in range(len(save_data)):
+
+        for idx in tqdm(range(len(save_data))):
             single_count = []
             answers = save_data[idx]['answer'].split(';;')
-            preds = predictions[idx].lower().split('\n')
-            preds = list(set(preds))
+            preds = [i.strip() for i in predictions[idx].lower().split('\n')]
+            preds = list(dict.fromkeys(preds))
             
             if save_data[idx]['category_id'] in ['CV1', 'CV2', 'CV3', 'FA1', 'FA2', 'I1', 'I2', 'MA2', 'MA3', 'RG1', 'RG2', 'RG3', 'RL1', 'RL3', 'RL4', 'V1', 'V2', 'V3', 'V4', 'V5']:
                 for pred in preds:
                     single_count.append(pred in [i.lower() for i in answers])
             
-            elif save_data[idx]['category_id'] in ['FA3', 'FE1', 'FE3', 'FI1', 'FI2', 'FI3', 'FW1', 'FW2', 'FW3', 'XU1', 'XU2', 'XU4']:
+            elif save_data[idx]['category_id'] in ['FA3', 'FE1', 'FE2', 'FE3', 'FI1', 'FI2', 'FI3', 'FW1', 'FW2', 'FW3', 'XU1', 'XU2', 'XU4']:
                 for pred in preds:
-                    query = answers[0].replace('<LLMEval>', f'You need to decide whether {pred} is an acceptable answer. ')
+                    query = answers[0].replace('<LLMEval>', f'You need to decide whether "{pred}" is an acceptable answer. ')
                     query += ' Respond with only one letter: Y if the answer is acceptable, N if it is not, in JSON format as follows: {"answer": YOUR_ANSWER_HERE}.'
                     response = self.eval_client.responses.create(
-                        model=eval_llm,
+                        model=self.eval_llm,
                         input=query
                     )
                     decision = self.extract_last_json_answer(response.output_text.lower())
+                    match = True
                     if save_data[idx]['category_id'] == 'FE1':
-                        single_count.append((decision == 'y') and self.match_FE1(save_data[idx]['question'], pred))
+                        match = self.match_FE1(save_data[idx]['question'], pred)
+                    elif save_data[idx]['category_id'] == 'FE2':
+                        match = self.match_FE2(save_data[idx]['question'], pred)
                     elif save_data[idx]['category_id'] == 'FW1':
-                        single_count.append((decision == 'y') and self.match_FW1(save_data[idx]['question'], pred))
+                        match = self.match_FW1(save_data[idx]['question'], pred)
                     elif save_data[idx]['category_id'] == 'FW2':
-                        single_count.append((decision == 'y') and self.match_FW2(save_data[idx]['question'], pred))
+                        match = self.match_FW2(save_data[idx]['question'], pred)
                     elif save_data[idx]['category_id'] == 'FW3':
-                        single_count.append((decision == 'y') and self.match_FW3(save_data[idx]['question'], pred))
-                    else:
-                        single_count.append(decision == 'y')
+                        match = self.match_FW3(save_data[idx]['question'], pred)
+                    
+                    single_count.append(decision == 'y' and match)
+                        
             
             elif save_data[idx]['category_id'] == 'XU3':
-                groups = [pred.split(':')[0].strip().split(',') for pred in preds]
-                groups = [[j.strip(',') for j in i] for i in groups]
+                groups = [pred.split(':')[0].split(',') for pred in preds if pred.strip()]
+                groups = [[j.strip() for j in i] for i in groups]
+                reason = [pred.split(':')[1].strip() for pred in preds if pred.strip()]
                 
                 lenth_check = [len(i) >= 3 for i in groups]
                 
                 repeat_check = []
-                seen = set()
-                for i in groups:
+                seen = []
+                for i in [','.join(i) for i in groups]:
                     if i in seen:
                         repeat_check.append(False)
                     else:
                         repeat_check.append(True)
-                        seen.add(i)
+                        seen.append(i)
 
                 llm_check = []
-                for pred in preds:
-                    query = answers[0].replace('<LLMEval>', f'You need to decide whether {pred} is an acceptable answer. ')
-                    query += ' Respond with only one letter: Y if the answer is acceptable, N if it is not, in JSON format as follows: {"answer": YOUR_ANSWER_HERE}.'
+                for g, r in zip(groups, reason):
+                    query = answers[0].replace('<LLMEval>', f'You need to decide whether "Groups: {', '.join(g)}; Reason: {r}" is an acceptable answer. ').replace('<br>', '\n')
+                    query += 'Respond with only one letter: Y if the answer is acceptable, N if it is not, in JSON format as follows: {"answer": YOUR_ANSWER_HERE}.'
                     response = self.eval_client.responses.create(
-                        model=eval_llm,
+                        model=self.eval_llm,
                         input=query
                     )
                     decision = self.extract_last_json_answer(response.output_text.lower())
                     llm_check.append(decision == 'y')
                 single_count = [(i and j and k) for i, j, k in zip(lenth_check, repeat_check, llm_check)]
-            
-            elif save_data[idx]['category_id'] == 'FE2':
-                qualified = [self.match_FE2(save_data[idx]['question'], pred) for pred in preds]
-                pred = '\n'.join(preds)
-                
-                query = answers[0].replace('<LLMEval>', f'You need to decide whether each row in:\n{pred}\nis an acceptable answer. ')
-                query += ' Respond with only one list of single letters, Y if the row is acceptable, N if it is not, in JSON format as follows: {"answer": [YOUR_ANSWER_HERE]}'
-                response = self.eval_client.responses.create(
-                    model=eval_llm,
-                    input=query
-                )
-                decision = self.extract_last_json_answer(response.output_text.lower())
-                decision = [i == 'y' for i in decision]
-                single_count = [i and j for i, j in zip(decision, qualified)]
             
             save_data[idx]['predictions'] = raw_predictions[idx]
             save_data[idx]['processed_preds'] = preds
@@ -178,7 +171,8 @@ class TextFRCT:
         
         for row in save_data:
             cid = str(row['category_id'])
-            accuracy[cid].append(row['pred_correct'] / row['pred_num'])
+            acc = row['pred_correct'] / row['pred_num'] if row['pred_num'] != 0 else 0
+            accuracy[cid].append(acc)
         
         for subtest in accuracy:
             accuracy[subtest] = sum(accuracy[subtest]) / len(accuracy[subtest])
@@ -187,6 +181,8 @@ class TextFRCT:
         with open(save_file.replace('.csv', '_acc.csv'), 'w') as f:
             for key in accuracy:
                 f.write(f'{key},{accuracy[key]}\n')
+        
+        for i in accuracy.keys():
+            print(f"{i:3}: {accuracy[i] * 100:8.2f}")
 
-        print(accuracy)
         return accuracy

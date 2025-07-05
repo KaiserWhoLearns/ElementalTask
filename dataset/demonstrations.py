@@ -40,8 +40,8 @@ VANILLA_DEMONSTRATIONS = {
     'XF1': "",
     'XF2': "",
     'XF3': "",
-    'XU1': "Input:<br>Request: Rub dirt off the inside of a small bottle. Location: An ordinary house; bottle cleaners are not available.<br>Output:<br>rag<br>pencil",
+    'XU1': "Input:<br>Request: Rub dirt off the inside of a small bottle. Location: An ordinary house; bottle cleaners are not available.<br>Output:<br>rag; pencil",
     'XU2': "Input:<br>You have been shipwrecked and are on a small raft with only your clothing, some food, some water, and some fishing equipment available. Name one object that is probably available and which can be used to make a small sail.<br>Output:<br>a shirt",
-    'XU3': "Input:<br>a. trout<br>b. robin<br>c. frog<br>d. car<br>e. boat<br>f. bat<br>g. airplane<br>Output:<br>a, b, c, f: animals<br>d, c, g: transportation<br>b, f, g: fly<br>a, c, e: found in water",
+    'XU3': "Input:<br>a. trout<br>b. robin<br>c. frog<br>d. car<br>e. boat<br>f. bat<br>g. airplane<br><br>Output:<br>a, b, c, f: animals<br>d, c, g: transportation<br>b, f, g: fly<br>a, c, e: found in water",
     'XU4': "Input:<br>MAGAZINE (used for reading)<br>Output:<br>swat mosquitoes<br>start a fire<br>make paper beads",
 }
