@@ -42,6 +42,18 @@ class TextFRCT:
            (raw_value.startswith("'") and raw_value.endswith("'")):
             raw_value = raw_value[1:-1]
         return raw_value
+
+    def merge_strings_without_colon(self, lst):
+        result = []
+        for s in lst:
+            if ':' in s:
+                result.append(s)
+            else:
+                if result:
+                    result[-1] += s
+                else:
+                    result.append(s)
+        return result
     
     def match_FE1(self, pattern, sentence):
         pattern_parts = pattern.strip("_").split("_")
@@ -100,7 +112,7 @@ class TextFRCT:
         for idx in tqdm(range(len(save_data))):
             single_count = []
             answers = save_data[idx]['answer'].split(';;')
-            preds = [i.strip() for i in predictions[idx].lower().split('\n')]
+            preds = [i.strip() for i in predictions[idx].lower().split('\n') if i.strip()]
             preds = list(dict.fromkeys(preds))
             
             if save_data[idx]['category_id'] in ['CV1', 'CV2', 'CV3', 'FA1', 'FA2', 'I1', 'I2', 'MA2', 'MA3', 'RG1', 'RG2', 'RG3', 'RL1', 'RL3', 'RL4', 'V1', 'V2', 'V3', 'V4', 'V5']:
@@ -132,9 +144,10 @@ class TextFRCT:
                         
             
             elif save_data[idx]['category_id'] == 'XU3':
-                groups = [pred.split(':')[0].split(',') for pred in preds if pred.strip()]
+                parse = self.merge_strings_without_colon(preds)
+                groups = [p.split(':')[0].split(',') for p in parse]
                 groups = [[j.strip() for j in i] for i in groups]
-                reason = [pred.split(':')[1].strip() for pred in preds if pred.strip()]
+                reason = [p.split(':')[1].strip() for p in parse]
                 
                 lenth_check = [len(i) >= 3 for i in groups]
                 
