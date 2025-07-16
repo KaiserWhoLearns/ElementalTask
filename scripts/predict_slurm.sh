@@ -26,15 +26,28 @@ conda activate eval-pipeline
 # source "/home/hsun74/.bashrc"
 cd $base_dir
 
+# python scripts/measure_ckpt_interp_perf.py --model_id LLM360/Crystal \
+#     --data_path dataset/simple.csv \
+#     --num_checkpoints 10 \
+#     --output_path output/Crystal_ckpt_interp_results.csv
+
 python scripts/measure_ckpt_interp_perf.py --model_id LLM360/Crystal \
     --data_path dataset/simple.csv \
-    --num_checkpoints 10 \
-    --output_path output/Crystal_ckpt_interp_results.csv
+    --begin 1 \
+    --end 20 \
+    --output_path output/Crystal_ckpt_interp_results_firstckpts.csv
 
 # python scripts/measure_ckpt_interp_perf.py --model_id allenai/OLMo-2-0425-1B \
 #     --use_vllm \
 #     --data_path dataset/simple.csv \
 #     --num_checkpoints 10 \
 #     --output_path output/olmo2_ckpt_interp_results.csv
+
+python scripts/measure_ckpt_interp_perf.py --model_id allenai/OLMo-2-0425-1B \
+    --use_vllm \
+    --data_path dataset/simple.csv \
+    --begin 1 \
+    --end 20 \
+    --output_path output/olmo2_ckpt_interp_results_firstckpts.csv
 
 EOT

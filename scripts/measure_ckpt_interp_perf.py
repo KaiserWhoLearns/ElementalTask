@@ -17,6 +17,18 @@ Usage examples:
     # Evaluate specific checkpoints
     python scripts/measure_ckpt_interp_perf.py --model_id LLM360/Crystal --use_vllm \
         --checkpoints CrystalCoder_phase1_checkpoint_055500 CrystalCoder_phase3_checkpoint_027728
+    
+    # Evaluate checkpoints 5 through 10 (0-indexed, inclusive)
+    python scripts/measure_ckpt_interp_perf.py --model_id LLM360/Crystal --use_vllm \
+        --num_checkpoints 20 --begin 5 --end 10
+    
+    # Evaluate all checkpoints from index 10 onwards
+    python scripts/measure_ckpt_interp_perf.py --model_id LLM360/Crystal --use_vllm \
+        --num_checkpoints 20 --begin 10
+    
+    # Evaluate checkpoints from beginning up to index 5
+    python scripts/measure_ckpt_interp_perf.py --model_id LLM360/Crystal --use_vllm \
+        --num_checkpoints 20 --end 5
 """
 
 import os
@@ -236,6 +248,10 @@ def main():
                        help="Specific checkpoints to evaluate (overrides automatic sampling)")
     parser.add_argument("--list_checkpoints_only", action="store_true",
                        help="Only list available checkpoints without running evaluation")
+    parser.add_argument("--begin", type=int, default=-1,
+                       help="Start evaluation at the begin-th checkpoint (0-indexed). Use -1 to disable range filtering")
+    parser.add_argument("--end", type=int, default=-1,
+                       help="End evaluation at the end-th checkpoint (0-indexed, inclusive). Use -1 to disable range filtering")
     
     args = parser.parse_args()
     
@@ -258,8 +274,41 @@ def main():
     # Get checkpoints
     if args.checkpoints:
         checkpoints = args.checkpoints
-    else:
+    elif args.begin == -1:
         checkpoints = get_uniformly_sampled_checkpoints(args.model_id, args.num_checkpoints)
+    else:
+        # Get all available checkpoints
+        checkpoints = get_uniformly_sampled_checkpoints(args.model_id, num_checkpoints=100000)  # Get all
+
+    
+    # Apply begin/end filtering if specified
+    if args.begin != -1:
+        if args.begin >= len(checkpoints):
+            print(f"ERROR: --begin ({args.begin}) is out of range. Total checkpoints: {len(checkpoints)}")
+            return
+        
+        if args.end != -1:
+            # Both begin and end specified
+            if args.end >= len(checkpoints):
+                print(f"ERROR: --end ({args.end}) is out of range. Total checkpoints: {len(checkpoints)}")
+                return
+            if args.begin > args.end:
+                print(f"ERROR: --begin ({args.begin}) must be less than or equal to --end ({args.end})")
+                return
+            
+            checkpoints = checkpoints[args.begin:args.end + 1]  # +1 because end is inclusive
+            print(f"Evaluating checkpoints from index {args.begin} to {args.end} (inclusive)")
+        else:
+            # Only begin specified
+            checkpoints = checkpoints[args.begin:]
+            print(f"Evaluating checkpoints from index {args.begin} to the end")
+    elif args.end != -1:
+        # Only end specified
+        if args.end >= len(checkpoints):
+            print(f"ERROR: --end ({args.end}) is out of range. Total checkpoints: {len(checkpoints)}")
+            return
+        checkpoints = checkpoints[:args.end + 1]  # +1 because end is inclusive
+        print(f"Evaluating checkpoints from the beginning to index {args.end} (inclusive)")
     
     print(f"Evaluating {len(checkpoints)} checkpoints on {len(task_categories_to_examples)} tasks")
     
