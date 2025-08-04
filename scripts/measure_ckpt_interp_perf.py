@@ -93,6 +93,16 @@ def get_uniformly_sampled_checkpoints(model_id, num_checkpoints=10):
                 checkpoint_branches.append((sort_key, branch_name, f"Phase {phase}, Checkpoint {checkpoint_num}"))
                 continue
             
+            # Handle stage/phase patterns with steps (e.g., stage1_step1000, phase2_step500)
+            stage_step_match = re.search(r'(?:stage|phase)(\d+).*?step(\d+)', branch_name.lower())
+            if stage_step_match:
+                stage = int(stage_step_match.group(1))
+                step_num = int(stage_step_match.group(2))
+                # Use stage * 1000000 + step_num for proper ordering
+                sort_key = stage * 1000000 + step_num
+                checkpoint_branches.append((sort_key, branch_name, f"Stage {stage}, Step {step_num}"))
+                continue
+            
             # Handle standard step-based patterns (step1000, step1000-tokens4B, etc.)
             step_match = re.search(r'step(\d+)', branch_name.lower())
             if step_match:
@@ -100,15 +110,27 @@ def get_uniformly_sampled_checkpoints(model_id, num_checkpoints=10):
                 checkpoint_branches.append((step_num, branch_name, f"Step {step_num}"))
                 continue
                 
-            # Handle other checkpoint patterns
-            if any(pattern in branch_name.lower() for pattern in ['checkpoint', 'epoch']):
+            # Handle checkpoint patterns with stage (e.g., checkpoint_stage1_100, stage1_checkpoint100)
+            stage_checkpoint_match = re.search(r'(?:stage|phase)(\d+).*?(?:checkpoint|ckpt|epoch).*?(\d+)', branch_name.lower())
+            if not stage_checkpoint_match:
+                stage_checkpoint_match = re.search(r'(?:checkpoint|ckpt|epoch).*?(?:stage|phase)(\d+).*?(\d+)', branch_name.lower())
+            
+            if stage_checkpoint_match:
+                stage = int(stage_checkpoint_match.group(1))
+                checkpoint_num = int(stage_checkpoint_match.group(2))
+                sort_key = stage * 1000000 + checkpoint_num
+                checkpoint_branches.append((sort_key, branch_name, f"Stage {stage}, Checkpoint {checkpoint_num}"))
+                continue
+                
+            # Handle other checkpoint patterns without stage
+            if any(pattern in branch_name.lower() for pattern in ['checkpoint', 'epoch', 'ckpt']):
                 # Try to extract any number for sorting
                 num_match = re.search(r'(\d+)', branch_name)
                 if num_match:
                     num = int(num_match.group(1))
                     checkpoint_branches.append((num, branch_name, f"Checkpoint {num}"))
         
-        # Sort by sort key
+        # Sort by sort key (first by stage/phase, then by checkpoint number)
         checkpoint_branches.sort(key=lambda x: x[0])
         
         if not checkpoint_branches:
@@ -183,7 +205,7 @@ def evaluate_checkpoint_on_tasks(model_id, checkpoint, data, use_vllm=True):
     all_answers = []
     all_categories = []
     
-    for idx, row in data.iterrows():
+    for _, row in data.iterrows():
         category = row['category_name']
         icl_prompt = craft_icl(category)
         icl_prompt += f"{row['question']} ->"

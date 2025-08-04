@@ -1,6 +1,6 @@
 #!/bin/bash
 export base_dir=/scratch4/mdredze1/hsun74/ElementalTask
-export exp_name=interp_perf_olm
+export exp_name=interp_perf_olmo
 
 cd $base_dir
 sbatch <<EOT
@@ -31,11 +31,11 @@ cd $base_dir
 #     --num_checkpoints 10 \
 #     --output_path output/Crystal_ckpt_interp_results.csv
 
-python scripts/measure_ckpt_interp_perf.py --model_id LLM360/Crystal \
-    --data_path dataset/simple.csv \
-    --begin 1 \
-    --end 20 \
-    --output_path output/Crystal_ckpt_interp_results_firstckpts.csv
+# python scripts/measure_ckpt_interp_perf.py --model_id LLM360/Crystal \
+#     --data_path dataset/simple.csv \
+#     --begin 1 \
+#     --end 10 \
+#     --output_path output/Crystal_ckpt_interp_results_firstckpts.csv
 
 # python scripts/measure_ckpt_interp_perf.py --model_id allenai/OLMo-2-0425-1B \
 #     --use_vllm \
@@ -47,7 +47,7 @@ python scripts/measure_ckpt_interp_perf.py --model_id allenai/OLMo-2-0425-1B \
     --use_vllm \
     --data_path dataset/simple.csv \
     --begin 1 \
-    --end 20 \
+    --end 10 \
     --output_path output/olmo2_ckpt_interp_results_firstckpts.csv
 
 EOT

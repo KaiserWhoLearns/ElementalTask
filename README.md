@@ -43,7 +43,7 @@ Example usage:
 Usage Examples (Generate images):
 ```
   # Generate all plot types
-  python analysis/plotting.py --csv_path output/olmo2_ckpt_interp_results.csv
+  python analysis/plotting.py --csv_path output/olmo2_ckpt_interp_results_firstckpts.csv
 
   # Generate only performance curves
   python analysis/plotting.py --csv_path
