@@ -4,15 +4,10 @@ import sys
 import os
 from typing import Dict, List, Any, Optional
 from pathlib import Path
-
-# Add project root to path for imports
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+import pandas as pd
 
 try:
     from ..base_task import BaseTask, TaskConfig
-    from dataset.utils import TextFRCT as TextFRCTDataset
-    from dataset.demonstrations import VANILLA_DEMONSTRATIONS
-    from dataset.questions import VANILLA_QUESTIONS
     TEXTFRCT_AVAILABLE = True
 except ImportError as e:
     print(f"TextFRCT dependencies not available: {e}")
@@ -27,84 +22,131 @@ if TEXTFRCT_AVAILABLE:
         TASK_NAME = "textfrct"  # Auto-registration name
         
         def __init__(self, config: TaskConfig, skip_subjective: bool = False):
-            # Initialize the TextFRCT dataset
-            self.textfrct_dataset = TextFRCTDataset(
-                data_path=config.data_path,
-                skip_subjective=skip_subjective
-            )
-            
-            # Call parent init with modified config
+            self.skip_subjective = skip_subjective
             super().__init__(config)
-            
-            # Override data with TextFRCT prompts
-            self.prompts = list(self.textfrct_dataset.build_prompt(VANILLA_QUESTIONS, VANILLA_DEMONSTRATIONS))
-            
-            # Store original data for evaluation
-            self.original_data = self.textfrct_dataset.data
         
         def _load_data(self):
-            """Override data loading since we use TextFRCT dataset directly."""
-            # Data is loaded in __init__ via TextFRCTDataset
-            pass
+            """Load TextFRCT data and filter out subjective tasks if requested."""
+            data = pd.read_csv(self.config.data_path)
+            
+            if self.skip_subjective:
+                # Filter out tasks that require LLM evaluation (contain <LLMEval>)
+                subjective_mask = data['answer'].astype(str).str.contains('<LLMEval>', na=False)
+                objective_data = data[~subjective_mask]
+                print(f"Filtered out {subjective_mask.sum()} subjective tasks, {len(objective_data)} objective tasks remaining")
+                self.data = objective_data
+            else:
+                self.data = data
+            
+            return self.data.to_dict('records')
         
         def get_split(self, split: str = "test") -> List[Dict[str, Any]]:
             """Get data split for TextFRCT."""
-            if split == "test" or split == "all":
-                # Convert prompts to the expected format
-                result = []
-                for i, prompt in enumerate(self.prompts):
-                    result.append({
-                        "input": prompt,
-                        "index": i
-                    })
-                return result
-            else:
-                return []
+            return self.data.to_dict('records') if hasattr(self.data, 'to_dict') else self.data
         
         def build_prompt(self, instance: Dict[str, Any]) -> str:
-            """Build prompt for TextFRCT - prompts are already built."""
-            return instance["input"]
+            """Build prompt based on category type."""
+            category = instance['category_id']
+            question = instance['question']
+            category_name = instance['category_name']
+            
+            if category.startswith('CV'):  # Convergent Visual
+                if category == 'CV1':  # Scrambled Words
+                    return f"Unscramble each group of letters to form a common English word. Use all the letters in each group. Respond with only the word.\n\nInput: {question}\nOutput:"
+                elif category == 'CV2':  # Hidden Words
+                    return f"Find all the hidden words in the following string of letters. Words are spelled forwards and are at least 4 letters long. List them separated by semicolons.\n\nInput: {question}\nOutput:"
+                elif category == 'CV3':  # Incomplete Words
+                    return f"Complete the word by filling in the missing letters.\n\nInput: {question}\nOutput:"
+            
+            elif category.startswith('FA'):  # Fluent Associational
+                if category == 'FA1':  # Controlled Association
+                    return f"List words that are related to or associated with '{question}'. Separate multiple answers with semicolons."
+                elif category == 'FA2':  # Opposites
+                    return f"List words that have the opposite meaning of '{question}'. Separate multiple answers with semicolons."
+            
+            elif category.startswith('V'):  # Vocabulary
+                choices = instance.get('choice', '').split(';;') if instance.get('choice') else []
+                if choices:
+                    choice_text = '\n'.join([f"{i+1}. {choice}" for i, choice in enumerate(choices)])
+                    return f"Choose the best definition for '{question}':\n\n{choice_text}\n\nAnswer (number):"
+                else:
+                    return f"What does '{question}' mean?"
+            
+            # Default format for other categories
+            return f"Task: {category_name}\nQuestion: {question}\nAnswer:"
         
         def evaluate(self, predictions: List[str], split: str = "test", **kwargs) -> Dict[str, float]:
-            """Evaluate predictions using TextFRCT's evaluation method."""
-            if len(predictions) != len(self.prompts):
-                raise ValueError(f"Prediction count ({len(predictions)}) doesn't match prompt count ({len(self.prompts)})")
+            """Evaluate predictions based on category type."""
+            data = self.get_split(split)
             
-            # Use TextFRCT's evaluation method
-            # Create a temporary file for the evaluation
-            temp_file = Path(self.config.metadata.get("temp_file", "temp_textfrct_eval.csv"))
+            if len(predictions) != len(data):
+                return {
+                    'accuracy': 0.0,
+                    'error': f'Prediction count ({len(predictions)}) does not match data count ({len(data)})'
+                }
             
-            try:
-                results = self.textfrct_dataset.evaluate(predictions, temp_file)
-                return results
-            except Exception as e:
-                print(f"Error in TextFRCT evaluation: {e}")
-                # Fallback to simple accuracy if TextFRCT evaluation fails
-                return {"accuracy": 0.0, "error": str(e)}
+            correct = 0
+            total = len(predictions)
+            
+            for i, (pred, example) in enumerate(zip(predictions, data)):
+                expected = example['answer']
+                category = example['category_id']
+                
+                if self._is_correct(pred, expected, category):
+                    correct += 1
+            
+            return {
+                'accuracy': correct / total if total > 0 else 0.0,
+                'correct': correct,
+                'total': total
+            }
+        
+        def _is_correct(self, prediction: str, expected: str, category: str) -> bool:
+            """Check if prediction is correct based on category."""
+            pred_clean = prediction.strip().lower()
+            expected_clean = str(expected).strip().lower()
+            
+            # Skip subjective tasks marked with <LLMEval>
+            if '<llmeval>' in expected_clean:
+                return False
+            
+            # Handle multiple correct answers separated by ;;
+            if ';;' in expected_clean:
+                correct_answers = [ans.strip().lower() for ans in expected_clean.split(';;')]
+                return pred_clean in correct_answers
+            
+            # For vocabulary tests, check if first character matches (multiple choice)
+            if category.startswith('V') and len(pred_clean) == 1:
+                try:
+                    answer_num = int(expected_clean)
+                    return pred_clean == str(answer_num)
+                except ValueError:
+                    pass
+            
+            return pred_clean == expected_clean
         
         def get_ground_truth(self, split: str = "test") -> List[str]:
-            """Get ground truth for TextFRCT - not directly available."""
-            # TextFRCT doesn't expose ground truth directly
-            # Return empty list as ground truth is handled in evaluate()
-            return [""] * len(self.prompts)
+            """Get ground truth for TextFRCT."""
+            data = self.get_split(split)
+            return [item['answer'] for item in data]
 
 
 def create_textfrct_task(
     data_path: str = "dataset/TextFRCT.csv",
-    skip_subjective: bool = False,
+    skip_subjective: bool = True,
     name: str = "textfrct"
 ) -> 'TextFRCTTask':
     """Create a TextFRCT task instance."""
     if not TEXTFRCT_AVAILABLE:
-        raise ImportError("TextFRCT task requires additional dependencies (dotenv, openai)")
+        raise ImportError("TextFRCT task requires base_task module")
     
     config = TaskConfig(
         name=name,
         description="TextFRCT evaluation dataset",
         data_path=data_path,
         data_format="csv",
-        input_column="input",
-        output_column="output",
+        input_column="question",
+        output_column="answer",
         evaluation_metrics=["accuracy"],
         metadata={"skip_subjective": skip_subjective}
     )
