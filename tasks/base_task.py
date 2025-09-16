@@ -45,10 +45,13 @@ class BaseTask(ABC):
             self.data = pd.DataFrame(self.config.in_memory_data)
             return
             
-        # Otherwise load from file
+        # If no data_path provided, let subclass handle data loading
         if not self.config.data_path:
-            raise ValueError("Either data_path or in_memory_data must be provided")
+            # Subclasses should override this method to provide their own data
+            # If they don't override it properly, self.data will remain None
+            return
             
+        # Otherwise load from file
         data_path = Path(self.config.data_path)
         
         if not data_path.exists():

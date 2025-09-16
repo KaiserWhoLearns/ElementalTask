@@ -165,6 +165,7 @@ def main():
             description="Basic arithmetic evaluation from CLI",
             data_format="memory",
             data_path=None,
+            in_memory_data=None,  # Signal to use task's default data
             input_column="question",
             output_column="answer",
             evaluation_metrics=["accuracy"]
@@ -189,7 +190,6 @@ def main():
     # Create evaluator and run evaluation
     print("Creating evaluator...")
     evaluator = TaskEvaluator(model_config, eval_config)
-    breakpoint()
     print("Running evaluation...")
     results = evaluator.evaluate_task(task)
     
