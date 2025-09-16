@@ -200,8 +200,7 @@ class TextFRCT:
 
                 llm_check = []
                 for g, r in zip(groups, reason):
-                    groups_str = ', '.join(g)
-                    query = answers[0].replace('<LLMEval>', f'You need to decide whether "Groups: {groups_str}; Reason: {r}" is an acceptable answer. ').replace('<br>', '\n')
+                    query = answers[0].replace('<LLMEval>', f'You need to decide whether "Groups: {", ".join(g)}; Reason: {r}" is an acceptable answer. ').replace('<br>', '\n')
                     query += 'Respond with only one letter: Y if the answer is acceptable, N if it is not, in JSON format as follows: {"answer": YOUR_ANSWER_HERE}.'
                     response = self.eval_client.responses.create(
                         model=self.eval_llm,
