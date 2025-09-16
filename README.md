@@ -24,6 +24,42 @@
     - Natural Langauge Inference = Understanding + Reasoning
 
 
+```
+Example usage:
+  # List all available checkpoints
+  python scripts/measure_ckpt_interp_perf.py --model_id allenai/OLMo-1B-hf --list_checkpoints_only
+
+  # Evaluate 10 uniformly sampled checkpoints
+  python scripts/measure_ckpt_interp_perf.py --model_id allenai/OLMo-1B-hf --use_vllm
+
+  # Evaluate specific checkpoints
+  python scripts/measure_ckpt_interp_perf.py --model_id allenai/OLMo-1B-hf --checkpoints step10000-tokens42B step50000-tokens210B --use_vllm
+```
+
+
+
+
+
+Usage Examples (Generate images):
+```
+  # Generate all plot types
+  python analysis/plotting.py --csv_path output/olmo2_ckpt_interp_results_firstckpts.csv
+
+  # Generate only performance curves
+  python analysis/plotting.py --csv_path
+  output/olmo2_ckpt_interp_results.csv --plot_type curves
+
+  # Generate grouped task curves
+  python analysis/plotting.py --csv_path
+  output/olmo2_ckpt_interp_results.csv --plot_type grouped
+
+  # Custom output directory and figure size
+  python analysis/plotting.py --csv_path
+  output/olmo2_ckpt_interp_results.csv --output_dir my_plots --figsize
+   16 10
+```
+
+
 ## Developmental TODOs
 
 * Data Preparation
