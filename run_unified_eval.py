@@ -10,9 +10,7 @@ import os
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from tasks.base_task import create_task_from_config, SimpleTask
-from tasks.implementations.simple_icl_task import SimpleICLTask
-from tasks.implementations.textfrct_task import create_textfrct_task
+from tasks.base_task import TaskConfig
 from tasks.evaluator import TaskEvaluator, ModelConfig, EvaluationConfig
 from tasks.registry import TaskRegistry
 
@@ -61,23 +59,23 @@ def main():
     available_tasks = list(registry.discover_tasks().keys())
     
     task_group.add_argument("--task_type", type=str, required=True,
-                           choices=available_tasks + ["config"],
+                           choices=available_tasks,
                            help=f"Type of task to run. Available: {', '.join(available_tasks)}")
-    task_group.add_argument("--task_config", type=str,
-                           help="Path to task configuration file (for config task type)")
-    task_group.add_argument("--skip_subjective", action="store_true",
-                           help="Skip subjective categories (for TextFRCT)")
     
-    # TextFRCT specific arguments
-    textfrct_group = parser.add_argument_group("TextFRCT Configuration")
-    textfrct_group.add_argument("--textfrct_categories", type=str, nargs="*",
-                               help="Specific TextFRCT categories to evaluate (e.g., CV1 CV2 FA1). "
-                                    "If not specified, all categories are used. "
-                                    "Common categories: CV1 (scrambled words), CV2 (hidden words), "
-                                    "CV3 (incomplete words), FA1 (associations), FA2 (opposites), "
-                                    "V1-V5 (vocabulary), RG1-RG3 (reasoning)")
-    textfrct_group.add_argument("--list_textfrct_categories", action="store_true",
-                               help="List all available TextFRCT categories and exit")
+    # TextFRCT specific arguments (only if textfrct is available)
+    if "textfrct" in available_tasks:
+        task_group.add_argument("--skip_subjective", action="store_true",
+                               help="Skip subjective categories (for TextFRCT)")
+        
+        textfrct_group = parser.add_argument_group("TextFRCT Configuration")
+        textfrct_group.add_argument("--textfrct_categories", type=str, nargs="*",
+                                   help="Specific TextFRCT categories to evaluate (e.g., CV1 CV2 FA1). "
+                                        "If not specified, all categories are used. "
+                                        "Common categories: CV1 (scrambled words), CV2 (hidden words), "
+                                        "CV3 (incomplete words), FA1 (associations), FA2 (opposites), "
+                                        "V1-V5 (vocabulary), RG1-RG3 (reasoning)")
+        textfrct_group.add_argument("--list_textfrct_categories", action="store_true",
+                                   help="List all available TextFRCT categories and exit")
     
     # Model arguments
     model_group = parser.add_argument_group("Model Configuration")
@@ -127,56 +125,66 @@ def main():
     model_config = create_model_config_from_args(args)
     eval_config = create_eval_config_from_args(args)
     
-    # Create task dynamically using registry
-    if args.task_type == "config":
-        if not args.task_config:
-            print("Error: --task_config required for config task type")
-            return 1
-        print(f"Creating task from config: {args.task_config}")
+    # Create task dynamically using registry - NO HARDCODED CONDITIONALS!
+    print(f"Creating {args.task_type} task...")
+    
+    # Get the task class from registry
+    task_class = registry.get_task_class(args.task_type)
+    if not task_class:
+        print(f"Error: Task '{args.task_type}' not found in registry")
+        return 1
+    
+    # Create task-specific configuration
+    if args.task_type == "textfrct":
+        # TextFRCT needs special configuration and constructor arguments
+        config = TaskConfig(
+            name="textfrct_cli",
+            description="TextFRCT evaluation from CLI",
+            data_path="dataset/TextFRCT.csv",
+            data_format="csv",
+            input_column="question",
+            output_column="answer",
+            evaluation_metrics=["accuracy"],
+            metadata={
+                "skip_subjective": getattr(args, 'skip_subjective', False),
+                "categories": getattr(args, 'textfrct_categories', None)
+            }
+        )
+        task = task_class(
+            config,
+            skip_subjective=getattr(args, 'skip_subjective', False),
+            categories=getattr(args, 'textfrct_categories', None)
+        )
+        if hasattr(args, 'textfrct_categories') and args.textfrct_categories:
+            print(f"Filtering to categories: {args.textfrct_categories}")
         
-        # For config type, we need to determine the task type from the config file
-        # For now, default to SimpleTask but this could be improved
-        task = create_task_from_config(args.task_config, SimpleTask)
+    elif args.task_type == "basic_arithmetic":
+        # BasicArithmetic uses in-memory data
+        config = TaskConfig(
+            name="basic_arithmetic_cli",
+            description="Basic arithmetic evaluation from CLI",
+            data_format="memory",
+            data_path=None,
+            input_column="question",
+            output_column="answer",
+            evaluation_metrics=["accuracy"]
+        )
+        task = task_class(config)
         
-    elif args.task_type == "textfrct":
-        # TextFRCT has special handling due to its factory function
-        print("Creating TextFRCT task...")
-        categories = args.textfrct_categories
-        if categories:
-            print(f"Filtering to categories: {categories}")
-            task = create_textfrct_task(
-                skip_subjective=args.skip_subjective,
-                categories=categories
-            )
-        else:
-            print("Using all categories (default)")
-            task = create_textfrct_task(skip_subjective=args.skip_subjective)
-            
     else:
-        # Use registry for dynamic task creation
-        print(f"Creating {args.task_type} task...")
-        
-        # Get the task class from registry
-        task_class = registry.get_task_class(args.task_type)
-        if not task_class:
-            print(f"Error: Task '{args.task_type}' not found in registry")
-            return 1
-        
-        # Create basic config for the task
-        # This could be made more sophisticated with task-specific config files
-        from tasks.base_task import TaskConfig
+        # Generic task creation for other tasks
         config = TaskConfig(
             name=f"{args.task_type}_cli",
-            description=f"{args.task_type} evaluation",
+            description=f"{args.task_type} evaluation from CLI",
             data_path=f"dataset/{args.task_type}.csv",  # Default data path
             data_format="csv",
             input_column="question",
             output_column="answer",
             evaluation_metrics=["accuracy"]
         )
-        
-        # Create task instance
         task = task_class(config)
+    
+    print(f"✅ Successfully created {args.task_type} task")
     
     # Create evaluator and run evaluation
     print("Creating evaluator...")
