@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Any, Optional, Union
 from pathlib import Path
 import pandas as pd
+from tqdm import tqdm
 
 # Model backends
 try:
@@ -122,6 +123,11 @@ class TaskEvaluator:
             trust_remote_code=self.model_config.trust_remote_code
         )
         
+        # Handle missing pad token (common in GPT-2 based models)
+        if self.tokenizer.pad_token is None:
+            self.tokenizer.pad_token = self.tokenizer.eos_token
+            print(f"⚠️  No pad token found, using EOS token as pad token: '{self.tokenizer.pad_token}'")
+        
         self.model = AutoModelForCausalLM.from_pretrained(
             model_path,
             revision=self.model_config.checkpoint,
@@ -184,6 +190,7 @@ class TaskEvaluator:
             **self.model_config.generation_kwargs
         )
         
+        print(f"Generating {len(prompts)} predictions with vLLM...")
         outputs = self.model.generate(prompts, sampling_params)
         return [output.outputs[0].text for output in outputs]
     
@@ -191,18 +198,32 @@ class TaskEvaluator:
         """Generate using Transformers."""
         generated_texts = []
         
-        for prompt in prompts:
+        # Use tqdm for progress tracking
+        for prompt in tqdm(prompts, desc="Generating predictions", unit="prompt"):
             inputs = self.tokenizer(prompt, return_tensors="pt", truncation=True, padding=True)
             inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
+            
+            # Prepare generation arguments
+            generation_kwargs = {
+                "max_new_tokens": self.model_config.max_tokens,
+                "pad_token_id": self.tokenizer.pad_token_id,
+                **self.model_config.generation_kwargs
+            }
+            
+            # Handle temperature and sampling
+            if self.model_config.temperature > 0:
+                generation_kwargs.update({
+                    "do_sample": True,
+                    "temperature": self.model_config.temperature,
+                    "top_p": self.model_config.top_p,
+                })
+            else:
+                generation_kwargs["do_sample"] = False
             
             with torch.no_grad():
                 outputs = self.model.generate(
                     **inputs,
-                    max_new_tokens=self.model_config.max_tokens,
-                    temperature=self.model_config.temperature,
-                    top_p=self.model_config.top_p,
-                    do_sample=self.model_config.temperature > 0,
-                    **self.model_config.generation_kwargs
+                    **generation_kwargs
                 )
             
             # Decode only the generated part (exclude input)
@@ -218,7 +239,7 @@ class TaskEvaluator:
         """Generate using API backends (OpenAI/Together)."""
         generated_texts = []
         
-        for prompt in prompts:
+        for prompt in tqdm(prompts, desc="Generating predictions", unit="prompt"):
             for attempt in range(self.eval_config.retry_attempts):
                 try:
                     response = self.client.chat.completions.create(

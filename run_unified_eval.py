@@ -11,8 +11,8 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from tasks.base_task import create_task_from_config, SimpleTask
-from tasks.simple_icl_task import SimpleICLTask
-from tasks.textfrct_task import create_textfrct_task
+from tasks.implementations.simple_icl_task import SimpleICLTask
+from tasks.implementations.textfrct_task import create_textfrct_task
 from tasks.evaluator import TaskEvaluator, ModelConfig, EvaluationConfig
 
 
@@ -45,6 +45,11 @@ def create_eval_config_from_args(args) -> EvaluationConfig:
 
 
 def main():
+    # Check for list categories flag first (before full argument parsing)
+    if "--list_textfrct_categories" in sys.argv:
+        print_textfrct_categories()
+        return 0
+    
     parser = argparse.ArgumentParser(description="Unified Task Evaluation System")
     
     # Task arguments
@@ -56,6 +61,17 @@ def main():
                            help="Path to task configuration file (for config task type)")
     task_group.add_argument("--skip_subjective", action="store_true",
                            help="Skip subjective categories (for TextFRCT)")
+    
+    # TextFRCT specific arguments
+    textfrct_group = parser.add_argument_group("TextFRCT Configuration")
+    textfrct_group.add_argument("--textfrct_categories", type=str, nargs="*",
+                               help="Specific TextFRCT categories to evaluate (e.g., CV1 CV2 FA1). "
+                                    "If not specified, all categories are used. "
+                                    "Common categories: CV1 (scrambled words), CV2 (hidden words), "
+                                    "CV3 (incomplete words), FA1 (associations), FA2 (opposites), "
+                                    "V1-V5 (vocabulary), RG1-RG3 (reasoning)")
+    textfrct_group.add_argument("--list_textfrct_categories", action="store_true",
+                               help="List all available TextFRCT categories and exit")
     
     # Model arguments
     model_group = parser.add_argument_group("Model Configuration")
@@ -116,7 +132,18 @@ def main():
         
     elif args.task_type == "textfrct":
         print("Creating TextFRCT task...")
-        task = create_textfrct_task(skip_subjective=args.skip_subjective)
+        
+        # Handle category filtering
+        categories = args.textfrct_categories
+        if categories:
+            print(f"Filtering to categories: {categories}")
+            task = create_textfrct_task(
+                skip_subjective=args.skip_subjective,
+                categories=categories
+            )
+        else:
+            print("Using all categories (default)")
+            task = create_textfrct_task(skip_subjective=args.skip_subjective)
         
     elif args.task_type == "config":
         if not args.task_config:
@@ -132,7 +159,7 @@ def main():
     # Create evaluator and run evaluation
     print("Creating evaluator...")
     evaluator = TaskEvaluator(model_config, eval_config)
-    
+    breakpoint()
     print("Running evaluation...")
     results = evaluator.evaluate_task(task)
     
@@ -154,6 +181,80 @@ def main():
     print(f"\nDetailed results saved to: {eval_config.output_dir}")
     
     return 0
+
+
+def print_textfrct_categories():
+    """Print all available TextFRCT categories with descriptions."""
+    print("Available TextFRCT Categories:")
+    print("=" * 50)
+    
+    categories = {
+        "CV1": "Scrambled Words - Unscramble letters to form words",
+        "CV2": "Hidden Words - Find words hidden in letter strings", 
+        "CV3": "Incomplete Words - Complete words with missing letters",
+        "FA1": "Controlled Association - Generate related words",
+        "FA2": "Opposites - Generate antonyms",
+        "FA3": "Figures of Speech - Complete metaphors/similes",
+        "FE1": "Making Sentences - Create sentences from patterns",
+        "FE2": "Arranging Words - Form sentences from word lists",
+        "FE3": "Rewriting - Rewrite sentences with same meaning",
+        "FI1": "Topics Test - Generate ideas about topics",
+        "FI2": "Theme Test - Write paragraphs about themes", 
+        "FI3": "Thing Categories - List items in categories",
+        "FW1": "Word Fluency - Generate words with constraints",
+        "FW2": "First and Last Letters - Words starting/ending with letters",
+        "FW3": "Pattern Words - Words matching letter patterns",
+        "I1": "Letter Sets - Pattern recognition with letters",
+        "I2": "Figure Classification - Spatial reasoning",
+        "MA2": "Object-Number - Associate objects with numbers",
+        "MA3": "First Names - Recall associated names",
+        "RG1": "Arithmetic Aptitude - Basic math operations",
+        "RG2": "Number Series - Continue number sequences",
+        "RG3": "Mathematical Reasoning - Solve math word problems",
+        "RL1": "Syllogistic Reasoning - Logical syllogisms",
+        "RL3": "Necessary Inference - Required logical conclusions",
+        "RL4": "Language Deciphering - Decode artificial languages",
+        "V1": "Vocabulary Level 1 - Basic vocabulary",
+        "V2": "Vocabulary Level 2 - Intermediate vocabulary",
+        "V3": "Vocabulary Level 3 - Advanced vocabulary", 
+        "V4": "Vocabulary Level 4 - Expert vocabulary",
+        "V5": "Vocabulary Level 5 - Scholar vocabulary",
+        "XU1": "Object Combination - Combine objects creatively",
+        "XU2": "Substitute Uses - Alternative uses for objects",
+        "XU3": "Object Grouping - Group objects by function",
+        "XU4": "Different Uses - Creative uses for objects"
+    }
+    
+    # Group by main category
+    groups = {
+        "CV (Convergent Visual)": ["CV1", "CV2", "CV3"],
+        "FA (Fluent Associational)": ["FA1", "FA2", "FA3"],
+        "FE (Flexible Expression)": ["FE1", "FE2", "FE3"],
+        "FI (Fluent Ideational)": ["FI1", "FI2", "FI3"],
+        "FW (Fluent Word)": ["FW1", "FW2", "FW3"],
+        "I (Inductive)": ["I1", "I2"],
+        "MA (Memory/Association)": ["MA2", "MA3"],
+        "RG (Reasoning)": ["RG1", "RG2", "RG3"],
+        "RL (Reasoning/Logic)": ["RL1", "RL3", "RL4"],
+        "V (Vocabulary)": ["V1", "V2", "V3", "V4", "V5"],
+        "XU (Creative)": ["XU1", "XU2", "XU3", "XU4"]
+    }
+    
+    for group_name, group_categories in groups.items():
+        print(f"\n{group_name}:")
+        for cat in group_categories:
+            if cat in categories:
+                print(f"  {cat}: {categories[cat]}")
+    
+    print(f"\nExample usage:")
+    print(f"  # Test only scrambled words and vocabulary:")
+    print(f"  python run_unified_eval.py --task_type textfrct --textfrct_categories CV1 V1 V2")
+    print(f"  ")
+    print(f"  # Test only reasoning tasks:")
+    print(f"  python run_unified_eval.py --task_type textfrct --textfrct_categories RG1 RG2 RG3 RL1")
+    print(f"  ")
+    print(f"  # Test all categories (default):")
+    print(f"  python run_unified_eval.py --task_type textfrct")
 
 
 if __name__ == "__main__":

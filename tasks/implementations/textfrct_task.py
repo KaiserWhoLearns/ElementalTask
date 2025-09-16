@@ -1,7 +1,5 @@
 """TextFRCT task implementation that integrates with the existing dataset utilities."""
 
-import sys
-import os
 from typing import Dict, List, Any, Optional
 from pathlib import Path
 import pandas as pd
@@ -9,6 +7,7 @@ import pandas as pd
 try:
     from ..base_task import BaseTask, TaskConfig
     TEXTFRCT_AVAILABLE = True
+    
 except ImportError as e:
     print(f"TextFRCT dependencies not available: {e}")
     TEXTFRCT_AVAILABLE = False
@@ -21,34 +20,38 @@ if TEXTFRCT_AVAILABLE:
         
         TASK_NAME = "textfrct"  # Auto-registration name
         
-        def __init__(self, config: TaskConfig, skip_subjective: bool = False):
+        def __init__(self, config: TaskConfig, skip_subjective: bool = False, categories: Optional[List[str]] = None):
             self.skip_subjective = skip_subjective
+            self.categories = categories
             super().__init__(config)
         
         def _load_data(self):
-            """Load TextFRCT data and filter out subjective tasks if requested."""
+            """Load TextFRCT data and optionally filter by categories and subjective tasks."""
             data = pd.read_csv(self.config.data_path)
             
-            if self.skip_subjective:
-                # Filter out tasks that require LLM evaluation (contain <LLMEval>)
-                subjective_mask = data['answer'].astype(str).str.contains('<LLMEval>', na=False)
-                objective_data = data[~subjective_mask]
-                print(f"Filtered out {subjective_mask.sum()} subjective tasks, {len(objective_data)} objective tasks remaining")
-                self.data = objective_data
-            else:
-                self.data = data
+            # Filter by categories if specified
+            if self.categories:
+                data = data[data['category_id'].isin(self.categories)]
+                print(f"Filtered to categories {self.categories}: {len(data)} examples")
             
-            return self.data.to_dict('records')
+            # Filter out subjective tasks if requested
+            if self.skip_subjective:
+                subjective_mask = data['answer'].astype(str).str.contains('<LLMEval>', na=False)
+                data = data[~subjective_mask]
+                print(f"Filtered out {subjective_mask.sum()} subjective tasks, {len(data)} objective tasks remaining")
+            
+            # Convert to list of dictionaries and assign to self.data
+            self.data = data.to_dict('records')
         
         def get_split(self, split: str = "test") -> List[Dict[str, Any]]:
             """Get data split for TextFRCT."""
-            return self.data.to_dict('records') if hasattr(self.data, 'to_dict') else self.data
+            return self.data
         
         def build_prompt(self, instance: Dict[str, Any]) -> str:
             """Build prompt based on category type."""
             category = instance['category_id']
             question = instance['question']
-            category_name = instance['category_name']
+            category_name = instance.get('category_name', category)
             
             if category.startswith('CV'):  # Convergent Visual
                 if category == 'CV1':  # Scrambled Words
@@ -72,13 +75,15 @@ if TEXTFRCT_AVAILABLE:
                 else:
                     return f"What does '{question}' mean?"
             
+            elif category.startswith('RG'):  # Reasoning
+                return f"Solve this problem: {question}\nAnswer:"
+            
             # Default format for other categories
             return f"Task: {category_name}\nQuestion: {question}\nAnswer:"
         
         def evaluate(self, predictions: List[str], split: str = "test", **kwargs) -> Dict[str, float]:
             """Evaluate predictions based on category type."""
             data = self.get_split(split)
-            
             if len(predictions) != len(data):
                 return {
                     'accuracy': 0.0,
@@ -87,19 +92,37 @@ if TEXTFRCT_AVAILABLE:
             
             correct = 0
             total = len(predictions)
+            category_stats = {}
             
             for i, (pred, example) in enumerate(zip(predictions, data)):
                 expected = example['answer']
                 category = example['category_id']
                 
-                if self._is_correct(pred, expected, category):
+                # Initialize category stats
+                if category not in category_stats:
+                    category_stats[category] = {'correct': 0, 'total': 0}
+                
+                is_correct = self._is_correct(pred, expected, category)
+                if is_correct:
                     correct += 1
+                    category_stats[category]['correct'] += 1
+                category_stats[category]['total'] += 1
             
-            return {
+            # Build results
+            results = {
                 'accuracy': correct / total if total > 0 else 0.0,
                 'correct': correct,
                 'total': total
             }
+            
+            # Add per-category results
+            for category, stats in category_stats.items():
+                cat_accuracy = stats['correct'] / stats['total'] if stats['total'] > 0 else 0.0
+                results[f'accuracy_{category}'] = cat_accuracy
+                results[f'correct_{category}'] = stats['correct'] 
+                results[f'total_{category}'] = stats['total']
+            
+            return results
         
         def _is_correct(self, prediction: str, expected: str, category: str) -> bool:
             """Check if prediction is correct based on category."""
@@ -128,27 +151,35 @@ if TEXTFRCT_AVAILABLE:
         def get_ground_truth(self, split: str = "test") -> List[str]:
             """Get ground truth for TextFRCT."""
             data = self.get_split(split)
-            return [item['answer'] for item in data]
+            return [str(example['answer']) for example in data]
 
 
 def create_textfrct_task(
     data_path: str = "dataset/TextFRCT.csv",
-    skip_subjective: bool = True,
+    skip_subjective: bool = False,
+    categories: Optional[List[str]] = None,
     name: str = "textfrct"
 ) -> 'TextFRCTTask':
     """Create a TextFRCT task instance."""
     if not TEXTFRCT_AVAILABLE:
-        raise ImportError("TextFRCT task requires base_task module")
+        raise ImportError("TextFRCT task requires additional dependencies (dotenv, openai)")
+    
+    # Update name to reflect filtering
+    if categories:
+        name = f"textfrct_{'_'.join(categories)}"
     
     config = TaskConfig(
         name=name,
-        description="TextFRCT evaluation dataset",
+        description=f"TextFRCT evaluation dataset{' (filtered categories)' if categories else ''}",
         data_path=data_path,
         data_format="csv",
         input_column="question",
         output_column="answer",
         evaluation_metrics=["accuracy"],
-        metadata={"skip_subjective": skip_subjective}
+        metadata={
+            "skip_subjective": skip_subjective,
+            "categories": categories
+        }
     )
     
-    return TextFRCTTask(config, skip_subjective=skip_subjective)
+    return TextFRCTTask(config, skip_subjective=skip_subjective, categories=categories)
