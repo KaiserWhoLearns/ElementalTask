@@ -4,18 +4,10 @@ from typing import Dict, List, Any, Optional
 from pathlib import Path
 import pandas as pd
 
-try:
-    from ..base_task import BaseTask, TaskConfig
-    TEXTFRCT_AVAILABLE = True
-    
-except ImportError as e:
-    print(f"TextFRCT dependencies not available: {e}")
-    TEXTFRCT_AVAILABLE = False
-    BaseTask = object  # Dummy base class
+from ..base_task import BaseTask, TaskConfig
 
 
-if TEXTFRCT_AVAILABLE:
-    class TextFRCTTask(BaseTask):
+class TextFRCTTask(BaseTask):
         """Task wrapper for the TextFRCT dataset."""
         
         TASK_NAME = "textfrct"  # Auto-registration name
@@ -161,9 +153,6 @@ def create_textfrct_task(
     name: str = "textfrct"
 ) -> 'TextFRCTTask':
     """Create a TextFRCT task instance."""
-    if not TEXTFRCT_AVAILABLE:
-        raise ImportError("TextFRCT task requires additional dependencies (dotenv, openai)")
-    
     # Update name to reflect filtering
     if categories:
         name = f"textfrct_{'_'.join(categories)}"
