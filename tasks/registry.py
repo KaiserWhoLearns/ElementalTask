@@ -18,7 +18,7 @@ class TaskRegistry:
     def discover_tasks(self, implementations_path: str = None) -> None:
         """Automatically discover and register tasks from the implementations directory."""
         if self._discovered:
-            return  # Already discovered
+            return self._tasks
         
         if implementations_path is None:
             # Default to tasks/implementations directory
@@ -74,6 +74,7 @@ class TaskRegistry:
         if failed_count > 0:
             print(f"  ⚠️  Failed to load: {failed_count} files")
         print(f"  📋 Available tasks: {list(self._tasks.keys())}")
+        return self._tasks
     
     def register_task(self, name: str, task_class: Type[BaseTask]) -> None:
         """Manually register a task class."""
