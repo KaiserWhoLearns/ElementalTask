@@ -14,6 +14,7 @@ from tasks.base_task import create_task_from_config, SimpleTask
 from tasks.implementations.simple_icl_task import SimpleICLTask
 from tasks.implementations.textfrct_task import create_textfrct_task
 from tasks.evaluator import TaskEvaluator, ModelConfig, EvaluationConfig
+from tasks.registry import TaskRegistry
 
 
 def create_model_config_from_args(args) -> ModelConfig:
@@ -54,9 +55,14 @@ def main():
     
     # Task arguments
     task_group = parser.add_argument_group("Task Configuration")
+    
+    # Discover available tasks dynamically
+    registry = TaskRegistry()
+    available_tasks = list(registry.discover_tasks().keys())
+    
     task_group.add_argument("--task_type", type=str, required=True,
-                           choices=["simple_icl", "textfrct", "config"],
-                           help="Type of task to run")
+                           choices=available_tasks + ["config"],
+                           help=f"Type of task to run. Available: {', '.join(available_tasks)}")
     task_group.add_argument("--task_config", type=str,
                            help="Path to task configuration file (for config task type)")
     task_group.add_argument("--skip_subjective", action="store_true",
@@ -121,19 +127,20 @@ def main():
     model_config = create_model_config_from_args(args)
     eval_config = create_eval_config_from_args(args)
     
-    # Create task based on type
-    if args.task_type == "simple_icl":
-        print("Creating Simple ICL task...")
-        task_config_path = "tasks/configs/simple_icl_tasks.json"
-        if not Path(task_config_path).exists():
-            print(f"Error: Task config file not found: {task_config_path}")
+    # Create task dynamically using registry
+    if args.task_type == "config":
+        if not args.task_config:
+            print("Error: --task_config required for config task type")
             return 1
-        task = create_task_from_config(task_config_path, SimpleICLTask)
+        print(f"Creating task from config: {args.task_config}")
+        
+        # For config type, we need to determine the task type from the config file
+        # For now, default to SimpleTask but this could be improved
+        task = create_task_from_config(args.task_config, SimpleTask)
         
     elif args.task_type == "textfrct":
+        # TextFRCT has special handling due to its factory function
         print("Creating TextFRCT task...")
-        
-        # Handle category filtering
         categories = args.textfrct_categories
         if categories:
             print(f"Filtering to categories: {categories}")
@@ -144,17 +151,32 @@ def main():
         else:
             print("Using all categories (default)")
             task = create_textfrct_task(skip_subjective=args.skip_subjective)
-        
-    elif args.task_type == "config":
-        if not args.task_config:
-            print("Error: --task_config required for config task type")
-            return 1
-        print(f"Creating task from config: {args.task_config}")
-        task = create_task_from_config(args.task_config, SimpleTask)
-        
+            
     else:
-        print(f"Error: Unknown task type: {args.task_type}")
-        return 1
+        # Use registry for dynamic task creation
+        print(f"Creating {args.task_type} task...")
+        
+        # Get the task class from registry
+        task_class = registry.get_task_class(args.task_type)
+        if not task_class:
+            print(f"Error: Task '{args.task_type}' not found in registry")
+            return 1
+        
+        # Create basic config for the task
+        # This could be made more sophisticated with task-specific config files
+        from tasks.base_task import TaskConfig
+        config = TaskConfig(
+            name=f"{args.task_type}_cli",
+            description=f"{args.task_type} evaluation",
+            data_path=f"dataset/{args.task_type}.csv",  # Default data path
+            data_format="csv",
+            input_column="question",
+            output_column="answer",
+            evaluation_metrics=["accuracy"]
+        )
+        
+        # Create task instance
+        task = task_class(config)
     
     # Create evaluator and run evaluation
     print("Creating evaluator...")
