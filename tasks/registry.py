@@ -15,7 +15,7 @@ class TaskRegistry:
         self._tasks: Dict[str, Type[BaseTask]] = {}
         self._discovered = False
     
-    def discover_tasks(self, implementations_path: str = None) -> None:
+    def discover_tasks(self, implementations_path: str = None) -> Dict[str, Type[BaseTask]]:
         """Automatically discover and register tasks from the implementations directory."""
         if self._discovered:
             return self._tasks
@@ -30,7 +30,7 @@ class TaskRegistry:
         if not implementations_path.exists():
             print(f"Warning: Task implementations directory not found: {implementations_path}")
             self._discovered = True
-            return
+            return self._tasks
         
         # Get all Python files in the implementations directory
         python_files = list(implementations_path.glob("*.py"))
@@ -143,9 +143,9 @@ class TaskRegistry:
 _task_registry = TaskRegistry()
 
 # Public API functions
-def discover_tasks(implementations_path: str = None) -> None:
+def discover_tasks(implementations_path: str = None) -> Dict[str, Type[BaseTask]]:
     """Discover and register all tasks from the implementations directory."""
-    _task_registry.discover_tasks(implementations_path)
+    return _task_registry.discover_tasks(implementations_path)
 
 def register_task(name: str, task_class: Type[BaseTask]) -> None:
     """Manually register a task class."""
