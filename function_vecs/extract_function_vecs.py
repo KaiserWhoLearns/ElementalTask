@@ -84,9 +84,25 @@ def extract_task_function_vec(task: BaseTask, config: ExtractConfig, head_set: D
     """Extract function vector for a specific task."""
     raise NotImplementedError("This function is not yet implemented.")
 
-def build_skill_basis(function_vecs: Dict[str, np.ndarray], method="svd", k=-1) -> Any:
+def build_skill_basis(task_vec_matrix: TaskMatrix, method="svd", k=-1) -> SkillBasis:
     """Build a skill basis from a set of function vectors."""
-    raise NotImplementedError("This function is not yet implemented.")
+    # NOTE: just svd for now
+    V = np.asarray(task_vec_matrix.V, dtype=np.float64)
+    mean = V.mean(axis=1, keepdims=True)
+    V_centered = V - mean
+
+    U, S, Vt = np.linalg.svd(V_centered, full_matrices=False)
+
+    if k == -1: # select based on energy
+        energy = np.cumsum(S**2) / np.sum(S**2)
+        k = int(np.searchsorted(energy, 0.95) + 1)
+
+    U = U[:, :k].astype(np.float32, copy=False)
+    S = S[:k].astype(np.float32, copy=False)
+    Vt = Vt[:k, :].astype(np.float32, copy=False)
+
+    return SkillBasis(method=method, U=U, S=S, Vt=Vt, task_names=task_vec_matrix.task_names)
+
 
 if __name__ == "__main__":
     # Discover and list all tasks
