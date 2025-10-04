@@ -4,7 +4,10 @@ from tasks.base_task import TaskConfig, BaseTask
 from dataclasses import dataclass, field
 from typing import List, Dict, Any
 
+import numpy as np
+import torch
 
+@dataclass
 class ExtractConfig:
     # function vector related arguments
     model_name: str = "EleutherAI/gpt-j-6B"
@@ -24,8 +27,36 @@ class ExtractConfig:
     basis_dim: int = 20
     eps: float = 0.01 # for eps-rank, see notes
 
+@dataclass
+class Headset:
+    mode: Literal["topk", "soft"]
+    heads: List[Tuple[int, int]] = field(default_factory=list)  # list of (layer, head) tuples
+    weights: Optional[np.ndarray] = None  # Optional weights for each head
 
-    
+@dataclass
+class TaskHeadMeans:
+    task_name: str
+    residual_means: np.ndarray
+
+@dataclass
+class TaskFunctionVec:
+    task_name: str
+    function_vec: np.ndarray
+    normalization: Literal["l2", "none"] = "l2"
+
+@dataclass
+class TaskMatrix:
+    V: np.ndarray
+    task_names: List[str]
+
+@dataclass
+class SkillBasis:
+    method: Literal["svd", "pca"]
+    U: np.ndarray
+    S: np.ndarray
+    Vt: np.ndarray
+    task_names: List[str]
+
 def discover_all_tasks():
     """Discover and list all available tasks."""
     print("Listing available tasks...")
