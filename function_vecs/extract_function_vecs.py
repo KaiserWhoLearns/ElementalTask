@@ -2,7 +2,7 @@ from tasks.registry import discover_tasks, get_task, list_tasks, get_task_info
 from tasks.base_task import TaskConfig, BaseTask
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional, Tuple, Literal
 
 import numpy as np
 import torch
@@ -83,6 +83,40 @@ def extract_informative_heads(config: ExtractConfig, tasks: List[BaseTask]) -> D
 def extract_task_function_vec(task: BaseTask, config: ExtractConfig, head_set: Dict) -> Dict:
     """Extract function vector for a specific task."""
     raise NotImplementedError("This function is not yet implemented.")
+
+
+def build_function_vec_from_means(
+    head_means: TaskHeadMeans,
+    head_set: Headset,
+    normalization: Literal["l2", "none"] = "l2"
+) -> TaskFunctionVec:
+    """
+    Combine the per-head residual stream means into a single function vector representing the task.
+    """
+    means = np.asarray(head_means.residual_means)
+    assert means.ndim == 2, "Residual means should be a 2D array"
+    d_model, H = means.shape
+
+    if head_set.mode == "topk":
+        vec_d = means.sum(axis=1)
+    elif head_set.mode == "soft":
+        weights = head_set.weights
+        assert weights is not None, "Weights must be provided for soft head selection"
+        assert len(weights) == H, "Weights length must match number of heads"
+        vec_d = means @ weights
+    else:
+        raise ValueError(f"Unknown head selection mode: {head_set.mode}")
+    
+    if normalization == "l2":
+        vec_d /= np.linalg.norm(vec_d) + 1e-10  # avoid division by zero
+
+    return TaskFunctionVec(task_name=head_means.task_name, function_vec=vec_d, normalization=normalization)
+
+def stack_function_vecs(task_vecs: List[TaskFunctionVec]) -> TaskMatrix:
+    assert len(task_vecs) > 0, "No task vectors provided"
+    vecs = [np.asarray(tv.function_vec) for tv in task_vecs]
+    v_space = np.column_stack(vecs)
+    return TaskMatrix(V=v_space, task_names=[tv.task_name for tv in task_vecs])
 
 def build_skill_basis(task_vec_matrix: TaskMatrix, method="svd", k=-1) -> SkillBasis:
     """Build a skill basis from a set of function vectors."""
