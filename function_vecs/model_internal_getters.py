@@ -1,86 +1,91 @@
+# fv/resid_capture.py
+from typing import Dict, List, Optional
 import torch
 import torch.nn as nn
 
-class AttnGetter:
-    """Helper class that exposes q_proj, v_proj, o_proj from hf models.
-    Currently supports:
-    - GPT-2 style models
-    - Llama/Qwen/GPT-J style models
-    Note: does not support gqa/mqa yet
-    """
-    def __init__(self, attn_module: nn.Module, hidden_size: int, num_heads: int):
-        self.attn_module = attn_module
-        self.hidden_size = hidden_size
-        self.num_heads = num_heads
-        assert hidden_size % num_heads == 0, "hidden_size must be divisible by num_heads"
-        self.head_size = hidden_size // num_heads
+def get_blocks(model) -> List[nn.Module]:
+    if hasattr(model, "model") and hasattr(model.model, "layers"):
+        return list(model.model.layers)            # LLaMA/Qwen/OPT
+    if hasattr(model, "gpt_neox") and hasattr(model.gpt_neox, "layers"):
+        return list(model.gpt_neox.layers)         # NeoX/Pythia
+    if hasattr(model, "transformer") and hasattr(model.transformer, "h"):
+        return list(model.transformer.h)           # GPT-2/J
+    raise RuntimeError("Unsupported model layout")
 
-        self.arch_type = self._detect_arch_type()
-        if self.arch_type is None:
-            raise ValueError("Unsupported attention module architecture")
+def get_attn(block: nn.Module) -> nn.Module:
+    for name in ("self_attn", "attention", "attn"):
+        if hasattr(block, name):
+            return getattr(block, name)
+    raise RuntimeError(f"No attention module in {type(block)}")
 
-    @property
-    def device(self):
-        return next(self.attn_module.parameters()).device
-    
-    def _detect_arch_type(self) -> Optional[str]:
-        """Detect the architecture type based on the presence of projection layers."""
-        if hasattr(self.attn_module, "q_proj") and hasattr(self.attn_module, "v_proj") and hasattr(self.attn_module, "o_proj"):
-            self.arch_type = "separate"
-        elif hasattr(self.attn_module, "c_attn") and hasattr(self.attn_module, "c_proj"):
-            self.arch_type = "gpt2"
-        elif hasattr(self.attn_module, "query_key_value") and (hasattr(self.attn_module, "dense") or hasattr(self.attn_module, "o_proj")):
-            self.arch_type = "neox"
-        else:
-            raise RuntimeError("Unsupported attention module type")
-    
-    def get_v_proj_weight(self) -> Tuple[torch.Tensor, Optional[torch.Tensor]]:
-        if self.arch_type == "separate":
-            W = self.attn_module.v_proj.weight
-            b = self.attn_module.v_proj.bias if self.attn_module.v_proj.bias is not None else None
-            return W, b
-        elif self.flavor == "gpt2":
-            # c_attn: (hidden, 3*hidden) -> last third is V
-            W_full = self.m.c_attn.weight
-            b_full = getattr(self.m.c_attn, "bias", None)
-            h = self.hidden_size
-            W = W_full[:, 2*h:3*h]
-            b = b_full[2*h:3*h] if b_full is not None else None
-            return W, b
-        else:  # neox
-            # query_key_value: (hidden, 3*hidden) -> last third is V
-            W_full = self.m.query_key_value.weight
-            b_full = getattr(self.m.query_key_value, "bias", None)
-            h = self.hidden_size
-            W = W_full[:, 2*h:3*h]
-            b = b_full[2*h:3*h] if b_full is not None else None
-            return W, b
+def get_mlp(block: nn.Module) -> nn.Module:
+    for name in ("mlp", "feed_forward", "ffn"):
+        if hasattr(block, name):
+            return getattr(block, name)
+    raise RuntimeError(f"No MLP/FFN module in {type(block)}")
 
-    def get_o_proj_weight(self) -> torch.Tensor:
-        if self.arch_type == "separate":
-            return self.attn_module.o_proj.weight
-        elif self.arch_type == "gpt2":
-            return self.attn_module.c_proj.weight
-        else:  # neox
-            if hasattr(self.attn_module, "o_proj"):
-                return self.attn_module.o_proj.weight
-            else:
-                return self.attn_module.dense.weight
+def get_post_attn_norm(block: nn.Module) -> nn.Module:
+    # GPT-2
+    if hasattr(block, "ln_2"):
+        return block.ln_2
+    # LLaMA/Qwen/OPT style
+    if hasattr(block, "post_attention_layernorm"):
+        return block.post_attention_layernorm
+    # Some NeoX variants
+    if hasattr(block, "post_attn_layer_norm"):
+        return block.post_attn_layer_norm
+    raise RuntimeError("Cannot find post-attention layernorm in block")
 
-    def get_head_outproj_slice(self, head_index: int) -> torch.Tensor:
-        W = self.get_o_proj_weight()
-        start = head_index * self.head_size
-        end = start + self.head_size
-        return W[start:end, :]
+def get_o_proj(attn: nn.Module) -> Optional[nn.Module]:
+    # Optional hook on the attention output projection
+    if hasattr(attn, "o_proj"):
+        return attn.o_proj          # LLaMA/Qwen/OPT
+    if hasattr(attn, "c_proj"):
+        return attn.c_proj          # GPT-2
+    if hasattr(attn, "o_proj"):
+        return attn.o_proj
+    if hasattr(attn, "dense"):
+        return attn.dense           # NeoX
+    return None
 
-    def get_V_states(self, x_in: torch.Tensor) -> torch.Tensor:
-        """Get the value states for input x_in of shape (B, T, hidden_size).
-        Returns V states of shape (B, T, hidden_size).
-        """
-        W_v, b_v = self.get_v_proj_weight()
-        Vlin = x_in @ W_v.t()
-        if b_v is not None:
-            Vlin = Vlin + b_v
-        B, T, _ = Vlin.shape
-        V = Vlin.view(B, T, self.num_heads, self.head_size)
-        return V
+class ResidualCapture:
+    """Capture residual stream tensors around the attention sublayer for one block."""
+    def __init__(self, model: nn.Module, layer_idx: int):
+        self.model = model
+        self.layer_idx = layer_idx
+        blocks = get_blocks(model)
+        assert 0 <= layer_idx < len(blocks)
+        self.block = blocks[layer_idx]
+        self.attn = get_attn(self.block)
+        self.mlp = get_mlp(self.block)
+        self.o_proj = get_o_proj(self.attn)
+        self.post_attn_norm = get_post_attn_norm(self.block)
+
+        self.cache: Dict[str, torch.Tensor] = {}
+        self._handles = []
+
+    def _block_pre(self, _m, args):
+        self.cache["resid_pre_attn"] = args[0].detach()  # input to block
+
+    def _post_attn_norm_pre(self, _m, args):
+        # input to the post-attn layernorm == residual AFTER attention add
+        self.cache["resid_after_attn_add"] = args[0].detach()
+
+    def _oproj_fwd(self, _m, _inp, out):
+        y = out[0] if isinstance(out, (tuple, list)) else out
+        self.cache["attn_out_proj"] = y.detach()
+
+    def enable(self):
+        self._handles.append(self.block.register_forward_pre_hook(self._block_pre))
+        self._handles.append(self.post_attn_norm.register_forward_pre_hook(self._post_attn_norm_pre))
+        if self.o_proj is not None:
+            self._handles.append(self.o_proj.register_forward_hook(self._oproj_fwd))
+        return self
+
+    def disable(self):
+        for h in self._handles:
+            h.remove()
+        self._handles.clear()
+
+    def __enter__(self): return self.enable()
+    def __exit__(self, *exc): self.disable()
