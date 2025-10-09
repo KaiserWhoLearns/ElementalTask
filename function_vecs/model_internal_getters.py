@@ -24,6 +24,33 @@ def get_mlp(block: nn.Module) -> nn.Module:
             return getattr(block, name)
     raise RuntimeError(f"No MLP/FFN module in {type(block)}")
 
+def infer_head_dims(model: nn.Module, block: nn.Module, attn: nn.Module):
+    # Try attention module first (present for GPT-2, LLaMA, NeoX families)
+    if hasattr(attn, "num_heads"):
+        num_heads = int(attn.num_heads)
+    elif hasattr(model.config, "num_attention_heads"):
+        num_heads = int(model.config.num_attention_heads)
+    else:
+        raise RuntimeError("Cannot infer num_heads")
+
+    if hasattr(model.config, "hidden_size"):
+        hidden_size = int(model.config.hidden_size)
+    elif hasattr(model.config, "n_embd"):  # GPT-2 / GPT-J
+        hidden_size = int(model.config.n_embd)
+    else:
+        # Fallback: read from a known linear in the block
+        # e.g., post-attn norm weight/affine size
+        if hasattr(block, "ln_2"):
+            hidden_size = block.ln_2.weight.numel()
+        elif hasattr(block, "post_attention_layernorm"):
+            hidden_size = block.post_attention_layernorm.weight.numel()
+        else:
+            raise RuntimeError("Cannot infer hidden_size")
+
+    assert hidden_size % num_heads == 0, "hidden_size must be divisible by num_heads"
+    head_dim = hidden_size // num_heads
+    return hidden_size, num_heads, head_dim
+
 def get_post_attn_norm(block: nn.Module) -> nn.Module:
     # GPT-2
     if hasattr(block, "ln_2"):
@@ -75,10 +102,19 @@ class ResidualCapture:
         y = out[0] if isinstance(out, (tuple, list)) else out
         self.cache["attn_out_proj"] = y.detach()
 
+    def _oproj_pre(self, _m, inputs):
+        # inputs[0] is (B, T, D) in most HF impls; some collapse to (B*T, D)
+        x = inputs[0]
+        if x.dim() == 2 and "resid_pre_attn" in self.cache:
+            B, T, D = self.cache["resid_pre_attn"].shape
+            x = x.view(B, T, D)
+        self.cache["attn_pre_proj"] = x.detach()
+
     def enable(self):
         self._handles.append(self.block.register_forward_pre_hook(self._block_pre))
         self._handles.append(self.post_attn_norm.register_forward_pre_hook(self._post_attn_norm_pre))
         if self.o_proj is not None:
+            self._handles.append(self.o_proj.register_forward_pre_hook(self._oproj_pre))   # <-- add this
             self._handles.append(self.o_proj.register_forward_hook(self._oproj_fwd))
         return self
 
