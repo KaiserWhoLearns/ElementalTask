@@ -171,7 +171,18 @@ def main():
             evaluation_metrics=["accuracy"]
         )
         task = task_class(config)
-        
+    elif args.task_type == "ioi_task":
+        # IOITask uses mib-bench/ioi dataset
+        config = TaskConfig(
+            name="ioi_task_cli",
+            description="Indirect Object Identification (IOI) evaluation from mib-bench/ioi dataset",
+            data_format="huggingface",
+            data_path="mib-bench/ioi",
+            input_column="prompt",  # The incomplete sentence
+            output_column="choices",  # List of choices, use with answer_index
+            evaluation_metrics=["accuracy"]
+        )
+        task = task_class(config)
     else:
         # Generic task creation for other tasks
         config = TaskConfig(
