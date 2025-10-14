@@ -556,6 +556,78 @@ def build_skill_basis(task_vec_matrix: TaskMatrix, method="svd", k=-1) -> SkillB
     return SkillBasis(method=method, U=U, S=S, Vt=Vt, task_names=task_vec_matrix.task_names)
 
 
+def extract_function_vector_simple(
+    task_name: str,
+    task_config: Optional[TaskConfig] = None,
+    model_name: str = "gpt2",
+    num_samples: int = 10,
+    device: str = "auto",
+    layer_idx: Optional[int] = None
+) -> TaskFunctionVec:
+    """
+    Simplified one-stop interface for extracting function vectors using the existing task registry.
+    
+    Args:
+        task_name: Name of task from registry (e.g., "simple_icl", "math", "simple", "textfrct") 
+        task_config: Optional custom config, will use defaults if None
+        model_name: Model to use for extraction
+        num_samples: Number of examples to use
+        device: Device to run on ("auto", "cuda", "cpu")
+        layer_idx: Which layer to extract from (None = use last layer)
+        
+    Returns:
+        TaskFunctionVec with the extracted function vector
+    """
+    if device == "auto":
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+    
+    # Use the existing task registry
+    if task_config is None:
+        # Provide sensible defaults for known tasks
+        if task_name == "simple_icl":
+            task_config = TaskConfig(
+                name=task_name,
+                data_path="dataset/simple.csv",
+                input_column="question",
+                output_column="answer"
+            )
+        else:
+            task_config = TaskConfig(name=task_name)
+    
+    # Get task from existing registry
+    task = get_task(task_name, task_config)
+    
+    # Load model and tokenizer
+    from transformers import AutoTokenizer, AutoModelForCausalLM
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    if tokenizer.pad_token_id is None:
+        tokenizer.pad_token = tokenizer.eos_token
+    model = AutoModelForCausalLM.from_pretrained(model_name).to(device).eval()
+    
+    # Determine which layer to use - last layer typically has more semantic information
+    if layer_idx is None:
+        blocks = get_blocks(model)
+        layer_idx = len(blocks) - 1  # Use last layer by default
+    
+    # Simple config
+    config = ExtractConfig(
+        model_name=model_name,
+        device=device,
+        num_samples_per_task=num_samples,
+        batch_size=min(8, num_samples),
+        layers=[layer_idx]  # Focus on single layer
+    )
+    
+    # Auto-select heads from the chosen layer
+    # Use top 5 heads as a reasonable default for most tasks
+    num_heads = model.config.num_attention_heads
+    head_set = Headset(
+        mode="topk", 
+        heads=[(layer_idx, h) for h in range(min(num_heads, 5))]
+    )
+    
+    # Extract function vector
+    return extract_task_function_vec(task, config, head_set, model, tokenizer)
 if __name__ == "__main__":
     # Discover and list all tasks
     discover_all_tasks()
