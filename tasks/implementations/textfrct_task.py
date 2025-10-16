@@ -38,6 +38,8 @@ class TextFRCTTask(BaseTask):
         def get_split(self, split: str = "test") -> List[Dict[str, Any]]:
             """Get data split for TextFRCT."""
             return self.data
+
+    # use BaseTask.get_icl_examples for standard TextFRCT records (input_column/output_column configured)
         
         def build_prompt(self, instance: Dict[str, Any]) -> str:
             """Build prompt based on category type."""

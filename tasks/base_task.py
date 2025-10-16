@@ -35,6 +35,8 @@ class BaseTask(ABC):
         self.config = config
         self.data = None
         self.demonstrations = None
+    # track which example indices have been used for ICL sampling
+    self._icl_used_indices = set()
         self._load_data()
         self._load_demonstrations()
     
@@ -92,7 +94,64 @@ class BaseTask(ABC):
                     # Try to load as text file with examples
                     with open(demo_path, 'r', encoding='utf-8') as f:
                         self.demonstrations = f.read().strip()
-    
+    @property
+    def supports_icl(self) -> bool:
+        """Check if this task supports ICL format"""
+        return hasattr(self, 'get_icl_examples') or self.config.in_memory_data is not None
+
+    def get_icl_examples(
+        self,
+        num_examples: int = 10,
+        shuffle: bool = True,
+        seed: Optional[int] = None,
+        fresh: bool = True,
+    ) -> List[Dict[str, str]]:
+        """Return ICL-formatted examples (dicts with 'input' and 'output').
+
+        Args:
+            num_examples: number of examples to return.
+            shuffle: whether to shuffle available examples before selection.
+            seed: optional random seed for reproducibility.
+            fresh: if True, prefer examples that haven't been returned before
+                   (tracks indices in ``self._icl_used_indices``).
+        """
+        rows = self.get_split("test")
+        if not rows:
+            return []
+
+        n = len(rows)
+        indices = list(range(n))
+
+        if shuffle:
+            import random
+            if seed is not None:
+                random.seed(seed)
+            random.shuffle(indices)
+
+        if fresh:
+            # choose indices not seen before; if insufficient, wrap around deterministically
+            available = [i for i in indices if i not in self._icl_used_indices]
+            if len(available) < num_examples:
+                # include previously used indices to fill up
+                available = available + [i for i in indices if i not in available]
+            selected = available[:min(num_examples, n)]
+            self._icl_used_indices.update(selected)
+        else:
+            selected = indices[:min(num_examples, n)]
+
+        examples: List[Dict[str, str]] = []
+        for i in selected:
+            item = rows[i]
+            examples.append({
+                "input": item.get(self.config.input_column, ""),
+                "output": str(item.get(self.config.output_column, "")),
+            })
+        return examples
+
+    def reset_icl_tracking(self) -> None:
+        """Reset internal tracking of used ICL examples so sampling starts fresh."""
+        self._icl_used_indices.clear()
+
     def get_split(self, split: str = "test") -> List[Dict[str, Any]]:
         """Get data split as a list of dictionaries."""
         if split not in ["train", "val", "test", "all"]:

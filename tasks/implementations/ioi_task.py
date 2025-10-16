@@ -14,11 +14,36 @@ class IOITask(BaseTask):
     
     def __init__(self, config: TaskConfig):
         super().__init__(config)
+    pass
     
     def _load_data(self):
         """Load the IOI (Indirect Object Identification) dataset from mib-bench."""
         self.data = load_dataset("mib-bench/ioi")
-    
+
+    def get_icl_examples(self, num_examples: int = 10, shuffle: bool = True, seed: int = None, fresh: bool = True) -> List[Dict[str, str]]:
+        """Return ICL examples for IOI-style data using the test split."""
+        data = self.get_split("test")
+        if not data:
+            return []
+
+        indices = list(range(len(data)))
+        if shuffle:
+            import random
+            if seed is not None:
+                random.seed(seed)
+            random.shuffle(indices)
+
+        selected = indices[:min(num_examples, len(indices))]
+        examples = []
+        for i in selected:
+            example = data[i]
+            prompt = example.get('prompt', '')
+            choices = example.get('choices', [])
+            answer_index = example.get('answer_index', 0)
+            output = choices[answer_index] if choices and 0 <= answer_index < len(choices) else example.get('answer', '')
+            examples.append({"input": prompt, "output": str(output)})
+        return examples
+
     def get_split(self, split: str = "test") -> List[Dict[str, Any]]:
         """Get data split for evaluation."""
         if split in self.data:

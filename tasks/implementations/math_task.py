@@ -12,6 +12,27 @@ class MathTask(BaseTask):
     
     def __init__(self, config: TaskConfig):
         super().__init__(config)
+
+    
+    def get_icl_examples(self, num_examples: int = 10, shuffle: bool = True, seed: int = None, fresh: bool = True) -> List[Dict[str, str]]:
+        """Generate simple arithmetic examples for ICL.
+
+        Note: `fresh` is ignored for synthetic/generated tasks (there's no stable dataset indices to track).
+        """
+        import random
+        if seed is not None:
+            random.seed(seed)
+
+        examples = []
+        for _ in range(num_examples):
+            a, b = random.randint(1, 10), random.randint(1, 10)
+            examples.append({"input": f"{a} + {b}", "output": str(a + b)})
+
+        if shuffle:
+            # shuffle in-place for diversity
+            random.shuffle(examples)
+
+        return examples[:num_examples]
     
     def evaluate(self, predictions: List[str], split: str = "test", **kwargs) -> Dict[str, float]:
         """Evaluate math predictions."""
