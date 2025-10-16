@@ -35,8 +35,8 @@ class BaseTask(ABC):
         self.config = config
         self.data = None
         self.demonstrations = None
-    # track which example indices have been used for ICL sampling
-    self._icl_used_indices = set()
+        # track which example indices have been used for ICL sampling
+        self._icl_used_indices = set()
         self._load_data()
         self._load_demonstrations()
     
