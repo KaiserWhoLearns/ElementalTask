@@ -582,21 +582,34 @@ def extract_function_vector_simple(
         device = "cuda" if torch.cuda.is_available() else "cpu"
     
     # Use the existing task registry
+    # For tasks without config, we need to provide proper defaults or use their factory functions
     if task_config is None:
-        # Provide sensible defaults for known tasks
-        if task_name == "simple_icl":
+        # Import factory functions for tasks that need them
+        if task_name == "basic_arithmetic":
+            from tasks.implementations.basic_arithmetic import create_basic_arithmetic_task
+            task = create_basic_arithmetic_task()
+        elif task_name == "token_reversal":
+            from tasks.implementations.token_reversal import create_token_reversal_task
+            task = create_token_reversal_task()
+        elif task_name == "part_of_speech":
+            from tasks.implementations.pos_id import create_pos_task
+            task = create_pos_task()
+        elif task_name == "simple_icl":
             task_config = TaskConfig(
                 name=task_name,
                 data_path="dataset/simple.csv",
                 input_column="question",
                 output_column="answer"
             )
+            task = get_task(task_name, task_config)
         else:
+            # For other tasks, try with minimal config
             task_config = TaskConfig(name=task_name)
-    
-    # Get task from existing registry
-    task = get_task(task_name, task_config)
-    
+            task = get_task(task_name, task_config)
+    else:
+        # User provided config, use it directly
+        task = get_task(task_name, task_config)
+
     # Load model and tokenizer
     from transformers import AutoTokenizer, AutoModelForCausalLM
     tokenizer = AutoTokenizer.from_pretrained(model_name)
