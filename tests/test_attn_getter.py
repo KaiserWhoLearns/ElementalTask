@@ -276,3 +276,69 @@ def test_crystal_residual_capture():
     assert max_diff < 1e-2, f"Residual mismatch too large: {max_diff:.3e}"
 
     print(f"✅ ResidualCapture works correctly with {CRYSTAL_MODEL_NAME}")
+
+
+@pytest.mark.integration
+@pytest.mark.skipif("CI" in os.environ and os.environ.get("CI") == "true",
+                    reason="Skip network downloads on CI")
+def test_olmo2_checkpoint_loading():
+    """Test that OLMo-2 can be loaded with a specific checkpoint/revision."""
+    torch.set_grad_enabled(False)
+    device = "cpu"
+
+    # Use a known early checkpoint (note: has "stage1-" prefix)
+    checkpoint = "stage1-step1000-tokens5B"
+
+    print(f"\nLoading {OLMO2_MODEL_NAME} with checkpoint {checkpoint}...")
+    model = AutoModelForCausalLM.from_pretrained(
+        OLMO2_MODEL_NAME,
+        revision=checkpoint,
+        torch_dtype=torch.float16,
+        device_map=device,
+        trust_remote_code=True
+    ).eval()
+
+    # Verify model loaded successfully
+    blocks = get_blocks(model)
+    assert len(blocks) == 32, f"Expected 32 blocks, got {len(blocks)}"
+    print(f"✓ Successfully loaded checkpoint {checkpoint} with {len(blocks)} blocks")
+
+    # Verify basic functionality
+    attn = get_attn(blocks[0])
+    assert attn is not None
+    print(f"✓ Model architecture is correct")
+
+    print(f"✅ Checkpoint loading works for {OLMO2_MODEL_NAME}")
+
+
+@pytest.mark.integration
+@pytest.mark.skipif("CI" in os.environ and os.environ.get("CI") == "true",
+                    reason="Skip network downloads on CI")
+def test_crystal_checkpoint_loading():
+    """Test that Crystal can be loaded with a specific checkpoint/revision."""
+    torch.set_grad_enabled(False)
+    device = "cpu"
+
+    # Use the phase 1 checkpoint mentioned in documentation
+    checkpoint = "CrystalCoder_phase1_checkpoint_055500"
+
+    print(f"\nLoading {CRYSTAL_MODEL_NAME} with checkpoint {checkpoint}...")
+    model = AutoModelForCausalLM.from_pretrained(
+        CRYSTAL_MODEL_NAME,
+        revision=checkpoint,
+        torch_dtype=torch.float16,
+        device_map=device,
+        trust_remote_code=True
+    ).eval()
+
+    # Verify model loaded successfully
+    blocks = get_blocks(model)
+    assert len(blocks) == 32, f"Expected 32 blocks, got {len(blocks)}"
+    print(f"✓ Successfully loaded checkpoint {checkpoint} with {len(blocks)} blocks")
+
+    # Verify basic functionality
+    attn = get_attn(blocks[0])
+    assert attn is not None
+    print(f"✓ Model architecture is correct")
+
+    print(f"✅ Checkpoint loading works for {CRYSTAL_MODEL_NAME}")
