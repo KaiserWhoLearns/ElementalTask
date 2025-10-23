@@ -5,7 +5,7 @@ import torch.nn as nn
 
 def get_blocks(model) -> List[nn.Module]:
     if hasattr(model, "model") and hasattr(model.model, "layers"):
-        return list(model.model.layers)            # LLaMA/Qwen/OPT
+        return list(model.model.layers)            # LLaMA/Qwen/OPT/OLMo-2
     if hasattr(model, "gpt_neox") and hasattr(model.gpt_neox, "layers"):
         return list(model.gpt_neox.layers)         # NeoX/Pythia
     if hasattr(model, "transformer") and hasattr(model.transformer, "h"):
@@ -55,7 +55,7 @@ def get_post_attn_norm(block: nn.Module) -> nn.Module:
     # GPT-2
     if hasattr(block, "ln_2"):
         return block.ln_2
-    # LLaMA/Qwen/OPT style
+    # LLaMA/Qwen/OPT/OLMo-2 style
     if hasattr(block, "post_attention_layernorm"):
         return block.post_attention_layernorm
     # Some NeoX variants
@@ -66,11 +66,9 @@ def get_post_attn_norm(block: nn.Module) -> nn.Module:
 def get_o_proj(attn: nn.Module) -> Optional[nn.Module]:
     # Optional hook on the attention output projection
     if hasattr(attn, "o_proj"):
-        return attn.o_proj          # LLaMA/Qwen/OPT
+        return attn.o_proj          # LLaMA/Qwen/OPT/OLMo-2
     if hasattr(attn, "c_proj"):
         return attn.c_proj          # GPT-2
-    if hasattr(attn, "o_proj"):
-        return attn.o_proj
     if hasattr(attn, "dense"):
         return attn.dense           # NeoX
     return None
