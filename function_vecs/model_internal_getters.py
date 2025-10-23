@@ -9,7 +9,7 @@ def get_blocks(model) -> List[nn.Module]:
     if hasattr(model, "gpt_neox") and hasattr(model.gpt_neox, "layers"):
         return list(model.gpt_neox.layers)         # NeoX/Pythia
     if hasattr(model, "transformer") and hasattr(model.transformer, "h"):
-        return list(model.transformer.h)           # GPT-2/J
+        return list(model.transformer.h)           # GPT-2/J/Crystal
     raise RuntimeError("Unsupported model layout")
 
 def get_attn(block: nn.Module) -> nn.Module:
@@ -52,7 +52,7 @@ def infer_head_dims(model: nn.Module, block: nn.Module, attn: nn.Module):
     return hidden_size, num_heads, head_dim
 
 def get_post_attn_norm(block: nn.Module) -> nn.Module:
-    # GPT-2
+    # GPT-2/Crystal style
     if hasattr(block, "ln_2"):
         return block.ln_2
     # LLaMA/Qwen/OPT/OLMo-2 style
@@ -68,7 +68,7 @@ def get_o_proj(attn: nn.Module) -> Optional[nn.Module]:
     if hasattr(attn, "o_proj"):
         return attn.o_proj          # LLaMA/Qwen/OPT/OLMo-2
     if hasattr(attn, "c_proj"):
-        return attn.c_proj          # GPT-2
+        return attn.c_proj          # GPT-2/Crystal
     if hasattr(attn, "dense"):
         return attn.dense           # NeoX
     return None
