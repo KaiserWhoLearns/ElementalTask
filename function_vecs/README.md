@@ -8,6 +8,7 @@ This directory contains tools for extracting **function vectors** from language 
 - [Two Extraction Interfaces](#two-extraction-interfaces)
   - [Simple Interface (Recommended)](#1-simple-interface-recommended)
   - [Advanced Interface](#2-advanced-interface-full-control)
+- [Loading Model Checkpoints](#loading-model-checkpoints)
 - [Building a Skill Basis](#building-a-skill-basis-from-multiple-tasks)
 - [Discovering Available Tasks](#discovering-available-tasks)
 - [Configuration Parameters](#key-configuration-parameters)
@@ -80,6 +81,7 @@ See [Discovering Available Tasks](#discovering-available-tasks) to list all task
 | `task_name` | str | Required | Name of task from registry |
 | `task_config` | TaskConfig | None | Optional custom config |
 | `model_name` | str | `"gpt2"` | HuggingFace model identifier |
+| `checkpoint` | str | None | Model checkpoint/revision (e.g., "stage1-step1000-tokens5B") |
 | `num_samples` | int | `10` | Number of examples to use |
 | `device` | str | `"auto"` | Device: "auto", "cuda", or "cpu" |
 | `layer_idx` | int | None | Layer to extract from (None = last) |
@@ -188,6 +190,130 @@ task = get_task("simple_icl", task_config)  # Use simple_icl as base class
 # Now extract function vector for this custom task
 function_vec = extract_task_function_vec(task, config, headset)
 ```
+
+---
+
+## Loading Model Checkpoints
+
+Both **OLMo-2** and **Crystal/CrystalCoder** models provide intermediate pre-training checkpoints, allowing you to analyze model behavior at different stages of training.
+
+### Supported Models with Checkpoints
+
+#### OLMo-2-1124-7B
+
+**Model ID:** `allenai/OLMo-2-1124-7B`
+
+**Checkpoint Format:** `stage1-stepXXXX-tokensYYYB`
+
+**Examples:**
+- `stage1-step1000-tokens5B` - Early checkpoint after ~5B tokens
+- `stage1-step10000-tokens42B` - Early training checkpoint
+- `stage1-step100000-tokens420B` - Mid-training checkpoint
+- `main` (default) - Final trained model
+
+#### LLM360/Crystal
+
+**Model ID:** `LLM360/Crystal`
+
+**Checkpoint Format:** `CrystalCoder_phaseN_checkpoint_XXXXXX`
+
+**Examples:**
+- `CrystalCoder_phase1_checkpoint_055500` - Phase 1 checkpoint
+- `CrystalCoder_phase3_checkpoint_027728` - Default/final checkpoint
+
+### Usage with Simple Interface
+
+```python
+from function_vecs.extract_function_vecs import extract_function_vector_simple
+
+# Extract from OLMo-2 early checkpoint
+function_vec = extract_function_vector_simple(
+    task_name="basic_arithmetic",
+    model_name="allenai/OLMo-2-1124-7B",
+    checkpoint="stage1-step1000-tokens5B",  # Specify checkpoint
+    num_samples=20,
+    device="cuda"
+)
+
+# Extract from Crystal Phase 1 checkpoint
+function_vec = extract_function_vector_simple(
+    task_name="simple_icl",
+    model_name="LLM360/Crystal",
+    checkpoint="CrystalCoder_phase1_checkpoint_055500",
+    num_samples=20,
+    device="cuda"
+)
+```
+
+### Usage with Advanced Interface
+
+```python
+from function_vecs.extract_function_vecs import ExtractConfig, extract_task_function_vec
+from tasks.registry import get_task
+from tasks.base_task import TaskConfig
+
+# Configure extraction with checkpoint
+config = ExtractConfig(
+    model_name="allenai/OLMo-2-1124-7B",
+    checkpoint="stage1-step1000-tokens5B",  # Specify checkpoint
+    device="cuda",
+    num_samples_per_task=20,
+    layers=[31]  # Last layer
+)
+
+# Load task and extract
+task_config = TaskConfig(name="basic_arithmetic")
+task = get_task("basic_arithmetic", task_config)
+function_vec = extract_task_function_vec(config, task)
+```
+
+### Analyzing Training Dynamics
+
+Compare function vectors across training checkpoints:
+
+```python
+# OLMo-2 training progression
+checkpoints = [
+    "stage1-step1000-tokens5B",
+    "stage1-step5000-tokens21B",
+    "stage1-step10000-tokens42B"
+]
+
+function_vecs = []
+for checkpoint in checkpoints:
+    vec = extract_function_vector_simple(
+        task_name="basic_arithmetic",
+        model_name="allenai/OLMo-2-1124-7B",
+        checkpoint=checkpoint,
+        num_samples=20
+    )
+    function_vecs.append(vec)
+    print(f"{checkpoint}: norm={vec.function_vec.dot(vec.function_vec):.6f}")
+
+# Analyze how function vectors evolve during training
+# (e.g., cosine similarity between checkpoints)
+```
+
+### Finding Available Checkpoints
+
+```python
+from huggingface_hub import list_repo_refs
+
+# List all OLMo-2 checkpoints
+out = list_repo_refs("allenai/OLMo-2-1124-7B")
+checkpoints = [b.name for b in out.branches]
+print(f"OLMo-2 checkpoints: {checkpoints}")
+
+# Visit HuggingFace "Files and versions" tab for Crystal:
+# https://huggingface.co/LLM360/Crystal/tree/main
+```
+
+### Notes
+
+- All checkpoint loading requires `trust_remote_code=True`
+- Checkpoints are cached locally by HuggingFace Hub
+- If no checkpoint is specified, the main/default branch is loaded
+- Both models are fully supported by the function_vecs framework
 
 ---
 
@@ -302,6 +428,7 @@ Complete configuration for the extraction process:
 class ExtractConfig:
     # Model configuration
     model_name: str = "EleutherAI/gpt-j-6B"
+    checkpoint: Optional[str] = None  # Model checkpoint/revision
     device: str = "cuda" if torch.cuda.is_available() else "cpu"
     batch_size: int = 8
     seed: int = 42
