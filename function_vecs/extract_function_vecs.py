@@ -25,6 +25,7 @@ class ExtractConfig:
     head_selection: Literal["topk", "soft"] = "topk"
     topk_heads: int = 10
     cached_headset_path: Optional[str] = None # use a cached set of heads to save computation time
+    score_metric: str = "logprob"  # "logprob" or "margin" for AIE computation
 
     # basis related arguments
     basis_method: Literal["svd", "pca"] = "svd"
@@ -421,7 +422,29 @@ def _sample_task_prompts(task: BaseTask, n: int) -> List[str]:
 def _sample_prompts_and_answers(task, n):
     rows = task.get_split("test")[:n]
     texts = [task.build_prompt(r) for r in rows]
-    answers = [r[task.config.output_column] for r in rows]
+    
+    # Try to get answers from the output column
+    try:
+        answers = [r[task.config.output_column] for r in rows]
+    except (KeyError, TypeError) as e:
+        # Debug: print task info
+        print(f"  ⚠️  Task '{task.config.name}' - column '{task.config.output_column}' not found")
+        if rows:
+            print(f"     Available columns: {list(rows[0].keys())}")
+        
+        # Try common alternative column names
+        for alt_col in ['answer', 'target', 'label', 'gold', 'expected', 'answerKey']:
+            try:
+                answers = [r[alt_col] for r in rows]
+                print(f"     ✓ Using column '{alt_col}' instead")
+                break
+            except (KeyError, TypeError):
+                continue
+        else:
+            # If no alternative works, return None to signal skip
+            print(f"     ✗ No compatible column found - will skip this task")
+            return None, None
+    
     return texts, answers
     
 # --- simple shuffled controls (permute targets) ---
@@ -566,16 +589,34 @@ def extract_informative_heads(config: ExtractConfig, tasks: List[BaseTask]) -> H
     # screen on a few tasks
     screen_tasks = tasks[: min(8, len(tasks))]
     aie_accum = None
-    for t in screen_tasks:
-        icl = _sample_task_prompts(t, config.num_samples_per_task)
+    tasks_screened = 0
+    for i, t in enumerate(screen_tasks, 1):
+        # Skip known incompatible tasks
+        if t.config.name in ['ioi_task']:
+            print(f"  [{i}/{len(screen_tasks)}] Skipping task: {t.config.name} (known incompatible format)")
+            continue
+            
+        print(f"  [{i}/{len(screen_tasks)}] Screening task: {t.config.name}")
+        icl, answers = _sample_prompts_and_answers(t, config.num_samples_per_task)
+        
+        # Skip if task couldn't be processed
+        if icl is None or answers is None:
+            continue
+        
         ctrl = get_shuffled_prompts(t, config.num_samples_per_task)
         for li in layers:
-            aie = compute_aie_for_layer(model, tok, icl, ctrl, li, config.device, config.score_metric)  # (H,)
+            aie = compute_aie_for_layer(model, tok, icl, answers, ctrl, li, config.device, config.score_metric)  # (H,)
             aie_np = aie.detach().cpu().numpy()
             if aie_accum is None:
                 aie_accum = {(li): aie_np.copy()}
             else:
                 aie_accum[li] = aie_accum.get(li, 0) + aie_np
+        tasks_screened += 1
+    
+    print(f"\n✓ Successfully screened {tasks_screened}/{len(screen_tasks)} tasks")
+    
+    if tasks_screened == 0:
+        raise ValueError("No tasks could be screened for head selection. All tasks had incompatible data formats.")
 
     # pick top-k across selected layer(s)
     topk = config.topk_heads
@@ -770,19 +811,34 @@ def stack_function_vecs(task_vecs: List[TaskFunctionVec]) -> TaskMatrix:
 def build_skill_basis(task_vec_matrix: TaskMatrix, method="svd", k=-1, center=False) -> SkillBasis:
     """Build a skill basis from a set of function vectors.
     
+    Mathematical note: SVD with centering IS equivalent to PCA!
+    - method="svd" with center=False: SVD on original (normalized) vectors
+    - method="svd" with center=True: PCA (SVD on centered vectors)  
+    - method="pca": Forces center=True and uses SVD (mathematically equivalent to PCA)
+    
     Args:
-        task_vec_matrix: Matrix of task function vectors
+        task_vec_matrix: Matrix of task function vectors (d_model x n_tasks)
         method: Method to use ("svd" or "pca")
-        k: Number of components to keep (-1 for 95% variance)
-        center: Whether to center the data before SVD. 
-               Set to False (default) for L2-normalized vectors to use cosine-based metrics.
-               Set to True for standard PCA on unnormalized vectors.
+                - "svd": Use raw SVD, respecting the center parameter
+                - "pca": Force centering (standard PCA), ignores center=False if provided
+        k: Number of components to keep (-1 for 95% variance threshold)
+        center: Whether to center the data before decomposition.
+               - False (default): No centering, good for L2-normalized vectors (cosine-based metrics)
+               - True: Center data (standard PCA), good for unnormalized data
+               Note: Ignored if method="pca" (always centers)
     
     Returns:
-        SkillBasis with the computed basis
+        SkillBasis with the computed basis vectors in U
     """
-    # NOTE: just svd for now
     V = np.asarray(task_vec_matrix.V, dtype=np.float64)
+    
+    # Handle method and centering
+    if method == "pca":
+        # PCA always requires centering
+        if center == False:
+            import warnings
+            warnings.warn("method='pca' requires centering. Setting center=True.")
+        center = True
     
     if center:
         mean = V.mean(axis=1, keepdims=True)
@@ -792,6 +848,7 @@ def build_skill_basis(task_vec_matrix: TaskMatrix, method="svd", k=-1, center=Fa
         mean = None
         V_centered = V
 
+    # Perform SVD (which is PCA if data is centered)
     U, S, Vt = np.linalg.svd(V_centered, full_matrices=False)
 
     if k == -1: # select based on energy
