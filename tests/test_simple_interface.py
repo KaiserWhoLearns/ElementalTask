@@ -21,14 +21,14 @@ def test_simple_interface_existing_task():
     
     # Use one of our working basic ICL tasks
     function_vec = extract_function_vector_simple(
-        task_name="simple_arithmetic",
+        task_name="basic_arithmetic",
         model_name="distilgpt2",  # Smaller model for testing
         num_samples=3,
         device="cpu"  # Force CPU to avoid CUDA issues
     )
-    
+
     # Verify the result
-    assert function_vec.task_name == "simple_arithmetic"
+    assert function_vec.task_name == "basic_arithmetic"
     assert function_vec.function_vec.shape[0] > 0  # Should have some dimensions
     assert abs(function_vec.function_vec.dot(function_vec.function_vec) - 1.0) < 1e-5  # Should be L2 normalized
     
@@ -47,8 +47,8 @@ def test_simple_interface_different_tasks():
     """Test the simplified interface with different built-in tasks."""
     print("Testing simplified interface with different tasks...")
     
-    # Test multiple basic ICL tasks
-    tasks_to_test = ["first_character", "last_character", "vowel_count"]
+    # Test multiple basic ICL tasks (use actual available tasks)
+    tasks_to_test = ["simple_icl", "token_reversal", "part_of_speech"]
     
     for task_name in tasks_to_test:
         print(f"Testing task: {task_name}")
@@ -79,10 +79,10 @@ def test_simple_interface_defaults():
     print("Testing simplified interface with defaults...")
     
     # Test with minimal parameters - should use all defaults
-    function_vec = extract_function_vector_simple("simple_arithmetic")
-    
+    function_vec = extract_function_vector_simple("basic_arithmetic")
+
     # Verify basic properties
-    assert function_vec.task_name == "simple_arithmetic"
+    assert function_vec.task_name == "basic_arithmetic"
     assert function_vec.function_vec.shape[0] > 0
     assert abs(function_vec.function_vec.dot(function_vec.function_vec) - 1.0) < 1e-5
     
@@ -97,13 +97,13 @@ def test_readme_example():
     print("Testing simple interface README example...")
     
     # Simple usage - use a working basic ICL task
-    function_vec = extract_function_vector_simple("simple_arithmetic", num_samples=3)
+    function_vec = extract_function_vector_simple("basic_arithmetic", num_samples=3)
     print(f"Function vector shape: {function_vec.function_vec.shape}")
-    
+
     # Verify it worked
     assert function_vec.function_vec.shape[0] > 0
     assert abs(np.linalg.norm(function_vec.function_vec) - 1.0) < 1e-6  # Should be L2 normalized
-    assert function_vec.task_name == "simple_arithmetic"
+    assert function_vec.task_name == "basic_arithmetic"
     
     print("✅ README example test passed!")
 

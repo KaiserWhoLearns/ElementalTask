@@ -15,6 +15,7 @@ import torch.nn as nn
 class ExtractConfig:
     # function vector related arguments
     model_name: str = "EleutherAI/gpt-j-6B"
+    checkpoint: Optional[str] = None  # Model checkpoint/revision (e.g., "step1000-tokens5B" for OLMo-2)
     device: str = "cuda" if torch.cuda.is_available() else "cpu"
     batch_size: int = 8
     seed: int = 42
@@ -578,10 +579,14 @@ def compute_aie_for_layer(
 
 def extract_informative_heads(config: ExtractConfig, tasks: List[BaseTask]) -> Headset:
     from transformers import AutoTokenizer, AutoModelForCausalLM
-    tok = AutoTokenizer.from_pretrained(config.model_name)
+    tok = AutoTokenizer.from_pretrained(config.model_name, revision=config.checkpoint, trust_remote_code=True)
     if tok.pad_token_id is None:
         tok.pad_token = tok.eos_token
-    model = AutoModelForCausalLM.from_pretrained(config.model_name).to(config.device).eval()
+    model = AutoModelForCausalLM.from_pretrained(
+        config.model_name,
+        revision=config.checkpoint,
+        trust_remote_code=True
+    ).to(config.device).eval()
 
     blocks = get_blocks(model)
     layers = config.layers if config.layers is not None else [len(blocks)-1]
@@ -640,10 +645,18 @@ def extract_task_function_vec(
     # Load once if not provided (lets you reuse across tasks)
     if model is None:
         from transformers import AutoModelForCausalLM, AutoTokenizer
-        tokenizer = AutoTokenizer.from_pretrained(config.model_name)
+        tokenizer = AutoTokenizer.from_pretrained(
+            config.model_name,
+            revision=config.checkpoint,
+            trust_remote_code=True
+        )
         if tokenizer.pad_token_id is None:
             tokenizer.pad_token = tokenizer.eos_token
-        model = AutoModelForCausalLM.from_pretrained(config.model_name).to(config.device).eval()
+        model = AutoModelForCausalLM.from_pretrained(
+            config.model_name,
+            revision=config.checkpoint,
+            trust_remote_code=True
+        ).to(config.device).eval()
     else:
         assert tokenizer is not None
 
@@ -876,6 +889,7 @@ def extract_function_vector_simple(
     task_name: str,
     task_config: Optional[TaskConfig] = None,
     model_name: str = "gpt2",
+    checkpoint: Optional[str] = None,
     num_samples: int = 10,
     device: str = "auto"
 ) -> TaskFunctionVec:
@@ -886,6 +900,7 @@ def extract_function_vector_simple(
         task_name: Name of task (e.g., "simple_icl", "math")
         task_config: Optional custom config, will use defaults if None
         model_name: Model to use for extraction
+        checkpoint: Model checkpoint/revision (e.g., "step1000-tokens5B" for OLMo-2, or "CrystalCoder_phase1_checkpoint_055500" for Crystal)
         num_samples: Number of examples to use
         device: Device to run on ("auto", "cuda", "cpu")
         
@@ -902,7 +917,11 @@ def extract_function_vector_simple(
     
     # Load model and tokenizer
     from transformers import AutoTokenizer, AutoModelForCausalLM
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    tokenizer = AutoTokenizer.from_pretrained(
+        model_name,
+        revision=checkpoint,
+        trust_remote_code=True
+    )
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
     model = AutoModelForCausalLM.from_pretrained(model_name).to(device).eval()
@@ -910,6 +929,7 @@ def extract_function_vector_simple(
     # Simple config
     config = ExtractConfig(
         model_name=model_name,
+        checkpoint=checkpoint,
         device=device,
         num_samples_per_task=num_samples,
         batch_size=min(8, num_samples)
