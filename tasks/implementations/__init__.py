@@ -21,3 +21,7 @@ class MyCustomTask(BaseTask):
 
 The task registry will automatically discover and register all tasks in this directory.
 """
+
+from .copying_task import CopyingTask
+from .ignoring_context_task import IgnoringContextTask
+from .string_analogy_task import StringAnalogyTask

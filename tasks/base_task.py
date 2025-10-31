@@ -165,14 +165,32 @@ class BaseTask(ABC):
             # Return empty for train/val if not implemented
             return []
     
-    def build_prompt(self, instance: Dict[str, Any]) -> str:
-        """Build a prompt for a given instance."""
+    def build_prompt(self, instance: Dict[str, Any], num_shots: int = 5) -> str:
+        """Build a prompt for a given instance.
+        
+        Args:
+            instance: The instance to build a prompt for
+            num_shots: Number of in-context learning examples to include (default: 5)
+        
+        Returns:
+            The formatted prompt string
+        """
         prompt = ""
         
         # Add demonstrations if available
         if self.demonstrations is not None:
             prompt += self._format_demonstrations()
             prompt += "\n\n"
+        # If task supports ICL generation, use that
+        elif hasattr(self, 'get_icl_examples') and num_shots > 0:
+            try:
+                icl_examples = self.get_icl_examples(num_examples=num_shots)
+                if icl_examples:
+                    prompt += self._format_icl_examples(icl_examples)
+                    prompt += "\n\n"
+            except Exception as e:
+                # If ICL generation fails, continue without examples
+                pass
         
         # Add the instance input
         if self.config.prompt_template:
@@ -187,12 +205,12 @@ class BaseTask(ABC):
         if isinstance(self.demonstrations, str):
             return self.demonstrations
         elif isinstance(self.demonstrations, pd.DataFrame):
-            demo_text = "Here are some examples:\n"
+            demo_text = ""
             for _, row in self.demonstrations.head(self.config.num_demonstrations).iterrows():
                 demo_text += f"Input: {row[self.config.input_column]}\nOutput: {row[self.config.output_column]}\n\n"
             return demo_text.strip()
         elif isinstance(self.demonstrations, list):
-            demo_text = "Here are some examples:\n"
+            demo_text = ""
             for demo in self.demonstrations[:self.config.num_demonstrations]:
                 demo_text += f"Input: {demo[self.config.input_column]}\nOutput: {demo[self.config.output_column]}\n\n"
             return demo_text.strip()
@@ -201,6 +219,29 @@ class BaseTask(ABC):
             return ""  # Will be handled by subclasses that need category-specific demos
         else:
             return ""
+    
+    def _format_icl_examples(self, examples: List[Dict[str, Any]]) -> str:
+        """Format ICL examples into a string.
+        
+        Args:
+            examples: List of example dictionaries with input/output keys
+            
+        Returns:
+            Formatted string of examples
+        """
+        if not examples:
+            return ""
+        
+        demo_text = "\n"
+        for ex in examples:
+            # Try different column names
+            input_val = ex.get(self.config.input_column) or ex.get('input') or ex.get('question')
+            output_val = ex.get(self.config.output_column) or ex.get('output') or ex.get('answer')
+            
+            if input_val is not None and output_val is not None:
+                demo_text += f"Input: {input_val}\nOutput: {output_val}\n\n"
+        
+        return demo_text.strip()
     
     @abstractmethod
     def evaluate(self, predictions: List[str], split: str = "test", **kwargs) -> Dict[str, float]:

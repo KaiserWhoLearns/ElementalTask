@@ -54,8 +54,16 @@ class IOITask(BaseTask):
             return self.data.to_dict('records')
         return self.data if isinstance(self.data, list) else []
     
-    def build_prompt(self, instance: Dict[str, Any]) -> str:
-        """Build prompt for pronoun resolution problems."""
+    def build_prompt(self, instance: Dict[str, Any], num_shots: int = 5) -> str:
+        """Build prompt for pronoun resolution problems.
+        
+        Args:
+            instance: The instance to build a prompt for
+            num_shots: Number of in-context learning examples (default: 5)
+        
+        Returns:
+            Formatted prompt string
+        """
         # The mib-bench/ioi dataset typically has these fields:
         # - 'prompt': the incomplete sentence
         # - 'choices': list of possible completions 
@@ -168,7 +176,7 @@ def create_ioi_task(
         name=name,
         description="Indirect Object Identification (IOI) evaluation task using mib-bench/ioi dataset",
         data_format="huggingface",
-        dataset_name="mib-bench/ioi",
+        data_path="mib-bench/ioi",  # HuggingFace dataset name
         input_column="prompt",  # The incomplete sentence
         output_column="choices",  # List of choices, use with answer_index
         evaluation_metrics=["accuracy"],
