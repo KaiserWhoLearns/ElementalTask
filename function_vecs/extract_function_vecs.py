@@ -26,6 +26,7 @@ class ExtractConfig:
     head_selection: Literal["topk", "soft"] = "topk"
     topk_heads: int = 10
     cached_headset_path: Optional[str] = None # use a cached set of heads to save computation time
+    score_metric: str = "logprob"  # "logprob" or "margin" for AIE computation
 
     # basis related arguments
     basis_method: Literal["svd", "pca"] = "svd"
@@ -61,6 +62,237 @@ class SkillBasis:
     S: np.ndarray
     Vt: np.ndarray
     task_names: List[str]
+    mean: Optional[np.ndarray] = None  # Mean vector used during centering
+    
+    def reconstruct(
+        self,
+        task_vec: TaskFunctionVec,
+        k: Optional[int] = None,
+        normalize: bool = True
+    ) -> np.ndarray:
+        """
+        Reconstruct a task vector using top-k basis vectors.
+        
+        Args:
+            task_vec: Vector to reconstruct
+            k: Number of basis vectors to use (None = use all available)
+            normalize: Whether to normalize the reconstruction (for cosine-based analysis)
+            
+        Returns:
+            Reconstructed vector (d_model,)
+        """
+        v = np.asarray(task_vec.function_vec, dtype=np.float64)
+        
+        # Center the vector if we have a mean (for centered PCA)
+        if self.mean is not None:
+            v_work = v - self.mean.flatten()
+        else:
+            v_work = v
+        
+        # Use top-k basis vectors
+        if k is None:
+            k = self.U.shape[1]
+        k = min(k, self.U.shape[1])
+        
+        U_k = self.U[:, :k]
+        
+        # Project onto basis and reconstruct
+        alpha = U_k.T @ v_work  # (k,)
+        v_reconstructed = U_k @ alpha  # (d_model,)
+        
+        # Add mean back if centered
+        if self.mean is not None:
+            v_reconstructed = v_reconstructed + self.mean.flatten()
+        
+        # Normalize if requested (for cosine-based comparison)
+        if normalize and self.mean is None:  # Only normalize for non-centered bases
+            norm = np.linalg.norm(v_reconstructed)
+            if norm > 1e-10:
+                v_reconstructed = v_reconstructed / norm
+        
+        return v_reconstructed.astype(np.float32)
+    
+    def epsilon_rank(
+        self, 
+        task_vec: TaskFunctionVec, 
+        epsilon: float = 0.01,
+        metric: Literal["cosine", "relative", "absolute"] = "cosine",
+        return_details: bool = False
+    ) -> Dict[str, Any]:
+        """
+        Find minimum k basis vectors needed to reconstruct task_vec within epsilon.
+        
+        Args:
+            task_vec: The task function vector to reconstruct
+            epsilon: Error threshold (default 0.01 = 1%)
+            metric: Error metric to use:
+                - "cosine": 1 - cosine_similarity (best for normalized vectors, range [0,2])
+                - "relative": ||v - v̂|| / ||v|| (L2 relative error, range [0,1])  
+                - "absolute": ||v - v̂|| (raw L2 error)
+            return_details: If True, return dict with errors, projections, etc.
+            
+        Returns:
+            If return_details=False: just the epsilon-rank (int)
+            If return_details=True: dict with {
+                "epsilon_rank": int,
+                "errors": np.ndarray,  # error for k=0, 1, 2, ..., max_k
+                "cosine_errors": np.ndarray,  # cosine distance
+                "projections": np.ndarray,  # coordinates in basis
+                "reconstruction": np.ndarray  # reconstructed vector at epsilon_rank
+            }
+        """
+        v = np.asarray(task_vec.function_vec, dtype=np.float64)
+        max_k = self.U.shape[1]
+        
+        # Center the vector if we have a mean
+        if self.mean is not None:
+            v_work = v - self.mean.flatten()
+        else:
+            v_work = v
+        
+        v_norm = np.linalg.norm(v_work)
+        
+        # Compute all projections once
+        projections = self.U.T @ v_work  # (max_k,)
+        
+        # Compute reconstruction errors for each k
+        l2_errors = np.zeros(max_k + 1, dtype=np.float64)
+        cosine_errors = np.zeros(max_k + 1, dtype=np.float64)
+        
+        # k=0: no reconstruction
+        l2_errors[0] = v_norm
+        cosine_errors[0] = 1.0  # Worst case: orthogonal
+        
+        epsilon_rank = max_k  # default if threshold never met
+        
+        for k in range(1, max_k + 1):
+            # Reconstruct with top k vectors
+            v_recon = self.U[:, :k] @ projections[:k]
+            
+            # L2 error
+            l2_error = np.linalg.norm(v_work - v_recon)
+            l2_errors[k] = l2_error
+            
+            # Cosine error (for normalized vectors or if no centering)
+            if self.mean is None:
+                # Normalize both for cosine comparison
+                v_norm_val = np.linalg.norm(v_work)
+                v_recon_norm = np.linalg.norm(v_recon)
+                if v_norm_val > 1e-10 and v_recon_norm > 1e-10:
+                    cosine_sim = np.dot(v_work, v_recon) / (v_norm_val * v_recon_norm)
+                    cosine_sim = np.clip(cosine_sim, -1.0, 1.0)  # Numerical stability
+                    cosine_errors[k] = 1.0 - cosine_sim
+                else:
+                    cosine_errors[k] = 1.0
+            else:
+                # For centered data, cosine doesn't make as much sense
+                cosine_errors[k] = l2_errors[k] / (v_norm + 1e-10)
+            
+            # Check if we've met the threshold
+            if metric == "cosine":
+                error_val = cosine_errors[k]
+            elif metric == "relative":
+                error_val = l2_errors[k] / (v_norm + 1e-10)
+            else:  # absolute
+                error_val = l2_errors[k]
+            
+            if error_val <= epsilon and epsilon_rank == max_k:
+                epsilon_rank = k
+        
+        if return_details:
+            relative_errors = l2_errors / (v_norm + 1e-10)
+            final_reconstruction = self.reconstruct(task_vec, k=epsilon_rank, normalize=(self.mean is None))
+            
+            return {
+                "epsilon_rank": epsilon_rank,
+                "errors": l2_errors.astype(np.float32),
+                "relative_errors": relative_errors.astype(np.float32),
+                "cosine_errors": cosine_errors.astype(np.float32),
+                "projections": projections.astype(np.float32),
+                "reconstruction": final_reconstruction,
+                "original_norm": float(v_norm),
+                "metric": metric
+            }
+        else:
+            return epsilon_rank
+    
+    def batch_epsilon_rank(
+        self,
+        task_vecs: List[TaskFunctionVec],
+        epsilon: float = 0.01,
+        metric: Literal["cosine", "relative", "absolute"] = "cosine"
+    ) -> Dict[str, int]:
+        """
+        Compute epsilon-rank for multiple task vectors efficiently.
+        
+        Args:
+            task_vecs: List of task function vectors to analyze
+            epsilon: Error threshold
+            metric: Error metric to use ("cosine", "relative", or "absolute")
+            
+        Returns:
+            Dictionary mapping task_name -> epsilon_rank
+        """
+        results = {}
+        for task_vec in task_vecs:
+            eps_rank = self.epsilon_rank(task_vec, epsilon=epsilon, metric=metric, return_details=False)
+            results[task_vec.task_name] = eps_rank
+        
+        return results
+    
+    def explained_variance_ratio(self) -> np.ndarray:
+        """
+        Return the cumulative fraction of variance explained by first k components.
+        Useful for scree plots.
+        
+        Returns:
+            Array of shape (k,) with cumulative variance ratios
+        """
+        variance_explained = self.S**2 / np.sum(self.S**2)
+        return np.cumsum(variance_explained)
+
+def save_function_vec(vec: TaskFunctionVec, filepath: str):
+    """Save a TaskFunctionVec to .npz file."""
+    np.savez_compressed(
+        filepath,
+        task_name=vec.task_name,
+        function_vec=vec.function_vec,
+        normalization=vec.normalization
+    )
+
+def load_function_vec(filepath: str) -> TaskFunctionVec:
+    """Load a TaskFunctionVec from .npz file."""
+    data = np.load(filepath, allow_pickle=True)
+    return TaskFunctionVec(
+        task_name=str(data['task_name']),
+        function_vec=data['function_vec'],
+        normalization=str(data['normalization'])
+    )
+
+def save_skill_basis(basis: SkillBasis, filepath: str):
+    """Save a SkillBasis to .npz file."""
+    np.savez_compressed(
+        filepath,
+        method=basis.method,
+        U=basis.U,
+        S=basis.S,
+        Vt=basis.Vt,
+        task_names=np.array(basis.task_names, dtype=object),
+        mean=basis.mean if basis.mean is not None else np.array([])
+    )
+
+def load_skill_basis(filepath: str) -> SkillBasis:
+    """Load a SkillBasis from .npz file."""
+    data = np.load(filepath, allow_pickle=True)
+    mean = data['mean'] if data['mean'].size > 0 else None
+    return SkillBasis(
+        method=str(data['method']),
+        U=data['U'],
+        S=data['S'],
+        Vt=data['Vt'],
+        task_names=data['task_names'].tolist(),
+        mean=mean
+    )
 
 def _batch_iter(iterable, n):
     iterable = iter(iterable)
@@ -191,7 +423,29 @@ def _sample_task_prompts(task: BaseTask, n: int) -> List[str]:
 def _sample_prompts_and_answers(task, n):
     rows = task.get_split("test")[:n]
     texts = [task.build_prompt(r) for r in rows]
-    answers = [r[task.config.output_column] for r in rows]
+    
+    # Try to get answers from the output column
+    try:
+        answers = [r[task.config.output_column] for r in rows]
+    except (KeyError, TypeError) as e:
+        # Debug: print task info
+        print(f"  ⚠️  Task '{task.config.name}' - column '{task.config.output_column}' not found")
+        if rows:
+            print(f"     Available columns: {list(rows[0].keys())}")
+        
+        # Try common alternative column names
+        for alt_col in ['answer', 'target', 'label', 'gold', 'expected', 'answerKey']:
+            try:
+                answers = [r[alt_col] for r in rows]
+                print(f"     ✓ Using column '{alt_col}' instead")
+                break
+            except (KeyError, TypeError):
+                continue
+        else:
+            # If no alternative works, return None to signal skip
+            print(f"     ✗ No compatible column found - will skip this task")
+            return None, None
+    
     return texts, answers
     
 # --- simple shuffled controls (permute targets) ---
@@ -340,16 +594,34 @@ def extract_informative_heads(config: ExtractConfig, tasks: List[BaseTask]) -> H
     # screen on a few tasks
     screen_tasks = tasks[: min(8, len(tasks))]
     aie_accum = None
-    for t in screen_tasks:
-        icl = _sample_task_prompts(t, config.num_samples_per_task)
+    tasks_screened = 0
+    for i, t in enumerate(screen_tasks, 1):
+        # Skip known incompatible tasks
+        if t.config.name in ['ioi_task']:
+            print(f"  [{i}/{len(screen_tasks)}] Skipping task: {t.config.name} (known incompatible format)")
+            continue
+            
+        print(f"  [{i}/{len(screen_tasks)}] Screening task: {t.config.name}")
+        icl, answers = _sample_prompts_and_answers(t, config.num_samples_per_task)
+        
+        # Skip if task couldn't be processed
+        if icl is None or answers is None:
+            continue
+        
         ctrl = get_shuffled_prompts(t, config.num_samples_per_task)
         for li in layers:
-            aie = compute_aie_for_layer(model, tok, icl, ctrl, li, config.device, config.score_metric)  # (H,)
+            aie = compute_aie_for_layer(model, tok, icl, answers, ctrl, li, config.device, config.score_metric)  # (H,)
             aie_np = aie.detach().cpu().numpy()
             if aie_accum is None:
                 aie_accum = {(li): aie_np.copy()}
             else:
                 aie_accum[li] = aie_accum.get(li, 0) + aie_np
+        tasks_screened += 1
+    
+    print(f"\n✓ Successfully screened {tasks_screened}/{len(screen_tasks)} tasks")
+    
+    if tasks_screened == 0:
+        raise ValueError("No tasks could be screened for head selection. All tasks had incompatible data formats.")
 
     # pick top-k across selected layer(s)
     topk = config.topk_heads
@@ -549,13 +821,47 @@ def stack_function_vecs(task_vecs: List[TaskFunctionVec]) -> TaskMatrix:
     v_space = np.column_stack(vecs)
     return TaskMatrix(V=v_space, task_names=[tv.task_name for tv in task_vecs])
 
-def build_skill_basis(task_vec_matrix: TaskMatrix, method="svd", k=-1) -> SkillBasis:
-    """Build a skill basis from a set of function vectors."""
-    # NOTE: just svd for now
+def build_skill_basis(task_vec_matrix: TaskMatrix, method="svd", k=-1, center=False) -> SkillBasis:
+    """Build a skill basis from a set of function vectors.
+    
+    Mathematical note: SVD with centering IS equivalent to PCA!
+    - method="svd" with center=False: SVD on original (normalized) vectors
+    - method="svd" with center=True: PCA (SVD on centered vectors)  
+    - method="pca": Forces center=True and uses SVD (mathematically equivalent to PCA)
+    
+    Args:
+        task_vec_matrix: Matrix of task function vectors (d_model x n_tasks)
+        method: Method to use ("svd" or "pca")
+                - "svd": Use raw SVD, respecting the center parameter
+                - "pca": Force centering (standard PCA), ignores center=False if provided
+        k: Number of components to keep (-1 for 95% variance threshold)
+        center: Whether to center the data before decomposition.
+               - False (default): No centering, good for L2-normalized vectors (cosine-based metrics)
+               - True: Center data (standard PCA), good for unnormalized data
+               Note: Ignored if method="pca" (always centers)
+    
+    Returns:
+        SkillBasis with the computed basis vectors in U
+    """
     V = np.asarray(task_vec_matrix.V, dtype=np.float64)
-    mean = V.mean(axis=1, keepdims=True)
-    V_centered = V - mean
+    
+    # Handle method and centering
+    if method == "pca":
+        # PCA always requires centering
+        if center == False:
+            import warnings
+            warnings.warn("method='pca' requires centering. Setting center=True.")
+        center = True
+    
+    if center:
+        mean = V.mean(axis=1, keepdims=True)
+        V_centered = V - mean
+    else:
+        # For normalized vectors, don't center (cosine-based analysis)
+        mean = None
+        V_centered = V
 
+    # Perform SVD (which is PCA if data is centered)
     U, S, Vt = np.linalg.svd(V_centered, full_matrices=False)
 
     if k == -1: # select based on energy
@@ -565,8 +871,18 @@ def build_skill_basis(task_vec_matrix: TaskMatrix, method="svd", k=-1) -> SkillB
     U = U[:, :k].astype(np.float32, copy=False)
     S = S[:k].astype(np.float32, copy=False)
     Vt = Vt[:k, :].astype(np.float32, copy=False)
+    
+    if mean is not None:
+        mean = mean.astype(np.float32)
 
-    return SkillBasis(method=method, U=U, S=S, Vt=Vt, task_names=task_vec_matrix.task_names)
+    return SkillBasis(
+        method=method, 
+        U=U, 
+        S=S, 
+        Vt=Vt, 
+        task_names=task_vec_matrix.task_names,
+        mean=mean
+    )
 
 
 def extract_function_vector_simple(
@@ -575,56 +891,30 @@ def extract_function_vector_simple(
     model_name: str = "gpt2",
     checkpoint: Optional[str] = None,
     num_samples: int = 10,
-    device: str = "auto",
-    layer_idx: Optional[int] = None
+    device: str = "auto"
 ) -> TaskFunctionVec:
     """
-    Simplified one-stop interface for extracting function vectors using the existing task registry.
-
+    Simplified one-stop interface for extracting function vectors.
+    
     Args:
-        task_name: Name of task from registry (e.g., "simple_icl", "math", "simple", "textfrct")
+        task_name: Name of task (e.g., "simple_icl", "math")
         task_config: Optional custom config, will use defaults if None
         model_name: Model to use for extraction
         checkpoint: Model checkpoint/revision (e.g., "step1000-tokens5B" for OLMo-2, or "CrystalCoder_phase1_checkpoint_055500" for Crystal)
         num_samples: Number of examples to use
         device: Device to run on ("auto", "cuda", "cpu")
-        layer_idx: Which layer to extract from (None = use last layer)
-
+        
     Returns:
         TaskFunctionVec with the extracted function vector
     """
     if device == "auto":
         device = "cuda" if torch.cuda.is_available() else "cpu"
     
-    # Use the existing task registry
-    # For tasks without config, we need to provide proper defaults or use their factory functions
+    # Create task
     if task_config is None:
-        # Import factory functions for tasks that need them
-        if task_name == "basic_arithmetic":
-            from tasks.implementations.basic_arithmetic import create_basic_arithmetic_task
-            task = create_basic_arithmetic_task()
-        elif task_name == "token_reversal":
-            from tasks.implementations.token_reversal import create_token_reversal_task
-            task = create_token_reversal_task()
-        elif task_name == "part_of_speech":
-            from tasks.implementations.pos_id import create_pos_task
-            task = create_pos_task()
-        elif task_name == "simple_icl":
-            task_config = TaskConfig(
-                name=task_name,
-                data_path="dataset/simple.csv",
-                input_column="question",
-                output_column="answer"
-            )
-            task = get_task(task_name, task_config)
-        else:
-            # For other tasks, try with minimal config
-            task_config = TaskConfig(name=task_name)
-            task = get_task(task_name, task_config)
-    else:
-        # User provided config, use it directly
-        task = get_task(task_name, task_config)
-
+        task_config = TaskConfig(name=task_name)
+    task = get_task(task_name, task_config)
+    
     # Load model and tokenizer
     from transformers import AutoTokenizer, AutoModelForCausalLM
     tokenizer = AutoTokenizer.from_pretrained(
@@ -634,37 +924,28 @@ def extract_function_vector_simple(
     )
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
-    model = AutoModelForCausalLM.from_pretrained(
-        model_name,
-        revision=checkpoint,
-        trust_remote_code=True
-    ).to(device).eval()
-
-    # Determine which layer to use - last layer typically has more semantic information
-    if layer_idx is None:
-        blocks = get_blocks(model)
-        layer_idx = len(blocks) - 1  # Use last layer by default
-
+    model = AutoModelForCausalLM.from_pretrained(model_name).to(device).eval()
+    
     # Simple config
     config = ExtractConfig(
         model_name=model_name,
         checkpoint=checkpoint,
         device=device,
         num_samples_per_task=num_samples,
-        batch_size=min(8, num_samples),
-        layers=[layer_idx]  # Focus on single layer
+        batch_size=min(8, num_samples)
     )
     
-    # Auto-select heads from the chosen layer
-    # Use top 5 heads as a reasonable default for most tasks
+    # Auto-select heads from layer 0 (simple approach)
     num_heads = model.config.num_attention_heads
     head_set = Headset(
         mode="topk", 
-        heads=[(layer_idx, h) for h in range(min(num_heads, 5))]
+        heads=[(0, h) for h in range(min(num_heads, 5))]  # Use first 5 heads from layer 0
     )
     
     # Extract function vector
     return extract_task_function_vec(task, config, head_set, model, tokenizer)
+
+
 if __name__ == "__main__":
     # Discover and list all tasks
     discover_all_tasks()

@@ -12,6 +12,33 @@ class MathTask(BaseTask):
     
     def __init__(self, config: TaskConfig):
         super().__init__(config)
+    
+    def _load_data(self):
+        """Generate synthetic math problems for testing."""
+        import pandas as pd
+        import random
+        
+        random.seed(42)  # For reproducibility
+        problems = []
+        
+        # Generate 20 simple arithmetic problems
+        for _ in range(20):
+            a, b = random.randint(1, 20), random.randint(1, 20)
+            op = random.choice(['+', '-', '*'])
+            
+            if op == '+':
+                answer = a + b
+            elif op == '-':
+                answer = a - b
+            else:  # multiplication
+                answer = a * b
+            
+            problems.append({
+                self.config.input_column: f"{a} {op} {b}",
+                self.config.output_column: str(answer)
+            })
+        
+        self.data = pd.DataFrame(problems)
 
     
     def get_icl_examples(self, num_examples: int = 10, shuffle: bool = True, seed: int = None, fresh: bool = True) -> List[Dict[str, str]]:

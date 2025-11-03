@@ -169,7 +169,8 @@ class CopyingTask(BaseTask):
 def make_copying_task(config: TaskConfig = None, 
                       use_generator: bool = False,
                       min_length: int = 3,
-                      max_length: int = 8) -> CopyingTask:
+                      max_length: int = 8,
+                      test_size: int = 20) -> CopyingTask:
     """Factory function to create a CopyingTask with default examples.
     
     Args:
@@ -179,19 +180,29 @@ def make_copying_task(config: TaskConfig = None,
                       This allows for limitless unique examples.
         min_length: Minimum length of generated random strings (only used if use_generator=True)
         max_length: Maximum length of generated random strings (only used if use_generator=True)
+        test_size: Number of test examples to generate (default: 20)
     
     Returns:
         CopyingTask instance
     """
     if config is None:
         if use_generator:
-            # For generator mode, provide minimal static data (won't be used for ICL)
-            default_examples = [
-                {"input": "test", "output": "test"},
-            ]
+            # Generate test examples once at task creation for deterministic evaluation
+            # We create a temporary instance just to use the generate_examples method
+            import random
+            import string
+            
+            # Generate deterministic test set
+            random.seed(42)
+            test_examples = []
+            for _ in range(test_size):
+                length = random.randint(min_length, max_length)
+                charset = string.ascii_letters + string.digits
+                random_str = ''.join(random.choices(charset, k=length))
+                test_examples.append({"input": random_str, "output": random_str})
         else:
             # Default examples - simple strings that should be copied exactly
-            default_examples = [
+            test_examples = [
                 {"input": "cat", "output": "cat"},
                 {"input": "dog", "output": "dog"},
                 {"input": "hello", "output": "hello"},
@@ -208,7 +219,7 @@ def make_copying_task(config: TaskConfig = None,
             name="copying",
             description="Task where output exactly copies the input (induction heads)",
             data_format="memory",
-            in_memory_data=default_examples,
+            in_memory_data=test_examples,
             num_demonstrations=5,
         )
     

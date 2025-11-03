@@ -9,6 +9,16 @@ class SimpleTask(BaseTask):
     
     TASK_NAME = "simple"  # Auto-registration name
     
+    def _load_data(self):
+        """Load data from CSV file."""
+        import pandas as pd
+        
+        if self.config.data_path:
+            self.data = pd.read_csv(self.config.data_path)
+        else:
+            # If no data path, create empty DataFrame
+            self.data = pd.DataFrame(columns=[self.config.input_column, self.config.output_column])
+    
     def evaluate(self, predictions: List[str], split: str = "test", **kwargs) -> Dict[str, float]:
         """Evaluate predictions with exact match accuracy."""
         ground_truth = self.get_ground_truth(split)

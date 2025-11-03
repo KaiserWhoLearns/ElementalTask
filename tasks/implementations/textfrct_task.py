@@ -32,6 +32,10 @@ class TextFRCTTask(BaseTask):
                 data = data[~subjective_mask]
                 print(f"Filtered out {subjective_mask.sum()} subjective tasks, {len(data)} objective tasks remaining")
             
+            # Fill NaN values to avoid Arrow conversion issues
+            # Replace NaN with empty string for string columns
+            data = data.fillna('')
+            
             # Convert to list of dictionaries and assign to self.data
             self.data = data.to_dict('records')
         
@@ -41,8 +45,16 @@ class TextFRCTTask(BaseTask):
 
     # use BaseTask.get_icl_examples for standard TextFRCT records (input_column/output_column configured)
         
-        def build_prompt(self, instance: Dict[str, Any]) -> str:
-            """Build prompt based on category type."""
+        def build_prompt(self, instance: Dict[str, Any], num_shots: int = 5) -> str:
+            """Build prompt based on category type.
+            
+            Args:
+                instance: The instance to build a prompt for
+                num_shots: Number of in-context learning examples (default: 5)
+            
+            Returns:
+                Formatted prompt string
+            """
             category = instance['category_id']
             question = instance['question']
             category_name = instance.get('category_name', category)

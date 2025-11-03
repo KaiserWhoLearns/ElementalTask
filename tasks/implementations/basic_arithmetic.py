@@ -44,10 +44,31 @@ class BasicArithmeticTask(BaseTask):
             return self.data.to_dict('records')
         return self.data
     
-    def build_prompt(self, instance: Dict[str, Any]) -> str:
-        """Build prompt for arithmetic problems."""
+    def build_prompt(self, instance: Dict[str, Any], num_shots: int = 5) -> str:
+        """Build prompt for arithmetic problems with optional ICL examples.
+        
+        Args:
+            instance: The instance to build a prompt for
+            num_shots: Number of in-context learning examples (default: 5)
+        
+        Returns:
+            Formatted prompt string
+        """
+        prompt = ""
+        
+        # Add ICL examples if requested and we have demonstrations
+        if num_shots > 0 and self.demonstrations:
+            # Use the first num_shots demonstrations
+            prompt += ""
+            for demo in self.demonstrations[:num_shots]:
+                prompt += f"{demo}\n"
+            prompt += "\n"
+        
+        # Add instruction and current problem
         question = instance[self.config.input_column]
-        return f"Solve this arithmetic problem. Respond with only the number.\n\nProblem: {question}\nAnswer:"
+        prompt += f"Input: {question}\Output:"
+        
+        return prompt
     
     def evaluate(self, predictions: List[str], split: str = "test", **kwargs) -> Dict[str, float]:
         """Evaluate arithmetic predictions by extracting numbers."""
@@ -113,11 +134,21 @@ def create_basic_arithmetic_task(
     name: str = "basic_arithmetic"
 ) -> BasicArithmeticTask:
     """Create a BasicArithmeticTask instance."""
+    # Define static demonstrations (separate from test set)
+    demonstrations = [
+        "Input: What is 7 + 5?\nOutput: 12",
+        "Input: What is 18 - 9?\nOutput: 9",
+        "Input: What is 6 - 4?\nOutput: 2",
+        "Input: What is 16 + 2?\nOutput: 18",
+        "Input: What is 11 + 3?\nOutput: 14",
+    ]
+    
     config = TaskConfig(
         name=name,
         description="Basic arithmetic evaluation task",
         data_format="memory",
         in_memory_data=problems,  # Use provided problems or None for defaults
+        in_memory_demonstrations=demonstrations,  # Static ICL examples
         input_column="question",
         output_column="answer",
         evaluation_metrics=["accuracy"],
