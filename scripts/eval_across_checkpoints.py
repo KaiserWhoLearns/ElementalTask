@@ -79,9 +79,9 @@ def run_single_evaluation(
     load_vllm: bool,
     num_shots: int,
     skip_existing: bool = True,
+    eval_mode: str = "exact_match",
 ) -> Dict[str, Any]:
     """Run evaluation for a single model checkpoint."""
-    from models.evaluate_models import evaluate_model
     
     # Create checkpoint-specific output directory
     chkpt_name = checkpoint.replace('/', '_')
@@ -90,7 +90,28 @@ def run_single_evaluation(
     
     print(f"\n{'='*70}")
     print(f"Evaluating {model_id} @ {checkpoint}")
+    print(f"Eval mode: {eval_mode}")
     print(f"{'='*70}")
+    
+    # Initialize evaluator for continuous metrics (reuse across tasks)
+    evaluator = None
+    if eval_mode in ["continuous", "all"]:
+        from tasks.evaluator import TaskEvaluator, ModelConfig, EvaluationConfig
+        
+        backend = "vllm" if load_vllm else "transformers"
+        model_config = ModelConfig(
+            model_id=model_id,
+            backend=backend,
+            checkpoint=checkpoint,
+            max_tokens=max_new_tokens,
+        )
+        eval_config = EvaluationConfig(
+            output_dir=str(output_dir),
+            eval_mode=eval_mode,
+            save_predictions=True,
+            save_detailed_results=True,
+        )
+        evaluator = TaskEvaluator(model_config, eval_config)
     
     results = []
     for i, task_name in enumerate(tasks, 1):
@@ -112,16 +133,35 @@ def run_single_evaluation(
                 continue
         
         try:
-            metrics = evaluate_model(
-                model_id=model_id,
-                chkpt=checkpoint,
-                task_name=task_name,
-                output_path=str(output_dir),
-                use_vllm=load_vllm,
-                max_new_tokens=max_new_tokens,
-                preprocess_fn=None,
-                num_shots=num_shots,
-            )
+            if eval_mode == "exact_match":
+                # Use original evaluate_model for exact match only
+                from models.evaluate_models import evaluate_model
+                metrics = evaluate_model(
+                    model_id=model_id,
+                    chkpt=checkpoint,
+                    task_name=task_name,
+                    output_path=str(output_dir),
+                    use_vllm=load_vllm,
+                    max_new_tokens=max_new_tokens,
+                    preprocess_fn=None,
+                    num_shots=num_shots,
+                )
+            else:
+                # Use new evaluator for continuous/all modes
+                from tasks.registry import get_task
+                task = get_task(task_name)
+                eval_result = evaluator.evaluate_task(task, split="test")
+                
+                # Flatten metrics for CSV compatibility
+                metrics = {}
+                if "exact_match" in eval_result.get("metrics", {}):
+                    metrics.update(eval_result["metrics"]["exact_match"])
+                if "continuous" in eval_result.get("metrics", {}):
+                    cont = eval_result["metrics"]["continuous"]
+                    metrics["mean_loss"] = cont.get("mean_loss")
+                    metrics["mean_perplexity"] = cont.get("mean_perplexity")
+                    metrics["mean_probability"] = cont.get("mean_probability")
+                    metrics["mean_normalized_probability"] = cont.get("mean_normalized_probability")
             
             results.append({
                 "model": model_id,
@@ -183,6 +223,9 @@ def main():
                         help="Number of in-context learning examples")
     parser.add_argument("--force_reeval", action="store_true",
                         help="Force re-evaluation even if results exist")
+    parser.add_argument("--eval_mode", type=str, default="exact_match",
+                        choices=["exact_match", "continuous", "all"],
+                        help="Evaluation mode: exact_match (default), continuous (loss/perplexity), or all")
     
     args = parser.parse_args()
     
@@ -207,6 +250,7 @@ def main():
         "max_new_tokens": args.max_new_tokens,
         "load_vllm": args.load_vllm,
         "num_shots": args.num_shots,
+        "eval_mode": args.eval_mode,
         "timestamp": datetime.now().isoformat(),
     }
     
@@ -221,6 +265,7 @@ def main():
     print(f"  num_shots: {args.num_shots}")
     print(f"  max_new_tokens: {args.max_new_tokens}")
     print(f"  load_vllm: {args.load_vllm}")
+    print(f"  eval_mode: {args.eval_mode}")
     
     # Discover tasks
     print("\n" + "="*70)
@@ -281,6 +326,7 @@ def main():
                 load_vllm=args.load_vllm,
                 num_shots=args.num_shots,
                 skip_existing=not args.force_reeval,
+                eval_mode=args.eval_mode,
             )
             all_results.append(result)
     
@@ -322,7 +368,7 @@ def main():
     detailed_df.to_csv(detailed_path, index=False)
     print(f"✓ Detailed results saved to: {detailed_path}")
     
-    # Create pivot table for easy comparison
+    # Create pivot table for easy comparison (accuracy)
     if 'accuracy' in detailed_df.columns:
         pivot_df = detailed_df.pivot_table(
             index=['model', 'checkpoint'],
@@ -339,6 +385,24 @@ def main():
         print("ACCURACY SUMMARY")
         print("="*70)
         print(pivot_df.to_string())
+    
+    # Create pivot table for loss (continuous metrics)
+    if 'mean_loss' in detailed_df.columns:
+        loss_pivot_df = detailed_df.pivot_table(
+            index=['model', 'checkpoint'],
+            columns='task',
+            values='mean_loss',
+            aggfunc='first'
+        )
+        loss_pivot_path = output_base / "loss_pivot.csv"
+        loss_pivot_df.to_csv(loss_pivot_path)
+        print(f"✓ Loss pivot table saved to: {loss_pivot_path}")
+        
+        # Print summary
+        print("\n" + "="*70)
+        print("LOSS SUMMARY (lower is better)")
+        print("="*70)
+        print(loss_pivot_df.to_string())
     
     # Success summary
     success_df = detailed_df.groupby(['model', 'checkpoint'])['success'].agg(['sum', 'count'])
@@ -366,38 +430,98 @@ def main():
         
         # Prepare data
         plot_df = detailed_df[detailed_df['success'] == True].copy()
-        if len(plot_df) > 0 and 'accuracy' in plot_df.columns:
+        
+        if len(plot_df) > 0:
             plot_df = prepare_plot_data(plot_df)
-            
-            # Overview plot
-            print("\n📊 Creating overview plot...")
-            overview_path = plot_dir / "overview_all_tasks.png"
-            plot_all_tasks_overview(
-                df=plot_df,
-                metric='accuracy',
-                output_path=overview_path,
-                figsize=(16, 12),
-                style='seaborn',
-            )
-            
-            # Individual task plots
             tasks = plot_df['task'].unique()
-            print(f"\n📊 Creating {len(tasks)} individual task plots...")
-            for task in tasks:
-                task_path = plot_dir / f"{task}_accuracy.png"
-                plot_task_progression(
+            
+            # === ACCURACY PLOTS ===
+            if 'accuracy' in plot_df.columns:
+                print("\n📊 Creating accuracy plots...")
+                
+                # Overview plot
+                overview_path = plot_dir / "overview_all_tasks_accuracy.png"
+                plot_all_tasks_overview(
                     df=plot_df,
-                    task=task,
                     metric='accuracy',
-                    output_path=task_path,
-                    figsize=(12, 8),
+                    output_path=overview_path,
+                    figsize=(16, 12),
                     style='seaborn',
                 )
-                matplotlib.pyplot.close('all')  # Free memory
+                
+                # Individual task plots
+                print(f"  Creating {len(tasks)} individual accuracy plots...")
+                for task in tasks:
+                    task_path = plot_dir / f"{task}_accuracy.png"
+                    plot_task_progression(
+                        df=plot_df,
+                        task=task,
+                        metric='accuracy',
+                        output_path=task_path,
+                        figsize=(12, 8),
+                        style='seaborn',
+                    )
+                    matplotlib.pyplot.close('all')
+            
+            # === LOSS PLOTS (continuous metrics) ===
+            if 'mean_loss' in plot_df.columns:
+                print("\n📊 Creating loss plots...")
+                
+                # Overview plot for loss
+                loss_overview_path = plot_dir / "overview_all_tasks_loss.png"
+                plot_all_tasks_overview(
+                    df=plot_df,
+                    metric='mean_loss',
+                    output_path=loss_overview_path,
+                    figsize=(16, 12),
+                    style='seaborn',
+                )
+                
+                # Individual task loss plots
+                print(f"  Creating {len(tasks)} individual loss plots...")
+                for task in tasks:
+                    task_path = plot_dir / f"{task}_loss.png"
+                    plot_task_progression(
+                        df=plot_df,
+                        task=task,
+                        metric='mean_loss',
+                        output_path=task_path,
+                        figsize=(12, 8),
+                        style='seaborn',
+                    )
+                    matplotlib.pyplot.close('all')
+            
+            # === PERPLEXITY PLOTS ===
+            if 'mean_perplexity' in plot_df.columns:
+                print("\n📊 Creating perplexity plots...")
+                
+                # Overview plot for perplexity
+                ppl_overview_path = plot_dir / "overview_all_tasks_perplexity.png"
+                plot_all_tasks_overview(
+                    df=plot_df,
+                    metric='mean_perplexity',
+                    output_path=ppl_overview_path,
+                    figsize=(16, 12),
+                    style='seaborn',
+                )
+                
+                # Individual task perplexity plots
+                print(f"  Creating {len(tasks)} individual perplexity plots...")
+                for task in tasks:
+                    task_path = plot_dir / f"{task}_perplexity.png"
+                    plot_task_progression(
+                        df=plot_df,
+                        task=task,
+                        metric='mean_perplexity',
+                        output_path=task_path,
+                        figsize=(12, 8),
+                        style='seaborn',
+                    )
+                    matplotlib.pyplot.close('all')
             
             print(f"\n✅ Plots saved to: {plot_dir}")
         else:
-            print("\n⚠️  No successful evaluations with accuracy metric found, skipping plots")
+            print("\n⚠️  No successful evaluations found, skipping plots")
     
     except ImportError:
         print("\n⚠️  matplotlib not available, skipping plot generation")
