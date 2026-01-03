@@ -31,37 +31,72 @@ import pandas as pd
 from tasks.registry import TaskRegistry
 
 
+def sanitize_task_name(task_name: str, spaced: bool = False) -> str:
+    """Sanitize task name for use in file paths (replace : with _)."""
+    sanitized = task_name.replace(':', '_').replace(',', '_')
+    if spaced:
+        sanitized += "_spaced"
+    return sanitized
+
+
 def check_existing_results(output_dir: Path, model_id: str, checkpoint: str, task_name: str):
-    """Check if results already exist and load them if available."""
+    """Check if results already exist and load them if available.
+    
+    Looks for detailed JSONL files with per-category results.
+    """
     model_name = model_id.replace('/', '_')
     chkpt_name = checkpoint.replace('/', '_')
+    task_name_safe = sanitize_task_name(task_name)
     
-    # Check for predictions file
-    predictions_file = output_dir / f"{model_name}_{chkpt_name}_{task_name}.jsonl"
+    # Check for new detailed predictions files (per-category or single)
+    # Pattern: {model}_{checkpoint}_{task}_detailed.jsonl or {model}_{checkpoint}_{task}_{category}_detailed.jsonl
+    detailed_pattern = f"{model_name}_{chkpt_name}_{task_name_safe}*_detailed.jsonl"
+    detailed_files = list(output_dir.glob(detailed_pattern))
     
-    if not predictions_file.exists() or predictions_file.stat().st_size == 0:
+    # Also check for old format for backwards compatibility
+    old_predictions_file = output_dir / f"{model_name}_{chkpt_name}_{task_name_safe}.jsonl"
+    
+    if not detailed_files and (not old_predictions_file.exists() or old_predictions_file.stat().st_size == 0):
         return None
     
     try:
-        # Load existing predictions
         import json
         predictions = []
-        with open(predictions_file, 'r') as f:
-            for line in f:
-                predictions.append(json.loads(line))
+        num_correct = 0
+        
+        if detailed_files:
+            # Load from new detailed format
+            for detailed_file in detailed_files:
+                with open(detailed_file, 'r') as f:
+                    for line in f:
+                        item = json.loads(line)
+                        predictions.append(item)
+                        if item.get('correct', False):
+                            num_correct += 1
+            
+            print(f"  ✓ Found cached results: {num_correct}/{len(predictions)} correct ({len(detailed_files)} files)")
+        else:
+            # Load from old format
+            with open(old_predictions_file, 'r') as f:
+                for line in f:
+                    predictions.append(json.loads(line))
+            print(f"  ✓ Found cached results with {len(predictions)} predictions (old format)")
         
         if len(predictions) == 0:
             return None
         
-        print(f"  ✓ Found cached results with {len(predictions)} predictions")
-        
         # Reconstruct metrics from predictions
-        # This is a simplified version - actual metrics depend on task type
         metrics = {
             "cached": True,
-            "predictions_file": str(predictions_file),
+            "predictions_file": str(detailed_files[0] if detailed_files else old_predictions_file),
             "num_predictions": len(predictions)
         }
+        
+        # Add accuracy if we have correct field
+        if detailed_files and len(predictions) > 0:
+            metrics["accuracy"] = num_correct / len(predictions)
+            metrics["correct"] = num_correct
+            metrics["total"] = len(predictions)
         
         return metrics
         
@@ -80,6 +115,7 @@ def run_single_evaluation(
     num_shots: int,
     skip_existing: bool = True,
     eval_mode: str = "exact_match",
+    spaced: bool = False,
 ) -> Dict[str, Any]:
     """Run evaluation for a single model checkpoint."""
     
@@ -91,6 +127,7 @@ def run_single_evaluation(
     print(f"\n{'='*70}")
     print(f"Evaluating {model_id} @ {checkpoint}")
     print(f"Eval mode: {eval_mode}")
+    print(f"Spaced mode: {spaced}")
     print(f"{'='*70}")
     
     # Initialize evaluator for continuous metrics (reuse across tasks)
@@ -115,16 +152,20 @@ def run_single_evaluation(
     
     results = []
     for i, task_name in enumerate(tasks, 1):
-        print(f"\n[{i}/{len(tasks)}] Task: {task_name}")
+        display_name = f"{task_name} (spaced)" if spaced else task_name
+        print(f"\n[{i}/{len(tasks)}] Task: {display_name}")
+        
+        # Use sanitized task name for file operations
+        task_name_sanitized = sanitize_task_name(task_name, spaced=spaced)
         
         # Check for existing results
         if skip_existing:
-            existing_metrics = check_existing_results(output_dir, model_id, checkpoint, task_name)
+            existing_metrics = check_existing_results(output_dir, model_id, checkpoint, task_name_sanitized)
             if existing_metrics is not None:
                 results.append({
                     "model": model_id,
                     "checkpoint": checkpoint,
-                    "task": task_name,
+                    "task": task_name_sanitized,
                     "success": True,
                     "metrics": existing_metrics,
                     "error": "",
@@ -145,11 +186,12 @@ def run_single_evaluation(
                     max_new_tokens=max_new_tokens,
                     preprocess_fn=None,
                     num_shots=num_shots,
+                    spaced=spaced,
                 )
             else:
                 # Use new evaluator for continuous/all modes
                 from tasks.registry import get_task
-                task = get_task(task_name)
+                task = get_task(task_name, spaced=spaced)
                 eval_result = evaluator.evaluate_task(task, split="test")
                 
                 # Flatten metrics for CSV compatibility
@@ -166,7 +208,7 @@ def run_single_evaluation(
             results.append({
                 "model": model_id,
                 "checkpoint": checkpoint,
-                "task": task_name,
+                "task": task_name_sanitized,
                 "success": True,
                 "metrics": metrics,
                 "error": "",
@@ -174,11 +216,11 @@ def run_single_evaluation(
             })
             
         except Exception as e:
-            print(f"❌ Failed to evaluate {task_name}: {e}")
+            print(f"❌ Failed to evaluate {display_name}: {e}")
             results.append({
                 "model": model_id,
                 "checkpoint": checkpoint,
-                "task": task_name,
+                "task": task_name_sanitized,
                 "success": False,
                 "metrics": {},
                 "error": str(e),
@@ -226,6 +268,8 @@ def main():
     parser.add_argument("--eval_mode", type=str, default="exact_match",
                         choices=["exact_match", "continuous", "all"],
                         help="Evaluation mode: exact_match (default), continuous (loss/perplexity), or all")
+    parser.add_argument("--spaced", action="store_true",
+                        help="Use spaced version of tasks (add spaces between characters for reversal/letter tasks)")
     
     args = parser.parse_args()
     
@@ -251,6 +295,7 @@ def main():
         "load_vllm": args.load_vllm,
         "num_shots": args.num_shots,
         "eval_mode": args.eval_mode,
+        "spaced": args.spaced,
         "timestamp": datetime.now().isoformat(),
     }
     
@@ -266,6 +311,7 @@ def main():
     print(f"  max_new_tokens: {args.max_new_tokens}")
     print(f"  load_vllm: {args.load_vllm}")
     print(f"  eval_mode: {args.eval_mode}")
+    print(f"  spaced: {args.spaced}")
     
     # Discover tasks
     print("\n" + "="*70)
@@ -327,6 +373,7 @@ def main():
                 num_shots=args.num_shots,
                 skip_existing=not args.force_reeval,
                 eval_mode=args.eval_mode,
+                spaced=args.spaced,
             )
             all_results.append(result)
     
@@ -364,7 +411,15 @@ def main():
             detailed_rows.append(row)
     
     detailed_df = pd.DataFrame(detailed_rows)
-    detailed_path = output_base / "detailed_results.csv"
+    
+    # Create task-specific suffix for output files to avoid overwriting
+    # When running single task (common in array jobs), include task name in filename
+    if len(task_names) == 1:
+        task_suffix = f"_{sanitize_task_name(task_names[0])}"
+    else:
+        task_suffix = ""
+    
+    detailed_path = output_base / f"detailed_results{task_suffix}.csv"
     detailed_df.to_csv(detailed_path, index=False)
     print(f"✓ Detailed results saved to: {detailed_path}")
     
@@ -376,7 +431,7 @@ def main():
             values='accuracy',
             aggfunc='first'
         )
-        pivot_path = output_base / "accuracy_pivot.csv"
+        pivot_path = output_base / f"accuracy_pivot{task_suffix}.csv"
         pivot_df.to_csv(pivot_path)
         print(f"✓ Accuracy pivot table saved to: {pivot_path}")
         
@@ -394,7 +449,7 @@ def main():
             values='mean_loss',
             aggfunc='first'
         )
-        loss_pivot_path = output_base / "loss_pivot.csv"
+        loss_pivot_path = output_base / f"loss_pivot{task_suffix}.csv"
         loss_pivot_df.to_csv(loss_pivot_path)
         print(f"✓ Loss pivot table saved to: {loss_pivot_path}")
         

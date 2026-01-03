@@ -126,11 +126,35 @@ class TaskEvaluator:
         
         model_path = self.model_config.local_path or self.model_config.model_id
         
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            model_path,
-            revision=self.model_config.checkpoint,
-            trust_remote_code=self.model_config.trust_remote_code
-        )
+        # Try to load tokenizer with fallback chain
+        tokenizer_loaded = False
+        tokenizer_errors = []
+        
+        # Attempt 1: Try loading tokenizer from the specific checkpoint
+        try:
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                model_path,
+                revision=self.model_config.checkpoint,
+                trust_remote_code=self.model_config.trust_remote_code
+            )
+            tokenizer_loaded = True
+        except Exception as e:
+            tokenizer_errors.append(f"Checkpoint tokenizer failed: {e}")
+            
+            # Attempt 2: Try loading from main branch (tokenizers are usually the same)
+            try:
+                print(f"⚠️  Tokenizer loading failed for checkpoint, falling back to 'main' branch...")
+                self.tokenizer = AutoTokenizer.from_pretrained(
+                    model_path,
+                    revision="main",
+                    trust_remote_code=self.model_config.trust_remote_code
+                )
+                tokenizer_loaded = True
+            except Exception as e2:
+                tokenizer_errors.append(f"Main branch tokenizer failed: {e2}")
+        
+        if not tokenizer_loaded:
+            raise RuntimeError(f"Failed to load tokenizer after all attempts: {tokenizer_errors}")
         
         # Handle missing pad token (common in GPT-2 based models)
         if self.tokenizer.pad_token is None:
@@ -543,12 +567,18 @@ class TaskEvaluator:
                      prompts: List[str], predictions: Optional[List[str]] = None,
                      target_metrics: Optional[List[Dict]] = None, 
                      targets: Optional[List[str]] = None):
-        """Save evaluation results to files."""
+        """Save evaluation results to files.
+        
+        For tasks with subtasks/categories (like simple_icl), saves separate files
+        per category to avoid overwriting.
+        """
         model_name = self.model_config.model_id.replace('/', '_')
         task_name = results["task_name"]
+        # Sanitize task name for file paths (replace : and , with _)
+        task_name_safe = task_name.replace(':', '_').replace(',', '_')
         checkpoint = self.model_config.checkpoint or "main"
         
-        base_filename = f"{model_name}_{checkpoint}_{task_name}"
+        base_filename = f"{model_name}_{checkpoint}_{task_name_safe}"
         
         # Save summary metrics
         summary_path = Path(self.eval_config.output_dir) / f"{base_filename}_metrics.json"
@@ -557,7 +587,9 @@ class TaskEvaluator:
         
         # Save detailed predictions if requested
         if self.eval_config.save_detailed_results:
-            detailed_data = []
+            # Group items by category if present
+            category_items = {}  # category_name -> list of items
+            
             for i, data in enumerate(task_data):
                 item = {
                     "index": i,
@@ -570,6 +602,12 @@ class TaskEvaluator:
                 # Add prediction if available
                 if predictions is not None:
                     item["prediction"] = predictions[i]
+                    
+                    # Add correct field by comparing prediction to target
+                    if targets is not None:
+                        pred_clean = predictions[i].split('\n')[0].strip().lower() if predictions[i] else ""
+                        target_clean = targets[i].strip().lower() if targets[i] else ""
+                        item["correct"] = (pred_clean == target_clean)
                 
                 # Add target and continuous metrics if available
                 if targets is not None:
@@ -578,12 +616,37 @@ class TaskEvaluator:
                 if target_metrics is not None:
                     item["continuous_metrics"] = target_metrics[i]
                 
-                detailed_data.append(item)
+                # Group by category if present
+                category = data.get("category_name", None)
+                if category:
+                    if category not in category_items:
+                        category_items[category] = []
+                    category_items[category].append(item)
+                else:
+                    # No category - use default
+                    if "_default" not in category_items:
+                        category_items["_default"] = []
+                    category_items["_default"].append(item)
             
-            detailed_path = Path(self.eval_config.output_dir) / f"{base_filename}_detailed.jsonl"
-            with open(detailed_path, 'w', encoding='utf-8') as f:
-                for item in detailed_data:
-                    f.write(json.dumps(item, default=str) + '\n')
+            # Save files - one per category or single file if no categories
+            if len(category_items) == 1 and "_default" in category_items:
+                # No categories - save single file
+                detailed_path = Path(self.eval_config.output_dir) / f"{base_filename}_detailed.jsonl"
+                with open(detailed_path, 'w', encoding='utf-8') as f:
+                    for item in category_items["_default"]:
+                        f.write(json.dumps(item, default=str) + '\n')
+            else:
+                # Multiple categories - save separate files per category
+                for category, items in category_items.items():
+                    if category == "_default":
+                        continue
+                    category_safe = category.replace(':', '_').replace(',', '_').replace(' ', '_')
+                    category_filename = f"{model_name}_{checkpoint}_{task_name_safe}_{category_safe}_detailed.jsonl"
+                    detailed_path = Path(self.eval_config.output_dir) / category_filename
+                    with open(detailed_path, 'w', encoding='utf-8') as f:
+                        for item in items:
+                            f.write(json.dumps(item, default=str) + '\n')
+                    print(f"  Saved {len(items)} items for category '{category}'")
         
         print(f"Results saved to {self.eval_config.output_dir}")
 

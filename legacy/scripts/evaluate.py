@@ -27,6 +27,7 @@ def evaluate_model(
     # # TODO: this is the format from kilt that probably needs to be generalized
     prompts = [item["input"] for item in data]
     answers = [item["output"][0]["answer"] for item in data]
+
     if use_vllm:
         model = vllm.LLM(
             model=model_id,
@@ -58,7 +59,6 @@ def evaluate_model(
             generated_texts.append(tokenizer.decode(outputs[0], skip_special_tokens=True))
         print(generated_texts)
 
-        breakpoint()
         raise NotImplementedError
 
     acc = sum(

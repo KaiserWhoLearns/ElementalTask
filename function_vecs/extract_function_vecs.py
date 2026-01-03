@@ -6,8 +6,10 @@ from function_vecs.activation_patching import HeadSwap
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional, Tuple, Literal
 from itertools import islice
+from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import torch
 import torch.nn as nn
 
@@ -32,6 +34,11 @@ class ExtractConfig:
     basis_method: Literal["svd", "pca"] = "svd"
     basis_dim: int = 20
     eps: float = 0.01 # for eps-rank, see notes
+    
+    # Filtering options - results_dir contains all checkpoints for a model
+    only_correct: bool = False  # Only use instances where model prediction was correct
+    results_dir: Optional[str] = None  # Path to results dir (e.g., "results/olmo2_continuous_1b_early_revised")
+    # Note: uses 'checkpoint' field above for filtering when only_correct=True
 
 @dataclass
 class Headset:
@@ -409,7 +416,64 @@ def _decision_index(attn_mask: torch.Tensor) -> torch.Tensor:
     return (attn_mask.sum(dim=1) - 1).clamp(min=0)
 
 # --- prompt sampling from your BaseTask ---
-def _sample_task_prompts(task: BaseTask, n: int) -> List[str]:
+def _sample_task_prompts(
+    task: BaseTask, 
+    n: int, 
+    results_dir: str = None,
+    checkpoint: str = "main",
+    only_correct: bool = False,
+    strict: bool = False
+) -> List[str]:
+    """Sample prompts from a task, optionally filtering to only correct instances.
+    
+    Args:
+        task: Task object
+        n: Number of samples to return
+        results_dir: Path to results dir for filtering correct instances
+        checkpoint: Checkpoint to use when filtering
+        only_correct: If True, only use instances that were correct
+        strict: If True and only_correct=True but no correct instances found, return empty list
+                instead of falling back to all instances
+    """
+    # Get the full task name (e.g., "simple_icl:uppercase" instead of just "simple_icl")
+    full_task_name = getattr(task, '_full_name', task.config.name)
+    
+    # If only_correct and we have results_dir, load from detailed results
+    if only_correct and results_dir:
+        correct_instances = load_correct_instances_from_detailed_results(
+            results_dir, full_task_name, checkpoint
+        )
+        if correct_instances:
+            n = min(n, len(correct_instances))
+            instances = correct_instances[:n]
+            
+            # Build prompts using task's build_prompt if possible
+            prompts = []
+            for inst in instances:
+                # Create a row dict that build_prompt expects
+                row = {
+                    task.config.input_column: inst['question'],
+                    task.config.output_column: inst['expected'],
+                    'question': inst['question'],
+                    'answer': inst['expected'],
+                    'input': inst['question'],
+                    'output': inst['expected'],
+                }
+                try:
+                    prompts.append(task.build_prompt(row))
+                except:
+                    # Fallback: just use the question directly
+                    prompts.append(inst['question'])
+            return prompts
+        else:
+            if strict:
+                # In strict mode, return empty list to signal no valid data
+                print(f"  ⚠️  No correct instances found for {full_task_name}, skipping (strict mode)")
+                return []
+            else:
+                print(f"  ⚠️  No correct instances found, falling back to all instances")
+    
+    # Original behavior: use all instances
     rows = task.get_split("test")
     if len(rows) == 0:
         return []
@@ -420,7 +484,198 @@ def _sample_task_prompts(task: BaseTask, n: int) -> List[str]:
         prompts.append(task.build_prompt(r))
     return prompts
 
-def _sample_prompts_and_answers(task, n):
+
+def load_correct_instances_from_detailed_results(
+    results_dir: str,
+    task_name: str,
+    checkpoint: str = "main",
+    category: str = None
+) -> Optional[List[Dict[str, Any]]]:
+    """
+    Load only the correct instances from detailed results JSONL files.
+    
+    Args:
+        results_dir: Path to results directory (e.g., "results/olmo2_continuous_1b_early_revised")
+        task_name: Task name (e.g., "basic_arithmetic" or "simple_icl:translate_eng_fr")
+        checkpoint: Checkpoint to filter by (e.g., "main" or "stage1-step10000-tokens21B")
+        category: Optional category name for subtasks (e.g., "translate_eng_fr")
+    
+    Returns:
+        List of correct instances with 'question', 'expected', and metadata keys, or None if not found
+    """
+    import json
+    import glob
+    
+    results_path = Path(results_dir)
+    
+    # Parse task name - could be "simple_icl:translate_eng_fr" or just "basic_arithmetic"
+    if ':' in task_name:
+        base_task, category = task_name.split(':', 1)
+    else:
+        base_task = task_name
+    
+    # Find the checkpoint directory
+    # Directory naming: {model_short_name}_{checkpoint}
+    # e.g., OLMo-2-0425-1B_main or OLMo-2-0425-1B_stage1-step10000-tokens21B
+    checkpoint_dirs = list(results_path.glob(f"*_{checkpoint}"))
+    
+    if not checkpoint_dirs:
+        print(f"  ⚠️  No checkpoint directory found for '{checkpoint}' in {results_path}")
+        return None
+    
+    checkpoint_dir = checkpoint_dirs[0]
+    
+    # Find the detailed JSONL file
+    # Naming patterns:
+    # - For tasks with categories: {model}_{checkpoint}_{task}_{category}_detailed.jsonl
+    # - For simple tasks: {model}_{checkpoint}_{task}_detailed.jsonl
+    task_sanitized = base_task.replace(":", "_").replace(",", "_")
+    
+    if category:
+        category_sanitized = category.replace(":", "_").replace(",", "_").replace(" ", "_")
+        pattern = f"*_{task_sanitized}_{category_sanitized}_detailed.jsonl"
+    else:
+        pattern = f"*_{task_sanitized}_detailed.jsonl"
+    
+    jsonl_files = list(checkpoint_dir.glob(pattern))
+    
+    if not jsonl_files:
+        # Try alternative pattern without category suffix
+        pattern = f"*_{task_sanitized}_detailed.jsonl"
+        jsonl_files = list(checkpoint_dir.glob(pattern))
+    
+    if not jsonl_files:
+        print(f"  ⚠️  No detailed JSONL file found matching '{pattern}' in {checkpoint_dir}")
+        # List available files for debugging
+        available = list(checkpoint_dir.glob("*_detailed.jsonl"))
+        if available:
+            print(f"      Available files: {[f.name for f in available[:5]]}...")
+        return None
+    
+    jsonl_file = jsonl_files[0]
+    
+    try:
+        correct_instances = []
+        total_instances = 0
+        category_instances = 0  # Track instances matching the category filter
+        
+        with open(jsonl_file, 'r', encoding='utf-8') as f:
+            for line in f:
+                if not line.strip():
+                    continue
+                item = json.loads(line)
+                total_instances += 1
+                
+                # Get item's category from metadata
+                metadata = item.get('metadata', {})
+                item_category = metadata.get('category_name', '')
+                
+                # If we're filtering by category, skip non-matching items
+                if category and item_category and item_category != category:
+                    continue
+                
+                category_instances += 1
+                
+                # Check if correct field exists, or compute it
+                if 'correct' in item:
+                    is_correct = item['correct']
+                else:
+                    # Compute correctness by comparing prediction to target
+                    prediction = item.get('prediction', '')
+                    target = item.get('target', item.get('ground_truth', ''))
+                    
+                    # Clean prediction (take first line, strip whitespace)
+                    pred_clean = prediction.split('\n')[0].strip().lower() if prediction else ""
+                    target_clean = target.strip().lower() if target else ""
+                    is_correct = (pred_clean == target_clean)
+                
+                if is_correct:
+                    # Extract question and expected answer
+                    question = metadata.get('question', item.get('input', ''))
+                    expected = item.get('target', metadata.get('answer', item.get('ground_truth', '')))
+                    
+                    correct_instances.append({
+                        'question': question,
+                        'expected': expected,
+                        'category_name': item_category or category,
+                        'metadata': metadata
+                    })
+        
+        if correct_instances:
+            if category:
+                print(f"  ✓ Found {len(correct_instances)}/{category_instances} correct instances for '{category}' from {jsonl_file.name}")
+            else:
+                print(f"  ✓ Found {len(correct_instances)}/{total_instances} correct instances from {jsonl_file.name}")
+            return correct_instances
+        else:
+            print(f"  ⚠️  No correct instances found in {jsonl_file.name} ({category_instances if category else total_instances} total)")
+            return None
+        
+    except Exception as e:
+        print(f"  ⚠️  Error reading {jsonl_file}: {e}")
+        return None
+
+
+def _sample_prompts_and_answers(
+    task, 
+    n: int, 
+    results_dir: str = None,
+    checkpoint: str = "main",
+    only_correct: bool = False,
+    strict: bool = False,
+):
+    """Sample prompts and their corresponding answers.
+    
+    Args:
+        task: Task object
+        n: Number of samples to return
+        results_dir: Path to results dir for filtering correct instances
+        checkpoint: Checkpoint to use when filtering (e.g., "main" or "stage1-step10000-tokens21B")
+        only_correct: If True, only use instances that were correct
+        strict: If True and only_correct=True but no correct instances found, return None
+                instead of falling back to all instances
+    """
+    # Get the full task name (e.g., "simple_icl:uppercase" instead of just "simple_icl")
+    full_task_name = getattr(task, '_full_name', task.config.name)
+    
+    # If only_correct and we have results_dir, load from detailed results
+    if only_correct and results_dir:
+        correct_instances = load_correct_instances_from_detailed_results(
+            results_dir, full_task_name, checkpoint
+        )
+        if correct_instances:
+            n = min(n, len(correct_instances))
+            instances = correct_instances[:n]
+            
+            # Build prompts using task's build_prompt if possible
+            texts = []
+            answers = []
+            for inst in instances:
+                # Create a row dict that build_prompt expects
+                row = {
+                    task.config.input_column: inst['question'],
+                    task.config.output_column: inst['expected'],
+                    'question': inst['question'],
+                    'answer': inst['expected'],
+                    'input': inst['question'],
+                    'output': inst['expected'],
+                }
+                try:
+                    texts.append(task.build_prompt(row))
+                except:
+                    # Fallback: just use the question directly
+                    texts.append(inst['question'])
+                answers.append(inst['expected'])
+            
+            return texts, answers
+        else:
+            if strict:
+                # In strict mode, return None to signal no valid data
+                return None, None
+            else:
+                print(f"  ⚠️  No correct instances found, falling back to all instances")
+    
+    # Original behavior: use all instances
     rows = task.get_split("test")[:n]
     texts = [task.build_prompt(r) for r in rows]
     
@@ -490,13 +745,24 @@ def get_shuffled_prompts(task: BaseTask, n: int) -> List[str]:
 @torch.no_grad()
 def _first_answer_token_ids(tokenizer, answers: List[str]) -> torch.Tensor:
     """Return a (B,) tensor with the first non-special token id of each answer (EOS if empty)."""
+    vocab_size = tokenizer.vocab_size
     ids = []
     for a in answers:
-        enc = tokenizer(a, add_special_tokens=False, return_tensors="pt")
-        if enc.input_ids.numel() == 0:
+        # Handle None or empty answers
+        if a is None or (isinstance(a, str) and len(a.strip()) == 0):
             tok = tokenizer.eos_token_id
         else:
-            tok = enc.input_ids[0, 0].item()
+            enc = tokenizer(str(a), add_special_tokens=False, return_tensors="pt")
+            if enc.input_ids.numel() == 0:
+                tok = tokenizer.eos_token_id
+            else:
+                tok = enc.input_ids[0, 0].item()
+        
+        # Validate token is in vocabulary bounds
+        if tok is None or tok < 0 or tok >= vocab_size:
+            print(f"  Warning: Invalid token ID {tok} for answer '{a}', using EOS")
+            tok = tokenizer.eos_token_id
+        
         ids.append(tok)
     return torch.tensor(ids, dtype=torch.long)
 
@@ -528,6 +794,27 @@ def compute_aie_for_layer(
     """
     # ---- 0) Prep and sanity checks
     assert len(icl_texts) == len(ctrl_texts) == len(icl_answers), "Batch sizes must match"
+    
+    # Filter out any None or empty answers
+    valid_indices = []
+    for i, ans in enumerate(icl_answers):
+        if ans is not None and (not isinstance(ans, str) or len(str(ans).strip()) > 0):
+            valid_indices.append(i)
+    
+    if len(valid_indices) < len(icl_answers):
+        print(f"  Warning: Filtering {len(icl_answers) - len(valid_indices)} invalid answers")
+        icl_texts = [icl_texts[i] for i in valid_indices]
+        icl_answers = [icl_answers[i] for i in valid_indices]
+        ctrl_texts = [ctrl_texts[i] for i in valid_indices]
+    
+    if len(icl_texts) == 0:
+        # Return zeros if no valid samples
+        blocks = get_blocks(model)
+        block = blocks[layer_idx]
+        attn = get_attn(block)
+        _, H, _ = infer_head_dims(model, block, attn)
+        return torch.zeros(H, device=device)
+    
     gold_ids = _first_answer_token_ids(tokenizer, icl_answers)               # (B,)
 
     # We'll need decision indices t* from the ICL batch (for the swapper)
@@ -577,9 +864,26 @@ def compute_aie_for_layer(
     return aie  # (H,)
 
 
-def extract_informative_heads(config: ExtractConfig, tasks: List[BaseTask]) -> Headset:
+def extract_informative_heads(
+    config: ExtractConfig, 
+    tasks: List[BaseTask],
+    max_screen_tasks: int = None,  # None = use all tasks
+    min_screen_tasks: int = 5,     # Minimum tasks to successfully screen
+) -> Headset:
+    """
+    Select informative attention heads using AIE metric.
+    
+    Args:
+        config: Extraction configuration
+        tasks: List of tasks to screen
+        max_screen_tasks: Maximum number of tasks to try screening (None = all)
+        min_screen_tasks: Minimum number of tasks that must be successfully screened
+    
+    Returns:
+        Headset with top-k informative heads
+    """
     from transformers import AutoTokenizer, AutoModelForCausalLM
-    tok = AutoTokenizer.from_pretrained(config.model_name, revision=config.checkpoint, trust_remote_code=True)
+    tok = AutoTokenizer.from_pretrained(config.model_name, revision=config.checkpoint, trust_remote_code=True, use_fast=False)
     if tok.pad_token_id is None:
         tok.pad_token = tok.eos_token
     model = AutoModelForCausalLM.from_pretrained(
@@ -591,37 +895,61 @@ def extract_informative_heads(config: ExtractConfig, tasks: List[BaseTask]) -> H
     blocks = get_blocks(model)
     layers = config.layers if config.layers is not None else [len(blocks)-1]
 
-    # screen on a few tasks
-    screen_tasks = tasks[: min(8, len(tasks))]
+    # Determine how many tasks to try
+    if max_screen_tasks is None:
+        max_screen_tasks = len(tasks)
+    
     aie_accum = None
     tasks_screened = 0
-    for i, t in enumerate(screen_tasks, 1):
+    tasks_tried = 0
+    
+    print(f"\n  Screening up to {max_screen_tasks} tasks (need at least {min_screen_tasks} successful)...")
+    
+    for t in tasks:
+        if tasks_tried >= max_screen_tasks:
+            break
+            
+        tasks_tried += 1
+        
         # Skip known incompatible tasks
         if t.config.name in ['ioi_task']:
-            print(f"  [{i}/{len(screen_tasks)}] Skipping task: {t.config.name} (known incompatible format)")
+            print(f"  [{tasks_tried}] Skipping: {t.config.name} (known incompatible format)")
             continue
-            
-        print(f"  [{i}/{len(screen_tasks)}] Screening task: {t.config.name}")
-        icl, answers = _sample_prompts_and_answers(t, config.num_samples_per_task)
         
-        # Skip if task couldn't be processed
-        if icl is None or answers is None:
+        # Try to get prompts and answers
+        icl, answers = _sample_prompts_and_answers(
+            t, 
+            config.num_samples_per_task,
+            results_dir=config.results_dir,
+            checkpoint=getattr(config, 'checkpoint', 'main'),
+            only_correct=config.only_correct,
+            strict=True  # Don't fall back to all instances
+        )
+        
+        # Skip if no valid data (e.g., no correct instances when only_correct=True)
+        if icl is None or answers is None or len(icl) == 0:
+            print(f"  [{tasks_tried}] Skipping: {t.config.name} (no valid instances)")
             continue
+        
+        print(f"  [{tasks_tried}] Screening: {t.config.name} ({len(icl)} samples)")
         
         ctrl = get_shuffled_prompts(t, config.num_samples_per_task)
         for li in layers:
             aie = compute_aie_for_layer(model, tok, icl, answers, ctrl, li, config.device, config.score_metric)  # (H,)
             aie_np = aie.detach().cpu().numpy()
             if aie_accum is None:
-                aie_accum = {(li): aie_np.copy()}
+                aie_accum = {li: aie_np.copy()}
             else:
                 aie_accum[li] = aie_accum.get(li, 0) + aie_np
         tasks_screened += 1
     
-    print(f"\n✓ Successfully screened {tasks_screened}/{len(screen_tasks)} tasks")
+    print(f"\n✓ Successfully screened {tasks_screened}/{tasks_tried} tasks")
     
-    if tasks_screened == 0:
-        raise ValueError("No tasks could be screened for head selection. All tasks had incompatible data formats.")
+    if tasks_screened < min_screen_tasks:
+        raise ValueError(
+            f"Only {tasks_screened} tasks could be screened (need at least {min_screen_tasks}). "
+            f"Check that evaluation results exist and tasks have correct instances."
+        )
 
     # pick top-k across selected layer(s)
     topk = config.topk_heads
@@ -648,7 +976,8 @@ def extract_task_function_vec(
         tokenizer = AutoTokenizer.from_pretrained(
             config.model_name,
             revision=config.checkpoint,
-            trust_remote_code=True
+            trust_remote_code=True,
+            use_fast=False
         )
         if tokenizer.pad_token_id is None:
             tokenizer.pad_token = tokenizer.eos_token
@@ -661,9 +990,16 @@ def extract_task_function_vec(
         assert tokenizer is not None
 
     # 1) sample prompts (+ optional shuffled)
-    prompts = _sample_task_prompts(task, config.num_samples_per_task)
+    prompts = _sample_task_prompts(
+        task, 
+        config.num_samples_per_task,
+        results_dir=config.results_dir,
+        checkpoint=config.checkpoint,
+        only_correct=config.only_correct,
+        strict=config.only_correct  # strict mode when filtering by correct instances
+    )
     if len(prompts) == 0:
-        raise ValueError(f"No data for task {task.config.name}")
+        raise ValueError(f"No data for task {task.config.name} (no correct instances when only_correct=True)")
 
     # 2) collect per-head contributions and average across batch
     # By default: only one layer; if config.layers is None, take the last layer.
@@ -692,7 +1028,9 @@ def extract_task_function_vec(
         count += 1
 
     residual_means = (means_sum / count).astype(np.float32)   # (d, H)
-    head_means = TaskHeadMeans(task_name=task.config.name, residual_means=residual_means)
+    # Use full task name if available (e.g., "simple_icl:uppercase" instead of "simple_icl")
+    task_name = getattr(task, '_full_name', task.config.name)
+    head_means = TaskHeadMeans(task_name=task_name, residual_means=residual_means)
 
     # 3) collapse to function vector via Headset
     return build_function_vec_from_means(head_means, head_set, normalization="l2")
@@ -709,7 +1047,17 @@ def get_task_head_means(
     np.random.seed(config.seed)
 
     num_prompts = config.num_samples_per_task
-    prompts = _sample_task_prompts(task, num_prompts)
+    prompts = _sample_task_prompts(
+        task, 
+        num_prompts,
+        results_dir=config.results_dir,
+        checkpoint=config.checkpoint,
+        only_correct=config.only_correct,
+        strict=config.only_correct  # strict mode when filtering by correct instances
+    )
+    
+    if len(prompts) == 0:
+        raise ValueError(f"No data for task {task.config.name} (no correct instances when only_correct=True)")
 
     means_sum = None
     count = 0
@@ -728,7 +1076,9 @@ def get_task_head_means(
         count += B
 
     res_means = (means_sum / count).astype(np.float32)
-    return TaskHeadMeans(task_name=task.config.name, residual_means=res_means)
+    # Use full task name if available
+    task_name = getattr(task, '_full_name', task.config.name)
+    return TaskHeadMeans(task_name=task_name, residual_means=res_means)
 
 @torch.no_grad()
 def per_head_contributions_from_hooks(
@@ -920,7 +1270,8 @@ def extract_function_vector_simple(
     tokenizer = AutoTokenizer.from_pretrained(
         model_name,
         revision=checkpoint,
-        trust_remote_code=True
+        trust_remote_code=True,
+        use_fast=False
     )
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
