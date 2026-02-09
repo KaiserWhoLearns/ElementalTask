@@ -384,3 +384,119 @@ def list_tasks() -> List[str]:
 def get_task_info(name: str = None) -> Dict:
     """Get information about tasks."""
     return _task_registry.get_task_info(name)
+
+def list_all_tasks(include_compositional: bool = True, include_textfrct: bool = True, include_simple_icl: bool = True) -> Dict[str, List[str]]:
+    """List all available tasks including subtasks.
+    
+    Args:
+        include_compositional: If True, enumerate all compositional subtasks
+        include_textfrct: If True, enumerate all TextFRCT subtasks
+        include_simple_icl: If True, enumerate all simple_icl categories
+    
+    Returns:
+        Dictionary mapping task categories to lists of task names
+    """
+    if not _task_registry._discovered:
+        _task_registry.discover_tasks()
+    
+    result = {
+        "base_tasks": [],
+        "compositional_tasks": [],
+        "textfrct_tasks": [],
+        "simple_icl_tasks": [],
+    }
+    
+    for task_name in sorted(_task_registry._tasks.keys()):
+        if task_name == "compositional" and include_compositional:
+            # Add base compositional task
+            result["base_tasks"].append("compositional")
+            
+            # Enumerate all compositional subtasks
+            try:
+                from tasks.implementations.compositional_task import STRING_COMPOSITIONS, LOOKUP_COMPOSITIONS
+                
+                # Add all string compositions
+                for comp_name in sorted(STRING_COMPOSITIONS.keys()):
+                    result["compositional_tasks"].append(f"compositional:{comp_name}")
+                    result["compositional_tasks"].append(f"compositional:{comp_name} (spaced)")
+                
+                # Add all lookup-based compositions
+                for comp_name in sorted(LOOKUP_COMPOSITIONS.keys()):
+                    result["compositional_tasks"].append(f"compositional:{comp_name}")
+                    result["compositional_tasks"].append(f"compositional:{comp_name} (spaced)")
+                    
+            except Exception as e:
+                print(f"Warning: Could not enumerate compositional tasks: {e}")
+        
+        elif task_name == "textfrct" and include_textfrct:
+            # Add base textfrct task
+            result["base_tasks"].append("textfrct")
+            
+            # Enumerate all TextFRCT categories
+            try:
+                import pandas as pd
+                from pathlib import Path
+                csv_path = Path(__file__).parent.parent / "dataset" / "TextFRCT.csv"
+                if csv_path.exists():
+                    df = pd.read_csv(csv_path)
+                    categories = sorted(df["category_id"].unique())
+                    for cat in categories:
+                        result["textfrct_tasks"].append(f"textfrct:{cat}")
+            except Exception as e:
+                print(f"Warning: Could not enumerate TextFRCT tasks: {e}")
+        
+        elif task_name == "simple_icl" and include_simple_icl:
+            # Add base simple_icl task
+            result["base_tasks"].append("simple_icl")
+            
+            # Enumerate all simple_icl categories
+            try:
+                import pandas as pd
+                from pathlib import Path
+                csv_path = Path(__file__).parent.parent / "dataset" / "simple.csv"
+                if csv_path.exists():
+                    df = pd.read_csv(csv_path)
+                    categories = sorted(df["category_name"].unique())
+                    for cat in categories:
+                        result["simple_icl_tasks"].append(f"simple_icl:{cat}")
+            except Exception as e:
+                print(f"Warning: Could not enumerate simple_icl tasks: {e}")
+        
+        else:
+            # Regular task
+            result["base_tasks"].append(task_name)
+    
+    return result
+
+def print_all_tasks():
+    """Print a formatted list of all available tasks."""
+    tasks = list_all_tasks()
+    
+    print("\n" + "="*70)
+    print("AVAILABLE TASKS")
+    print("="*70)
+    
+    print("\n📋 BASE TASKS:")
+    for task in tasks["base_tasks"]:
+        print(f"  • {task}")
+    
+    if tasks["simple_icl_tasks"]:
+        print(f"\n🎯 SIMPLE_ICL TASKS ({len(tasks['simple_icl_tasks'])} total):")
+        for task in tasks["simple_icl_tasks"]:
+            print(f"  • {task}")
+    
+    if tasks["compositional_tasks"]:
+        print(f"\n🔗 COMPOSITIONAL TASKS ({len(tasks['compositional_tasks'])} total):")
+        for task in tasks["compositional_tasks"]:
+            print(f"  • {task}")
+    
+    if tasks["textfrct_tasks"]:
+        print(f"\n📝 TEXTFRCT TASKS ({len(tasks['textfrct_tasks'])} total):")
+        for task in tasks["textfrct_tasks"]:
+            print(f"  • {task}")
+    
+    print("\n" + "="*70)
+    total = (len(tasks["base_tasks"]) + len(tasks["compositional_tasks"]) + 
+             len(tasks["textfrct_tasks"]) + len(tasks["simple_icl_tasks"]))
+    print(f"TOTAL: {total} tasks available")
+    print("="*70 + "\n")
