@@ -178,15 +178,89 @@ LOOKUP_COMPOSITIONS = {
 # Input Pools
 # =============================================================================
 
-# Generic strings for pure string compositions
-STRING_INPUT_POOL = [
-    "hello", "world", "python", "apple", "banana", "cherry",
-    "delta", "echo", "foxtrot", "golf", "hotel", "india",
-    "juliet", "kilo", "lima", "mike", "november", "oscar",
-    "papa", "quebec", "romeo", "sierra", "tango", "uniform",
-    "victor", "whiskey", "xray", "yankee", "zulu", "alpha",
-    "bravo", "charlie", "example", "testing", "compose", "chain",
-]
+
+def load_atomic_operation_inputs() -> Dict[str, List[str]]:
+    """Load actual input examples for each atomic operation from simple.csv.
+    
+    This ensures compositional tasks use in-distribution inputs from component tasks.
+    
+    Returns:
+        Dictionary mapping operation names to their input pools from simple.csv
+    """
+    csv_path = Path(__file__).parent.parent.parent / "dataset" / "simple.csv"
+    if not csv_path.exists():
+        return {}
+    
+    df = pd.read_csv(csv_path)
+    
+    # Map simple.csv category names to operation names
+    category_to_op = {
+        "uppercase": "uppercase",
+        "lowercase": "lowercase",
+        "first_letter": "first_letter",
+        "last_letter": "last_letter",
+        "reverse": "reverse",  # May not exist in simple.csv
+    }
+    
+    operation_inputs = {}
+    for category, op_name in category_to_op.items():
+        cat_data = df[df["category_name"] == category]
+        if not cat_data.empty:
+            operation_inputs[op_name] = cat_data["question"].unique().tolist()
+    
+    return operation_inputs
+
+
+def get_string_composition_inputs(operations: List[str], strict_chain: bool = False) -> List[str]:
+    """Get input pool for a string composition.
+    
+    Args:
+        operations: List of operation names in the composition
+        strict_chain: If True, only use inputs where intermediate results are also 
+                     in-distribution (Approach B). If False, use first op's inputs (Approach A).
+    
+    Returns:
+        List of valid input strings for this composition
+    """
+    operation_inputs = load_atomic_operation_inputs()
+    
+    first_op = operations[0]
+    
+    # Get inputs for first operation (must exist, otherwise no examples)
+    if first_op not in operation_inputs:
+        return []
+    
+    inputs = operation_inputs[first_op]
+    
+    # Approach A (default): Use all inputs valid for first operation
+    if not strict_chain:
+        return inputs
+    
+    # Approach B (strict): Only keep inputs where entire chain is in-distribution
+    if len(operations) < 2:
+        return inputs
+    
+    second_op = operations[1]
+    
+    # Get valid inputs for second operation (if not exists, no examples satisfy strict chain)
+    if second_op not in operation_inputs:
+        return []
+    
+    valid_for_op2 = set(operation_inputs[second_op])
+    
+    # Filter to inputs where intermediate result is in-distribution for op2
+    valid_inputs = []
+    for inp in inputs:
+        try:
+            op_func = get_operation(first_op)
+            intermediate = op_func(inp)
+            if intermediate in valid_for_op2:
+                valid_inputs.append(inp)
+        except:
+            continue
+    
+    return valid_inputs  # May return empty list if no inputs satisfy strict chain requirement
+
 
 # Operations that benefit from character spacing
 SPACING_BENEFITS = {"reverse", "first_letter", "last_letter"}
@@ -272,13 +346,21 @@ class CompositionalTask(BaseTask):
             # Optionally save to CSV for future runs
             self._save_data(data_path)
     
-    def _generate_data(self):
-        """Generate compositional examples programmatically."""
+    def _generate_data(self, strict_chain: bool = False):
+        """Generate compositional examples programmatically.
+        
+        Args:
+            strict_chain: If True, use Approach B (only inputs where entire chain is in-distribution).
+                         If False, use Approach A (use first operation's inputs).
+        """
         examples = []
         
         # Generate examples for pure string compositions
-        for input_str in STRING_INPUT_POOL:
-            for comp_name, ops in STRING_COMPOSITIONS.items():
+        for comp_name, ops in STRING_COMPOSITIONS.items():
+            # Get appropriate input pool based on approach
+            valid_inputs = get_string_composition_inputs(ops, strict_chain=strict_chain)
+            
+            for input_str in valid_inputs:
                 try:
                     output = apply_composition(input_str, ops)
                     
@@ -469,12 +551,14 @@ class CompositionalTask(BaseTask):
 # Utility Functions
 # =============================================================================
 
-def generate_compositional_csv(output_path: str = None, spaced: bool = False):
+def generate_compositional_csv(output_path: str = None, spaced: bool = False, strict_chain: bool = False):
     """Generate the compositional.csv or compositional_spaced.csv file.
     
     Args:
         output_path: Path to save CSV. Defaults to dataset/compositional.csv or compositional_spaced.csv
         spaced: If True, generate spaced version with spaces between characters
+        strict_chain: If True, use Approach B (strict in-distribution chains). 
+                     If False, use Approach A (first op's inputs).
     """
     if output_path is None:
         if spaced:
@@ -491,9 +575,11 @@ def generate_compositional_csv(output_path: str = None, spaced: bool = False):
     
     examples = []
     
-    # Generate pure string compositions
-    for input_str in STRING_INPUT_POOL:
-        for comp_name, ops in STRING_COMPOSITIONS.items():
+    # Generate pure string compositions using Approach A or B
+    for comp_name, ops in STRING_COMPOSITIONS.items():
+        valid_inputs = get_string_composition_inputs(ops, strict_chain=strict_chain)
+        
+        for input_str in valid_inputs:
             try:
                 output = apply_composition(input_str, ops)
                 
@@ -554,7 +640,8 @@ def generate_compositional_csv(output_path: str = None, spaced: bool = False):
     total_comps = string_comps + lookup_comps
     
     mode = "spaced" if spaced else "normal"
-    print(f"Generated {len(examples)} {mode} examples across {total_comps} compositions")
+    approach = "Approach B (strict chains)" if strict_chain else "Approach A (first op's inputs)"
+    print(f"Generated {len(examples)} {mode} examples across {total_comps} compositions using {approach}")
     print(f"  - {string_comps} string compositions (pure string ops)")
     print(f"  - {lookup_comps} lookup compositions (translation/morphological + string ops)")
     print(f"Saved to: {output_path}")
