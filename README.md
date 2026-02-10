@@ -1,5 +1,58 @@
-* Models for analysis (ckpt required)
+## Project Structure
 
+```
+ElementalTask/
+├── configs/                    # Model checkpoint configurations
+│   ├── olmo2_checkpoints.json  # OLMo-2 1B/7B checkpoint definitions
+│   └── ...
+│
+├── dataset/                    # Task datasets (CSVs)
+│   ├── simple.csv              # Atomic ICL tasks (uppercase, lowercase, first_letter, etc.)
+│   ├── simple_spaced.csv       # Spaced variant of atomic tasks
+│   ├── compositional.csv       # Compositional tasks (chained operations)
+│   ├── compositional_spaced.csv
+│   ├── math_expressions.csv    # Math/arithmetic tasks
+│   ├── textfrct/               # TextFRCT benchmark tasks
+│   └── ...
+│
+├── tasks/                      # Task framework
+│   ├── base_task.py            # BaseTask abstract class and TaskConfig
+│   ├── registry.py             # Task discovery, registration, and listing
+│   └── implementations/        # Task implementations
+│       ├── simple_icl_task.py          # Atomic ICL tasks (10 categories)
+│       ├── compositional_task.py       # Compositional tasks (chained ops)
+│       ├── textfrct_task.py            # TextFRCT benchmark tasks
+│       ├── math_task.py                # Math expression tasks
+│       ├── basic_arithmetic_task.py    # Basic arithmetic
+│       ├── copying_task.py             # Exact copying
+│       ├── token_reversal_task.py      # Token reversal
+│       ├── string_analogy_task.py      # String analogies
+│       ├── ignoring_context_task.py    # Ignoring irrelevant context
+│       ├── ioi_task.py                 # Indirect Object Identification
+│       └── part_of_speech_task.py      # Part of speech tagging
+│
+├── function_vecs/              # Function vector extraction & analysis
+│   ├── extract_function_vecs.py    # FV extraction (simple + detailed API)
+│   └── experiments/                # FV analysis experiments
+│       └── analyze_real_tasks.py
+├── scripts/                    # Evaluation & analysis scripts
+│   ├── eval_across_checkpoints.py          # Main checkpoint evaluation
+│   ├── eval_array_job_v2.sh                # SLURM array job for batch eval
+│   ├── eval_new_compositions.sh            # Eval for new compositional tasks
+│   ├── eval_checkpoints.sh                 # Single-node eval script
+│   ├── run_unified_eval.py                 # Unified evaluation runner
+│   └── trajectory_analysis/                # Developmental trajectory analysis
+│       └── predict_compositional_from_components.py
+│
+├── analysis/                   # Plotting & visualization
+├── results/                    # Evaluation outputs
+├── plots/                      # Generated figures
+├── logs/                       # SLURM job logs
+└── tests/                      # Unit tests
+    └── test_basic_icl_tasks.py
+```
+
+## Past Notes
     - Olmo 1
     - Olmo 2
     - LLM360
