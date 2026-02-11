@@ -7,7 +7,7 @@ import torch
 import vllm
 from datasets import Dataset
 sys.path.append(os.getcwd())
-from scripts.inference import load_model_revision
+# from scripts.inference import load_model_revision  # TODO: restore when scripts/inference.py is back
 from tasks.registry import get_task
 
 def preprocess_5shot(dataset):
@@ -37,6 +37,8 @@ def evaluate_model(
     preprocess_fn: callable = preprocess_5shot,
     num_shots: int = 5,
     spaced: bool = False,
+    quantization: str = None,
+    model=None,
 ):
     # Load the dataset with optional spaced mode
     task = get_task(task_name, spaced=spaced)
@@ -72,23 +74,27 @@ def evaluate_model(
 
     # Load the model
     if use_vllm:
-        model = vllm.LLM(
-            model=model_id,
-            tokenizer=model_id,
-            revision=chkpt,
-            tokenizer_mode="auto",
-            tensor_parallel_size=torch.cuda.device_count(),
-            trust_remote_code=True,
-        )
-        
+        if model is None:
+            model = vllm.LLM(
+                model=model_id,
+                tokenizer=model_id,
+                revision=chkpt,
+                tokenizer_mode="auto",
+                tensor_parallel_size=torch.cuda.device_count(),
+                trust_remote_code=True,
+                quantization=quantization,
+            )
+
         sampling_params = vllm.SamplingParams(
             temperature=0,  # greedy decoding
             max_tokens=max_new_tokens,
         )
                 
         outputs = model.generate(dataset["prompt"], sampling_params)
-        outputs = [it.outputs[0].text for it in outputs]
-        breakpoint()
+        # outputs = [it.outputs[0].text for it in outputs]
+        # breakpoint()
+        # TODO: restore original lines above when debugging is needed
+        generated_texts = [it.outputs[0].text for it in outputs]
     else:
         model, tokenizer = load_model_revision(model_id, chkpt)
         generated_texts = []
@@ -196,16 +202,19 @@ def main():
     parser.add_argument("--output_path", default="output/", type=str, help="Path to save the evaluation results.")
     parser.add_argument("--load_vllm", action="store_true")
     parser.add_argument("--max_new_tokens", type=int, default=100, help="Max tokens for generation.")
-    
+    parser.add_argument("--quantization", type=str, default=None,
+                        help="Quantization method for vLLM (e.g., bitsandbytes, awq, gptq).")
+
     args = parser.parse_args()
-    
+
     evaluate_model(
         model_id=args.model_id,
         chkpt=args.chkpt,
         task_name=args.task_name,
         output_path=args.output_path,
         use_vllm=args.load_vllm,
-        max_new_tokens=args.max_new_tokens
+        max_new_tokens=args.max_new_tokens,
+        quantization=args.quantization,
     )
     
     # print(f"Results saved to {args.output_path}")
