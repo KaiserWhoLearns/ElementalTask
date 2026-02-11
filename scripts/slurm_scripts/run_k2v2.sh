@@ -34,7 +34,7 @@ pkill -u hsun74 -f python
 
 
 BASE_DIR="/scratch4/mdredze1/hsun74/ElementalTask"
-RESULTS_DIR="${BASE_DIR}/results/k2v2"
+RESULTS_DIR="${BASE_DIR}/results/k2v2_test_dir"
 PLOTS_DIR="${BASE_DIR}/plots/k2v2"
 
 # Create output directories
@@ -65,11 +65,11 @@ echo "Step 1: Running evaluation across checkpoints"
 echo "============================================"
 
 python scripts/eval_across_checkpoints.py \
-    --model_configs eval_configs/k2v2_sanitycheck.json \
+    --model_configs eval_configs/k2v2_sanity_check.json \
     --output_path "${RESULTS_DIR}" \
     --load_vllm \
     --max_new_tokens 20 \
-    --quantization bitsandbytes
+    --force_reeval
 
 echo "Evaluation complete."
 

@@ -166,7 +166,8 @@ def run_single_evaluation(
             tensor_parallel_size=torch.cuda.device_count(),
             trust_remote_code=True,
             quantization=quantization,
-            gpu_memory_utilization=0.9,  # limit KV cache to 85% of remaining GPU memory
+            gpu_memory_utilization=0.9,
+            max_model_len=1024,  # prompts are short; avoids KV cache OOM on large models
         )
 
     results = []
