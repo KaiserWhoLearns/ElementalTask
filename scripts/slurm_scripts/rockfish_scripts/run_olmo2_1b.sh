@@ -17,6 +17,11 @@
 module load gcc/11.4.0
 module load anaconda
 conda activate elementaltask
+
+# Force newer libstdc++ for FlashInfer/vLLM worker subprocesses
+# (system /lib64/libstdc++.so.6 only has GLIBCXX up to 3.4.25, FlashInfer needs 3.4.26)
+export LD_PRELOAD=/data/apps/extern/spack_on/gcc/9.3.0/gcc/11.4.0-hzz5maaw347vs5ygsiqkl77ua35qa2d7/lib64/libstdc++.so.6
+
 # ============================================================================
 # SLURM Script: OLMo-2 1B Evaluation + Trajectory Analysis
 # ============================================================================
