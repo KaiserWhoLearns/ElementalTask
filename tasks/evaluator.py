@@ -52,6 +52,7 @@ class ModelConfig:
     top_p: float = 1.0
     tensor_parallel_size: Optional[int] = None
     trust_remote_code: bool = True
+    quantization: Optional[str] = None
     generation_kwargs: Dict[str, Any] = field(default_factory=dict)
 
 
@@ -117,6 +118,7 @@ class TaskEvaluator:
             revision=self.model_config.checkpoint,
             tensor_parallel_size=tensor_parallel_size,
             trust_remote_code=self.model_config.trust_remote_code,
+            quantization=self.model_config.quantization,
         )
     
     def _load_transformers_model(self):
