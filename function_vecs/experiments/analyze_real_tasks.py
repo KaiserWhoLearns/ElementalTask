@@ -23,7 +23,6 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from tasks.registry import TaskRegistry
 from tasks.base_task import BaseTask, TaskConfig
 from function_vecs.extract_function_vecs import (
     ExtractConfig,
@@ -33,198 +32,173 @@ from function_vecs.extract_function_vecs import (
     save_function_vec,
     save_skill_basis,
     Headset,
+    TaskFunctionVec,
 )
 
 
+def load_task_performance(
+    results_dir: str,
+    checkpoint: str = "main",
+    task_names: List[str] = None
+) -> Dict[str, float]:
+    """
+    Load final accuracy for each task from pivot CSV files.
+    
+    Args:
+        results_dir: Path to results directory (e.g., "results/olmo2_continuous_1b_early_revised")
+        checkpoint: Checkpoint to filter by (e.g., "main")
+        task_names: Optional list of task names to load (loads all if None)
+    
+    Returns:
+        Dict mapping task_name -> accuracy (0.0-1.0)
+    """
+    import pandas as pd
+    
+    results_path = Path(results_dir)
+    performance = {}
+    
+    # Load from accuracy_pivot_*.csv files
+    for pivot_file in results_path.glob("accuracy_pivot_*.csv"):
+        try:
+            df = pd.read_csv(pivot_file)
+            
+            # Get task name from column (third column after model, checkpoint)
+            task_cols = [c for c in df.columns if c not in ['model', 'checkpoint']]
+            if not task_cols:
+                continue
+            task_name = task_cols[0]
+            
+            # Filter to the requested checkpoint
+            df_ckpt = df[df['checkpoint'] == checkpoint]
+            if df_ckpt.empty:
+                continue
+            
+            # Get accuracy
+            acc = df_ckpt[task_name].values[0]
+            
+            if task_names and task_name not in task_names:
+                continue
+            
+            performance[task_name] = float(acc)
+            
+        except Exception as e:
+            # Skip files that can't be parsed
+            continue
+    
+    return performance
+
+
 def discover_icl_tasks() -> List[BaseTask]:
-    """Discover all tasks that support ICL format."""
+    """Discover all tasks that support ICL format, including subtasks."""
     print("\n" + "="*70)
     print("DISCOVERING ICL TASKS")
     print("="*70)
     
-    registry = TaskRegistry()
-    registry.discover_tasks()
-    all_task_names = registry.list_tasks()
+    from tasks.registry import discover_tasks, get_task, list_tasks
     
-    print(f"\nFound {len(all_task_names)} registered tasks")
-    print("Checking ICL support...")
+    # Discover base tasks
+    discover_tasks()
+    base_tasks = list_tasks()
+    print(f"\nFound {len(base_tasks)} registered base tasks")
     
-    # Import factory functions
-    try:
-        from tasks.implementations.copying_task import make_copying_task
-        from tasks.implementations.ignoring_context_task import make_ignoring_context_task
-        from tasks.implementations.string_analogy_task import make_string_analogy_task
-        from tasks.implementations.basic_arithmetic import create_basic_arithmetic_task
-        from tasks.implementations.ioi_task import create_ioi_task
-        from tasks.implementations.token_reversal import create_token_reversal_task
-        from tasks.implementations.pos_id import create_pos_task
+    # Define all tasks to try, including subtasks
+    # These are the tasks we want to analyze
+    task_names_to_try = [
+        # Base tasks
+        "basic_arithmetic",
+        "copying",
+        "token_reversal",
+        "string_analogy",
+        # "ignoring_context",  # May have format issues
+        # "ioi_task",  # Known incompatible format
         
-        factories = {
-            'copying': lambda: make_copying_task(use_generator=True),
-            'ignoring_context': lambda: make_ignoring_context_task(use_generator=True),
-            'string_analogy': lambda: make_string_analogy_task(use_generator=True),
-            'basic_arithmetic': lambda: create_basic_arithmetic_task(),
-            'ioi_task': lambda: create_ioi_task(),
-            'token_reversal': lambda: create_token_reversal_task(),
-            'part_of_speech': lambda: create_pos_task(),
-        }
-    except ImportError as e:
-        print(f"Warning: Could not import factory functions: {e}")
-        factories = {}
+        # simple_icl subtasks
+        "simple_icl:uppercase",
+        "simple_icl:lowercase",
+        "simple_icl:first_letter",
+        "simple_icl:last_letter",
+        "simple_icl:translate_eng_fr",
+        "simple_icl:translate_fr_eng",
+        "simple_icl:translate_eng_sp",
+        "simple_icl:translate_sp_eng",
+        "simple_icl:present_to_gerund",
+        "simple_icl:singular_to_plural",
+        "simple_icl:country_to_capital",
+        "simple_icl:country_to_currency",
+        
+        # textfrct subtasks (objective ones with enough data)
+        "textfrct:CV1",
+        "textfrct:CV2",
+        "textfrct:CV3",
+        "textfrct:I1",
+        "textfrct:I2",
+        "textfrct:MA2",
+        "textfrct:MA3",
+        "textfrct:RG1",
+        "textfrct:RG2",
+        "textfrct:RG3",
+        "textfrct:RL1",
+        "textfrct:RL3",
+        "textfrct:V1",
+        "textfrct:V2",
+        "textfrct:V3",
+        "textfrct:V4",
+        "textfrct:V5",
+        
+        # compositional subtasks
+        "compositional:upper_reverse",
+        "compositional:lower_reverse",
+        "compositional:reverse_upper",
+        "compositional:reverse_lower",
+        "compositional:upper_first",
+        "compositional:upper_last",
+        "compositional:lower_first",
+        "compositional:lower_last",
+        "compositional:first_upper",
+        "compositional:last_upper",
+        "compositional:gerund_upper",
+        "compositional:gerund_reverse",
+        "compositional:plural_upper",
+        "compositional:plural_reverse",
+    ]
     
-    # Try loading tasks from config files for data-dependent tasks
-    config_based_tasks = {}
-    try:
-        import json
-        from pathlib import Path
-        config_dir = Path(__file__).parent.parent.parent / "tasks" / "configs"
-        
-        # Try loading simple_icl from config - but we'll split it by category
-        simple_icl_config_path = config_dir / "simple_icl_tasks.json"
-        if simple_icl_config_path.exists():
-            with open(simple_icl_config_path) as f:
-                simple_icl_config_data = json.load(f)
-                # Check if data file exists
-                data_path = Path(simple_icl_config_data.get("data_path", ""))
-                if not data_path.is_absolute():
-                    data_path = Path(__file__).parent.parent.parent / data_path
-                if data_path.exists():
-                    # Load the CSV to see categories
-                    import pandas as pd
-                    df = pd.read_csv(data_path)
-                    if 'category_name' in df.columns:
-                        categories = df['category_name'].unique()
-                        print(f"  Found {len(categories)} categories in simple_icl: {list(categories)}")
-                        
-                        # Create separate config for each category
-                        for category in categories:
-                            category_data = df[df['category_name'] == category].to_dict('records')
-                            category_config_data = simple_icl_config_data.copy()
-                            category_config_data['name'] = f"simple_icl_{category}"
-                            category_config_data['in_memory_data'] = category_data
-                            category_config_data['data_format'] = "memory"
-                            # Remove data_path since we're using in_memory_data
-                            category_config_data.pop('data_path', None)
-                            config_based_tasks[f'simple_icl_{category}'] = TaskConfig(**category_config_data)
-                            print(f"    ✓ Created config for simple_icl_{category} ({len(category_data)} examples)")
-        
-        # Try loading textfrct - split by category similar to simple_icl
-        textfrct_path = Path(__file__).parent.parent.parent / "dataset" / "TextFRCT.csv"
-        if textfrct_path.exists():
-            import pandas as pd
-            df = pd.read_csv(textfrct_path)
-            if 'category_name' in df.columns:
-                # Only keep objective tasks (filter out LLMEval)
-                df = df[~df['answer'].astype(str).str.contains('<LLMEval>', na=False)]
-                
-                categories = df['category_name'].unique()
-                print(f"  Found {len(categories)} objective categories in textfrct")
-                
-                # Create separate task for each category (limit to categories with enough data)
-                for category in categories:
-                    category_data = df[df['category_name'] == category].to_dict('records')
-                    if len(category_data) >= 5:  # Only include categories with at least 5 examples
-                        category_config_data = {
-                            'name': f"textfrct_{category.lower().replace(' ', '_')}",
-                            'input_column': 'question',
-                            'output_column': 'answer',
-                            'in_memory_data': category_data,
-                            'data_format': 'memory'
-                        }
-                        config_based_tasks[category_config_data['name']] = TaskConfig(**category_config_data)
-                        print(f"    ✓ Created config for {category_config_data['name']} ({len(category_data)} examples)")
-    except Exception as e:
-        print(f"  Warning: Could not load config-based tasks: {e}")
+    print(f"\nAttempting to load {len(task_names_to_try)} tasks...")
     
     icl_tasks = []
-    for task_name in all_task_names:
-        # Skip the base simple_icl and textfrct tasks - we'll use the category-specific ones
-        if task_name == 'simple_icl' and len([k for k in config_based_tasks if k.startswith('simple_icl_')]) > 0:
-            print(f"  ⊘ {task_name} (using category-specific versions instead)")
-            continue
-        if task_name == 'textfrct' and len([k for k in config_based_tasks if k.startswith('textfrct_')]) > 0:
-            print(f"  ⊘ {task_name} (using category-specific versions instead)")
-            continue
-            
+    for task_name in task_names_to_try:
         try:
-            # Try using factory function first if available
-            if task_name in factories:
-                try:
-                    task = factories[task_name]()
-                    # Verify it has data
-                    sample_data = task.get_split("test")
-                    if sample_data and len(sample_data) > 0:
-                        icl_tasks.append(task)
-                        print(f"  ✓ {task_name} (factory, {len(sample_data)} examples)")
-                        continue
-                except Exception as factory_error:
-                    print(f"  ⚠ {task_name} factory failed: {factory_error}, trying default...")
+            task = get_task(task_name)
             
-            # Try config-based instantiation for data-dependent tasks
-            if task_name in config_based_tasks:
-                try:
-                    task_class = registry.get_task_class(task_name.split('_')[0] if '_' in task_name else task_name)
-                    task = task_class(config_based_tasks[task_name])
-                    sample_data = task.get_split("test")
-                    if sample_data and len(sample_data) > 0:
-                        icl_tasks.append(task)
-                        print(f"  ✓ {task_name} (config, {len(sample_data)} examples)")
-                        continue
-                except Exception as config_error:
-                    print(f"  ⚠ {task_name} config failed: {config_error}, trying default...")
+            # Store the full task name (including subtask) as an attribute
+            # This is needed because task.config.name doesn't include the subtask
+            task._full_name = task_name
             
-            # Fall back to standard instantiation
-            task_class = registry.get_task_class(task_name)
-            config = TaskConfig(
-                name=task_name,
-                input_column="input",
-                output_column="output"
-            )
-            task = task_class(config)
-            
-            # Check if task supports ICL and has data
-            if hasattr(task, 'supports_icl') and task.supports_icl:
-                # Try to get a sample split to verify task has data
-                try:
-                    sample_data = task.get_split("test")
-                    if sample_data and len(sample_data) > 0:
-                        icl_tasks.append(task)
-                        print(f"  ✓ {task_name} ({len(sample_data)} examples)")
-                    else:
-                        print(f"  ✗ {task_name} (no data available)")
-                except Exception as data_error:
-                    print(f"  ✗ {task_name} (data error: {data_error})")
-            else:
-                print(f"  ✗ {task_name} (no ICL support)")
+            # Try to get sample data to verify task works
+            try:
+                sample_data = task.get_split("test")
+                n_examples = len(sample_data) if sample_data else 0
+                if n_examples > 0:
+                    icl_tasks.append(task)
+                    print(f"  ✓ {task_name} ({n_examples} examples)")
+                else:
+                    print(f"  ✗ {task_name} (no data)")
+            except Exception as data_err:
+                print(f"  ✗ {task_name} (data error: {data_err})")
                 
         except Exception as e:
             print(f"  ✗ {task_name} (error: {e})")
     
-    # Add the category-specific tasks from config_based_tasks
-    for cat_task_name in config_based_tasks:
-        if cat_task_name not in [t.config.name for t in icl_tasks]:
-            try:
-                # Determine the base task class
-                if cat_task_name.startswith('simple_icl_'):
-                    # Get the base task name (e.g., 'simple_icl' from 'simple_icl_uppercase')
-                    base_name = 'simple_icl'
-                elif cat_task_name.startswith('textfrct_'):
-                    # For textfrct, use the SimpleTask class with the config
-                    base_name = 'simple'
-                else:
-                    continue
-                    
-                task_class = registry.get_task_class(base_name)
-                task = task_class(config_based_tasks[cat_task_name])
-                sample_data = task.get_split("test")
-                if sample_data and len(sample_data) > 0:
-                    icl_tasks.append(task)
-                    # Already printed above
-            except Exception as e:
-                print(f"  ✗ {cat_task_name} (config load error: {e})")
-    
     print(f"\n✓ Found {len(icl_tasks)} ICL-compatible tasks")
     return icl_tasks
+
+
+def get_task_display_name(task: BaseTask) -> str:
+    """Get the full display name for a task, including subtask if applicable."""
+    # Check for our custom _full_name attribute first
+    if hasattr(task, '_full_name'):
+        return task._full_name
+    # Fall back to config.name
+    return task.config.name
 
 
 def split_tasks(tasks: List[BaseTask], train_ratio: float = 0.7, seed: int = 42):
@@ -250,22 +224,40 @@ def extract_function_vectors(
     tokenizer,
     desc: str = "tasks"
 ):
-    """Extract function vectors from a list of tasks."""
+    """Extract function vectors from a list of tasks.
+    
+    Tasks with no correct instances (when only_correct=True) will be skipped.
+    """
     print(f"\nExtracting function vectors from {len(tasks)} {desc}...")
+    if config.only_correct:
+        print("  (strict mode: tasks with 0 correct instances will be skipped)")
     
     function_vecs = []
+    skipped_no_correct = 0
     for i, task in enumerate(tasks, 1):
         try:
-            print(f"  [{i}/{len(tasks)}] {task.config.name}...", end=" ")
+            task_name = get_task_display_name(task)
+            print(f"  [{i}/{len(tasks)}] {task_name}...", end=" ")
             fv = extract_task_function_vec(task, config, headset, model, tokenizer)
+            # Also store the full task name in the function vector
+            fv.task_name = task_name
             function_vecs.append(fv)
             norm = np.linalg.norm(fv.function_vec)
             print(f"✓ (norm={norm:.4f})")
+        except ValueError as e:
+            if "no correct instances" in str(e).lower():
+                print(f"⚠ SKIPPED (no correct instances)")
+                skipped_no_correct += 1
+            else:
+                print(f"✗ ERROR: {e}")
+            continue
         except Exception as e:
             print(f"✗ ERROR: {e}")
             continue
     
     print(f"✓ Successfully extracted {len(function_vecs)}/{len(tasks)} function vectors")
+    if skipped_no_correct > 0:
+        print(f"  ({skipped_no_correct} tasks skipped due to no correct instances)")
     return function_vecs
 
 
@@ -395,7 +387,7 @@ def print_summary(
     print("-" * len(header))
     
     # Collect training task scores
-    train_task_names = {t.config.name for t in train_tasks}
+    train_task_names = {get_task_display_name(t) for t in train_tasks}
     train_scores = []
     for vec in train_vecs:
         task_name = vec.task_name
@@ -509,6 +501,234 @@ def print_summary(
     print("\n" + "="*70)
 
 
+def interpret_principal_components(
+    basis,
+    train_fvs: List[TaskFunctionVec],
+    test_fvs: List[TaskFunctionVec],
+    n_components: int = 10,
+    top_k: int = 5
+):
+    """
+    Interpret principal components by analyzing task loadings.
+    
+    Shows which tasks load most heavily on each PC and identifies patterns
+    that may reveal what each dimension captures (e.g., case transformation,
+    reversal, translation, etc.)
+    """
+    from collections import defaultdict
+    
+    print("\n" + "=" * 70)
+    print("PRINCIPAL COMPONENT INTERPRETATION")
+    print("=" * 70)
+    
+    # Combine all FVs
+    all_fvs = {fv.task_name: fv for fv in train_fvs + test_fvs}
+    task_names = list(all_fvs.keys())
+    n_tasks = len(task_names)
+    n_components = min(n_components, basis.U.shape[1], n_tasks)
+    
+    print(f"\nAnalyzing {n_components} principal components across {n_tasks} tasks")
+    
+    # Compute loadings: project each FV onto each PC
+    loadings = np.zeros((n_tasks, n_components))
+    for i, task_name in enumerate(task_names):
+        fv = all_fvs[task_name].function_vec
+        for j in range(n_components):
+            pc = basis.U[:, j]
+            loadings[i, j] = np.dot(fv, pc)
+    
+    # Helper to categorize tasks
+    def get_category(task_name):
+        t = task_name.lower()
+        if any(x in t for x in ['upper', 'lower', 'reverse', 'first_letter', 'copying']):
+            return 'string_manip'
+        if 'translate' in t:
+            return 'translation'
+        if any(x in t for x in ['plural', 'singular', 'gerund']):
+            return 'grammatical'
+        if any(x in t for x in ['capital', 'currency']):
+            return 'factual'
+        if 'arithmetic' in t:
+            return 'arithmetic'
+        if 'textfrct' in t:
+            # Sub-categorize textfrct
+            if ':v' in t:
+                return 'textfrct:vocab'
+            elif ':rg' in t:
+                return 'textfrct:reading'
+            elif ':rl' in t:
+                return 'textfrct:reasoning'
+            elif ':ma' in t:
+                return 'textfrct:math'
+            elif ':cv' in t:
+                return 'textfrct:comprehension'
+            elif ':i' in t:
+                return 'textfrct:inference'
+            return 'textfrct:other'
+        if 'compositional' in t:
+            return 'compositional'
+        return 'other'
+    
+    # Print explained variance summary
+    total_var = np.sum(basis.S ** 2)
+    cumulative_var = 0
+    print(f"\nExplained variance by component:")
+    for pc_idx in range(min(10, n_components)):
+        var = (basis.S[pc_idx] ** 2) / total_var * 100
+        cumulative_var += var
+        print(f"  PC{pc_idx + 1:2d}: {var:5.2f}% (cumulative: {cumulative_var:5.2f}%)")
+    
+    # Analyze each PC
+    for pc_idx in range(n_components):
+        pc_loadings = loadings[:, pc_idx]
+        explained_var = (basis.S[pc_idx] ** 2) / total_var * 100
+        
+        # Sort by loading
+        sorted_idx = np.argsort(pc_loadings)
+        
+        print(f"\n{'─' * 70}")
+        print(f"PC {pc_idx + 1} (explains {explained_var:.2f}% variance)")
+        print(f"{'─' * 70}")
+        
+        print(f"\n  HIGH loadings (tasks that activate this component):")
+        for i in sorted_idx[-top_k:][::-1]:
+            cat = get_category(task_names[i])
+            print(f"    {pc_loadings[i]:+.4f}  {task_names[i]:<40} [{cat}]")
+        
+        print(f"\n  LOW loadings (tasks anti-correlated with this component):")
+        for i in sorted_idx[:top_k]:
+            cat = get_category(task_names[i])
+            print(f"    {pc_loadings[i]:+.4f}  {task_names[i]:<40} [{cat}]")
+        
+        # Category means
+        cat_loadings = defaultdict(list)
+        for i, t in enumerate(task_names):
+            cat_loadings[get_category(t)].append(pc_loadings[i])
+        
+        cat_means = {cat: np.mean(vals) for cat, vals in cat_loadings.items()}
+        cat_means_sorted = sorted(cat_means.items(), key=lambda x: abs(x[1]), reverse=True)
+        
+        print(f"\n  Category mean loadings (sorted by |loading|):")
+        for cat, mean in cat_means_sorted[:7]:  # Top 7 categories
+            n_tasks_cat = len(cat_loadings[cat])
+            print(f"    {mean:+.4f}  {cat:<25} (n={n_tasks_cat})")
+        
+        # Try to interpret based on patterns
+        pos_tasks = [task_names[i] for i in sorted_idx[-top_k:]]
+        neg_tasks = [task_names[i] for i in sorted_idx[:top_k]]
+        
+        interpretations = []
+        
+        # Check for upper/lower contrast
+        upper_pos = sum(1 for t in pos_tasks if 'upper' in t.lower())
+        lower_pos = sum(1 for t in pos_tasks if 'lower' in t.lower())
+        upper_neg = sum(1 for t in neg_tasks if 'upper' in t.lower())
+        lower_neg = sum(1 for t in neg_tasks if 'lower' in t.lower())
+        
+        if upper_pos > 1 and lower_neg > 1:
+            interpretations.append("uppercase ↔ lowercase")
+        elif lower_pos > 1 and upper_neg > 1:
+            interpretations.append("lowercase ↔ uppercase")
+        
+        # Check for reverse
+        reverse_pos = sum(1 for t in pos_tasks if 'reverse' in t.lower())
+        reverse_neg = sum(1 for t in neg_tasks if 'reverse' in t.lower())
+        if reverse_pos > 1 and reverse_neg == 0:
+            interpretations.append("+ reversal operations")
+        elif reverse_neg > 1 and reverse_pos == 0:
+            interpretations.append("- reversal operations")
+        
+        # Check for translation
+        trans_pos = sum(1 for t in pos_tasks if 'translate' in t.lower())
+        trans_neg = sum(1 for t in neg_tasks if 'translate' in t.lower())
+        if trans_pos > 1:
+            interpretations.append("+ translation tasks")
+        elif trans_neg > 1:
+            interpretations.append("- translation tasks")
+        
+        # Check for grammatical
+        gram_pos = sum(1 for t in pos_tasks if any(x in t.lower() for x in ['plural', 'gerund']))
+        gram_neg = sum(1 for t in neg_tasks if any(x in t.lower() for x in ['plural', 'gerund']))
+        if gram_pos > 1:
+            interpretations.append("+ grammatical transforms")
+        elif gram_neg > 1:
+            interpretations.append("- grammatical transforms")
+        
+        # Check for factual
+        fact_pos = sum(1 for t in pos_tasks if any(x in t.lower() for x in ['capital', 'currency']))
+        fact_neg = sum(1 for t in neg_tasks if any(x in t.lower() for x in ['capital', 'currency']))
+        if fact_pos > 1:
+            interpretations.append("+ factual lookup")
+        elif fact_neg > 1:
+            interpretations.append("- factual lookup")
+        
+        # Check for textfrct
+        tf_pos = sum(1 for t in pos_tasks if 'textfrct' in t.lower())
+        tf_neg = sum(1 for t in neg_tasks if 'textfrct' in t.lower())
+        if tf_pos >= 3:
+            interpretations.append("+ textfrct tasks")
+        elif tf_neg >= 3:
+            interpretations.append("- textfrct tasks")
+        
+        # Check for first/last
+        first_pos = sum(1 for t in pos_tasks if 'first' in t.lower())
+        last_pos = sum(1 for t in pos_tasks if 'last' in t.lower())
+        first_neg = sum(1 for t in neg_tasks if 'first' in t.lower())
+        last_neg = sum(1 for t in neg_tasks if 'last' in t.lower())
+        if first_pos > 1 and last_neg > 1:
+            interpretations.append("first ↔ last position")
+        elif last_pos > 1 and first_neg > 1:
+            interpretations.append("last ↔ first position")
+        
+        if interpretations:
+            print(f"\n  💡 Interpretation: {'; '.join(interpretations)}")
+        else:
+            print(f"\n  💡 Interpretation: (no clear pattern detected)")
+    
+    # Print correlation matrix between task features and PCs
+    print(f"\n{'=' * 70}")
+    print("PC-FEATURE CORRELATIONS")
+    print(f"{'=' * 70}")
+    
+    # Create binary features
+    features = {
+        'has_upper': np.array([1 if 'upper' in t.lower() else 0 for t in task_names]),
+        'has_lower': np.array([1 if 'lower' in t.lower() else 0 for t in task_names]),
+        'has_reverse': np.array([1 if 'reverse' in t.lower() else 0 for t in task_names]),
+        'is_translation': np.array([1 if 'translate' in t.lower() else 0 for t in task_names]),
+        'is_factual': np.array([1 if any(x in t.lower() for x in ['capital', 'currency']) else 0 for t in task_names]),
+        'is_grammatical': np.array([1 if any(x in t.lower() for x in ['plural', 'gerund']) else 0 for t in task_names]),
+        'is_textfrct': np.array([1 if 'textfrct' in t.lower() else 0 for t in task_names]),
+        'is_simple_icl': np.array([1 if 'simple_icl' in t.lower() else 0 for t in task_names]),
+        'is_compositional': np.array([1 if 'compositional' in t.lower() else 0 for t in task_names]),
+    }
+    
+    # Print header
+    header = f"{'Feature':<18}"
+    for i in range(min(8, n_components)):
+        header += f" PC{i+1:>5}"
+    print(header)
+    print("-" * len(header))
+    
+    for feat_name, feat_vals in features.items():
+        if feat_vals.sum() == 0 or feat_vals.sum() == len(feat_vals):
+            continue  # Skip if no variance
+        
+        row = f"{feat_name:<18}"
+        for pc_idx in range(min(8, n_components)):
+            corr = np.corrcoef(feat_vals, loadings[:, pc_idx])[0, 1]
+            # Highlight strong correlations
+            if abs(corr) > 0.5:
+                row += f" {corr:+.2f}*"
+            else:
+                row += f" {corr:+.2f} "
+        print(row)
+    
+    print("\n(* indicates |correlation| > 0.5)")
+    
+    return loadings, task_names
+
+
 def visualize_task_projections(
     train_tasks: List[BaseTask],
     test_tasks: List[BaseTask],
@@ -544,9 +764,12 @@ def visualize_task_projections(
     print("="*70)
     
     # Get task projections (coefficients in the skill basis)
-    # basis.Vt is (k, n_tasks) where n_tasks are the training tasks
+    # basis.Vt is (k, n_tasks) where n_tasks are the training tasks that were successfully extracted
     projections = basis.Vt.T  # (n_tasks, k)
-    task_names = [t.config.name for t in train_tasks]
+    
+    # Use task names from the basis (these are the tasks that were actually extracted)
+    # This handles the case where some tasks were skipped due to no correct instances
+    task_names = basis.task_names
     
     # Get explained variance ratios
     var_ratios = basis.explained_variance_ratio()
@@ -794,9 +1017,20 @@ def visualize_task_projections_interactive(
     test_tasks: List[BaseTask],
     basis,
     output_dir: Path,
-    model_name: str = "model"
+    model_name: str = "model",
+    performance: Dict[str, float] = None,
+    color_by: str = "both"
 ):
     """Create interactive plotly visualization of task projections.
+    
+    Args:
+        train_tasks: Training tasks used to build basis
+        test_tasks: Held-out test tasks
+        basis: Skill basis from SVD
+        output_dir: Output directory for HTML files
+        model_name: Model name for filenames
+        performance: Optional dict mapping task_name -> accuracy (0.0-1.0)
+        color_by: "category", "performance", or "both" (creates separate plots)
     
     This is called after matplotlib plots are generated to avoid blocking
     the main visualizations if plotly is not available.
@@ -804,6 +1038,7 @@ def visualize_task_projections_interactive(
     try:
         import plotly.graph_objects as go
         import plotly.express as px
+        from plotly.subplots import make_subplots
     except ImportError:
         print("\n⚠️  plotly not available - skipping interactive visualization")
         print("   Install with: pip install plotly")
@@ -815,18 +1050,17 @@ def visualize_task_projections_interactive(
     
     # Get task projections
     projections = basis.Vt.T  # (n_tasks, k)
-    task_names = [t.config.name for t in train_tasks]
+    
+    # Use task names from the basis (these are the tasks that were actually extracted)
+    task_names = basis.task_names
     var_ratios = basis.explained_variance_ratio()
     
     # Categorize tasks
     def categorize_task(name):
         name_lower = name.lower()
         
-        # 1. Arithmetic/Mathematical
         if any(kw in name_lower for kw in ['arithmetic', 'add_one', 'math']):
             return 'Arithmetic', '#e74c3c'
-        
-        # 2. String Manipulation
         if any(kw in name_lower for kw in [
             'capitalization', 'uppercase', 'lowercase',
             'first_letter', 'last_letter', 'first_character', 'last_character',
@@ -834,40 +1068,28 @@ def visualize_task_projections_interactive(
             'scrambled_words', 'incomplete_words', 'hidden_words'
         ]):
             return 'String Manipulation', '#3498db'
-        
-        # 3. Factual Lookup
         if any(kw in name_lower for kw in [
             'translate', 'country_to_capital', 'country_to_currency'
         ]):
             return 'Factual Lookup', '#2ecc71'
-        
-        # 4. Grammatical
         if any(kw in name_lower for kw in [
             'singular_to_plural', 'present_to_gerund', 'part_of_speech'
         ]):
             return 'Grammatical', '#9b59b6'
-        
-        # 5. Semantic Relations
         if any(kw in name_lower for kw in [
             'opposites', 'nonsense_syllogisms', 'inference', 
             'analogy', 'rhyming', 'deciphering_languages'
         ]):
             return 'Semantic Reasoning', '#f39c12'
-        
-        # 6. Vocabulary
         if any(kw in name_lower for kw in [
             'vocabulary_test', 'controlled_association', 
             'first_and_last_name', 'objest-number'
         ]):
             return 'Vocabulary', '#1abc9c'
-        
-        # 7. Pattern Recognition
         if any(kw in name_lower for kw in [
             'letter_sets', 'locations_test', 'copying'
         ]):
             return 'Pattern Recognition', '#e67e22'
-        
-        # 8. Meta-Cognitive
         if any(kw in name_lower for kw in [
             'ignoring_context', 'ioi_task'
         ]):
@@ -878,191 +1100,243 @@ def visualize_task_projections_interactive(
     
     # Build data for plotly
     categories = []
-    colors = []
+    cat_colors = []
     for name in task_names:
         cat, color = categorize_task(name)
         categories.append(cat)
-        colors.append(color)
+        cat_colors.append(color)
     
-    # Create 3D scatter plot
-    fig = go.Figure(data=[go.Scatter3d(
-        x=projections[:, 0],
-        y=projections[:, 1],
-        z=projections[:, 2],
-        mode='markers+text',
-        marker=dict(
-            size=8,
-            color=colors,
-            opacity=0.8,
-            line=dict(color='black', width=0.5)
-        ),
-        text=task_names,
-        textposition='top center',
-        textfont=dict(size=8),
-        hovertemplate=(
-            '<b>%{text}</b><br>' +
-            'Component 1: %{x:.3f}<br>' +
-            'Component 2: %{y:.3f}<br>' +
-            'Component 3: %{z:.3f}<br>' +
-            '<extra></extra>'
-        ),
-        name='Tasks'
-    )])
+    # Get performance values if available
+    perf_values = []
+    has_performance = performance is not None and len(performance) > 0
+    if has_performance:
+        for name in task_names:
+            perf_values.append(performance.get(name, np.nan))
+        perf_values = np.array(perf_values)
+        n_with_perf = np.sum(~np.isnan(perf_values))
+        print(f"  Performance data available for {n_with_perf}/{len(task_names)} tasks")
     
-    # Update layout
-    fig.update_layout(
-        title=dict(
-            text='Task Projections in 3D Skill Basis Space (Interactive)',
-            font=dict(size=18, family='Arial, sans-serif'),
-            x=0.5,
-            xanchor='center'
-        ),
-        scene=dict(
-            xaxis=dict(
-                title=f'Basis Component 1 ({var_ratios[0]:.1%} variance)',
-                backgroundcolor='rgb(230, 230, 230)',
-                gridcolor='white',
-                showbackground=True
-            ),
-            yaxis=dict(
-                title=f'Basis Component 2 ({var_ratios[1]:.1%} variance)',
-                backgroundcolor='rgb(230, 230, 230)',
-                gridcolor='white',
-                showbackground=True
-            ),
-            zaxis=dict(
-                title=f'Basis Component 3 ({var_ratios[2]:.1%} variance)',
-                backgroundcolor='rgb(230, 230, 230)',
-                gridcolor='white',
-                showbackground=True
-            ),
-            camera=dict(
-                eye=dict(x=1.5, y=1.5, z=1.3)
-            )
-        ),
-        width=1200,
-        height=900,
-        showlegend=False,
-        hovermode='closest',
-        font=dict(family='Arial, sans-serif', size=12)
-    )
-    
-    # Add category legend as annotations
-    legend_text = "<b>Categories:</b><br>"
-    unique_cats = {}
-    for cat, color in zip(categories, colors):
-        if cat not in unique_cats:
-            unique_cats[cat] = color
-    
-    for i, (cat, color) in enumerate(sorted(unique_cats.items())):
-        legend_text += f'<span style="color:{color}">■</span> {cat}<br>'
-    
-    fig.add_annotation(
-        text=legend_text,
-        xref="paper", yref="paper",
-        x=0.02, y=0.98,
-        xanchor='left', yanchor='top',
-        showarrow=False,
-        bgcolor='rgba(255, 255, 255, 0.8)',
-        bordercolor='black',
-        borderwidth=1,
-        font=dict(size=10)
-    )
-    
-    # Save interactive HTML
     viz_dir = output_dir / "visualizations"
     viz_dir.mkdir(exist_ok=True)
-    html_path = viz_dir / f"task_basis_3d_interactive_{model_name}.html"
     
-    fig.write_html(str(html_path))
-    print(f"✓ Saved interactive 3D plot to: {html_path}")
-    print(f"  Open in browser to explore: file://{html_path.absolute()}")
-    
-    # Also create 2D interactive plots
-    print("\n📊 Creating interactive 2D plots...")
-    
-    # Create subplot with 3 panels
-    from plotly.subplots import make_subplots
-    
-    fig_2d = make_subplots(
-        rows=1, cols=3,
-        subplot_titles=(
-            f'Component 1 vs 2',
-            f'Component 1 vs 3',
-            f'Component 2 vs 3'
-        ),
-        horizontal_spacing=0.1
-    )
-    
-    # Plot 1: Component 1 vs 2
-    fig_2d.add_trace(
-        go.Scatter(
+    # Helper to create a 3D plot
+    def create_3d_plot(colors, color_mode, title_suffix, colorbar_title=None):
+        if color_mode == "performance":
+            marker_dict = dict(
+                size=10,
+                color=colors,
+                colorscale='RdYlGn',  # Red (low) to Green (high)
+                cmin=0,
+                cmax=1,
+                colorbar=dict(title=colorbar_title or 'Accuracy', x=1.02),
+                opacity=0.8,
+                line=dict(color='black', width=0.5)
+            )
+        else:
+            marker_dict = dict(
+                size=8,
+                color=colors,
+                opacity=0.8,
+                line=dict(color='black', width=0.5)
+            )
+        
+        # Build hover text with performance info
+        hover_texts = []
+        for i, name in enumerate(task_names):
+            text = f'<b>{name}</b><br>Category: {categories[i]}'
+            if has_performance and not np.isnan(perf_values[i]):
+                text += f'<br>Accuracy: {perf_values[i]:.1%}'
+            hover_texts.append(text)
+        
+        fig = go.Figure(data=[go.Scatter3d(
             x=projections[:, 0],
             y=projections[:, 1],
+            z=projections[:, 2],
             mode='markers+text',
-            marker=dict(size=10, color=colors, opacity=0.8, line=dict(color='black', width=0.5)),
+            marker=marker_dict,
             text=task_names,
             textposition='top center',
-            textfont=dict(size=7),
-            hovertemplate='<b>%{text}</b><br>C1: %{x:.3f}<br>C2: %{y:.3f}<extra></extra>',
-            showlegend=False
-        ),
-        row=1, col=1
-    )
+            textfont=dict(size=8),
+            customdata=hover_texts,
+            hovertemplate='%{customdata}<br>C1: %{x:.3f}<br>C2: %{y:.3f}<br>C3: %{z:.3f}<extra></extra>',
+            name='Tasks'
+        )])
+        
+        fig.update_layout(
+            title=dict(
+                text=f'Task Projections in 3D Skill Basis Space {title_suffix}',
+                font=dict(size=18, family='Arial, sans-serif'),
+                x=0.5,
+                xanchor='center'
+            ),
+            scene=dict(
+                xaxis=dict(
+                    title=f'Basis Component 1 ({var_ratios[0]:.1%} variance)',
+                    backgroundcolor='rgb(230, 230, 230)',
+                    gridcolor='white',
+                    showbackground=True
+                ),
+                zaxis=dict(
+                    title=f'Basis Component 3 ({var_ratios[2]:.1%} variance)',
+                    backgroundcolor='rgb(230, 230, 230)',
+                    gridcolor='white',
+                    showbackground=True
+                ),
+                camera=dict(
+                    eye=dict(x=1.5, y=1.5, z=1.3)
+                )
+            ),
+            width=1200,
+            height=900,
+            showlegend=False,
+            hovermode='closest',
+            font=dict(family='Arial, sans-serif', size=12)
+        )
+        
+        # Add category legend for category-colored plots
+        if color_mode == "category":
+            legend_text = "<b>Categories:</b><br>"
+            unique_cats = {}
+            for cat, color in zip(categories, cat_colors):
+                if cat not in unique_cats:
+                    unique_cats[cat] = color
+            for cat, color in sorted(unique_cats.items()):
+                legend_text += f'<span style="color:{color}">■</span> {cat}<br>'
+            
+            fig.add_annotation(
+                text=legend_text,
+                xref="paper", yref="paper",
+                x=0.02, y=0.98,
+                xanchor='left', yanchor='top',
+                showarrow=False,
+                bgcolor='rgba(255, 255, 255, 0.8)',
+                bordercolor='black',
+                borderwidth=1,
+                font=dict(size=10)
+            )
+        
+        return fig
     
-    # Plot 2: Component 1 vs 3
-    fig_2d.add_trace(
-        go.Scatter(
-            x=projections[:, 0],
-            y=projections[:, 2],
-            mode='markers+text',
-            marker=dict(size=10, color=colors, opacity=0.8, line=dict(color='black', width=0.5)),
-            text=task_names,
-            textposition='top center',
-            textfont=dict(size=7),
-            hovertemplate='<b>%{text}</b><br>C1: %{x:.3f}<br>C3: %{y:.3f}<extra></extra>',
-            showlegend=False
-        ),
-        row=1, col=2
-    )
+    # Create category-colored plot
+    if color_by in ["category", "both"]:
+        fig_cat = create_3d_plot(cat_colors, "category", "(by Category)")
+        html_path = viz_dir / f"task_basis_3d_interactive_{model_name}.html"
+        fig_cat.write_html(str(html_path))
+        print(f"✓ Saved interactive 3D plot (by category) to: {html_path}")
     
-    # Plot 3: Component 2 vs 3
-    fig_2d.add_trace(
-        go.Scatter(
-            x=projections[:, 1],
-            y=projections[:, 2],
-            mode='markers+text',
-            marker=dict(size=10, color=colors, opacity=0.8, line=dict(color='black', width=0.5)),
-            text=task_names,
-            textposition='top center',
-            textfont=dict(size=7),
-            hovertemplate='<b>%{text}</b><br>C2: %{x:.3f}<br>C3: %{y:.3f}<extra></extra>',
-            showlegend=False
-        ),
-        row=1, col=3
-    )
+    # Create performance-colored plot if data available
+    if has_performance and color_by in ["performance", "both"]:
+        # Replace NaN with 0.5 for display (gray in RdYlGn)
+        perf_display = np.where(np.isnan(perf_values), 0.5, perf_values)
+        fig_perf = create_3d_plot(perf_display.tolist(), "performance", "(by Accuracy)", "Accuracy")
+        html_path_perf = viz_dir / f"task_basis_3d_performance_{model_name}.html"
+        fig_perf.write_html(str(html_path_perf))
+        print(f"✓ Saved interactive 3D plot (by performance) to: {html_path_perf}")
+        
+        # Also analyze performance clustering
+        analyze_performance_clustering(projections, perf_values, task_names, categories)
+    elif color_by == "performance" and not has_performance:
+        print("  ⚠️  No performance data available - skipping performance-colored plot")
     
-    # Update axes labels
-    fig_2d.update_xaxes(title_text=f'Component 1 ({var_ratios[0]:.1%})', row=1, col=1)
-    fig_2d.update_yaxes(title_text=f'Component 2 ({var_ratios[1]:.1%})', row=1, col=1)
+    # Create 2D interactive plots
+    print("\n📊 Creating interactive 2D plots...")
     
-    fig_2d.update_xaxes(title_text=f'Component 1 ({var_ratios[0]:.1%})', row=1, col=2)
-    fig_2d.update_yaxes(title_text=f'Component 3 ({var_ratios[2]:.1%})', row=1, col=2)
+    # Helper to create 2D plot
+    def create_2d_plots(colors, color_mode):
+        fig_2d = make_subplots(
+            rows=1, cols=3,
+            subplot_titles=(
+                f'Component 1 vs 2',
+                f'Component 1 vs 3',
+                f'Component 2 vs 3'
+            ),
+            horizontal_spacing=0.1
+        )
+        
+        marker_dict = dict(size=10, color=colors, opacity=0.8, line=dict(color='black', width=0.5))
+        if color_mode == "performance":
+            marker_dict.update(colorscale='RdYlGn', cmin=0, cmax=1)
+        
+        # Plot 1: Component 1 vs 2
+        fig_2d.add_trace(
+            go.Scatter(
+                x=projections[:, 0],
+                y=projections[:, 1],
+                mode='markers+text',
+                marker=marker_dict,
+                text=task_names,
+                textposition='top center',
+                textfont=dict(size=7),
+                hovertemplate='<b>%{text}</b><br>C1: %{x:.3f}<br>C2: %{y:.3f}<extra></extra>',
+                showlegend=False
+            ),
+            row=1, col=1
+        )
+        
+        # Plot 2: Component 1 vs 3
+        fig_2d.add_trace(
+            go.Scatter(
+                x=projections[:, 0],
+                y=projections[:, 2],
+                mode='markers+text',
+                marker=marker_dict,
+                text=task_names,
+                textposition='top center',
+                textfont=dict(size=7),
+                hovertemplate='<b>%{text}</b><br>C1: %{x:.3f}<br>C3: %{y:.3f}<extra></extra>',
+                showlegend=False
+            ),
+            row=1, col=2
+        )
+        
+        # Plot 3: Component 2 vs 3
+        fig_2d.add_trace(
+            go.Scatter(
+                x=projections[:, 1],
+                y=projections[:, 2],
+                mode='markers+text',
+                marker=marker_dict,
+                text=task_names,
+                textposition='top center',
+                textfont=dict(size=7),
+                hovertemplate='<b>%{text}</b><br>C2: %{x:.3f}<br>C3: %{y:.3f}<extra></extra>',
+                showlegend=False
+            ),
+            row=1, col=3
+        )
+        
+        # Update axes labels
+        fig_2d.update_xaxes(title_text=f'Component 1 ({var_ratios[0]:.1%})', row=1, col=1)
+        fig_2d.update_yaxes(title_text=f'Component 2 ({var_ratios[1]:.1%})', row=1, col=1)
+        fig_2d.update_xaxes(title_text=f'Component 1 ({var_ratios[0]:.1%})', row=1, col=2)
+        fig_2d.update_yaxes(title_text=f'Component 3 ({var_ratios[2]:.1%})', row=1, col=2)
+        fig_2d.update_xaxes(title_text=f'Component 2 ({var_ratios[1]:.1%})', row=1, col=3)
+        fig_2d.update_yaxes(title_text=f'Component 3 ({var_ratios[2]:.1%})', row=1, col=3)
+        
+        suffix = "(by Category)" if color_mode == "category" else "(by Accuracy)"
+        fig_2d.update_layout(
+            title_text=f'Task Projections in Skill Basis Space - 2D Views {suffix}',
+            height=500,
+            width=1800,
+            showlegend=False,
+            font=dict(family='Arial, sans-serif', size=11)
+        )
+        
+        return fig_2d
     
-    fig_2d.update_xaxes(title_text=f'Component 2 ({var_ratios[1]:.1%})', row=1, col=3)
-    fig_2d.update_yaxes(title_text=f'Component 3 ({var_ratios[2]:.1%})', row=1, col=3)
+    # Create 2D plots
+    if color_by in ["category", "both"]:
+        fig_2d = create_2d_plots(cat_colors, "category")
+        html_2d_path = viz_dir / f"task_basis_2d_interactive_{model_name}.html"
+        fig_2d.write_html(str(html_2d_path))
+        print(f"✓ Saved interactive 2D plots (by category) to: {html_2d_path}")
     
-    fig_2d.update_layout(
-        title_text='Task Projections in Skill Basis Space - 2D Views (Interactive)',
-        height=500,
-        width=1800,
-        showlegend=False,
-        font=dict(family='Arial, sans-serif', size=11)
-    )
-    
-    html_2d_path = viz_dir / f"task_basis_2d_interactive_{model_name}.html"
-    fig_2d.write_html(str(html_2d_path))
-    print(f"✓ Saved interactive 2D plots to: {html_2d_path}")
+    if has_performance and color_by in ["performance", "both"]:
+        perf_display = np.where(np.isnan(perf_values), 0.5, perf_values)
+        fig_2d_perf = create_2d_plots(perf_display.tolist(), "performance")
+        html_2d_perf_path = viz_dir / f"task_basis_2d_performance_{model_name}.html"
+        fig_2d_perf.write_html(str(html_2d_perf_path))
+        print(f"✓ Saved interactive 2D plots (by performance) to: {html_2d_perf_path}")
     
     print("\n" + "="*70)
     print("✓ Interactive visualizations complete!")
@@ -1075,10 +1349,106 @@ def visualize_task_projections_interactive(
     print("  - Click and drag to select region for zoom")
 
 
+def analyze_performance_clustering(
+    projections: np.ndarray,
+    perf_values: np.ndarray,
+    task_names: List[str],
+    categories: List[str],
+    threshold: float = 0.5
+):
+    """Analyze if hard tasks cluster in FV space."""
+    from scipy import stats
+    
+    print("\n" + "=" * 70)
+    print("PERFORMANCE CLUSTERING ANALYSIS")
+    print("=" * 70)
+    
+    valid_mask = ~np.isnan(perf_values)
+    n_valid = valid_mask.sum()
+    
+    if n_valid < 5:
+        print(f"  Not enough tasks with performance data ({n_valid}/5 required)")
+        return
+    
+    hard_mask = (perf_values < threshold) & valid_mask
+    easy_mask = (perf_values >= threshold) & valid_mask
+    
+    print(f"\nDifficulty split (threshold: {threshold:.0%}):")
+    print(f"  Hard tasks (< {threshold:.0%}): {hard_mask.sum()}")
+    print(f"  Easy tasks (≥ {threshold:.0%}): {easy_mask.sum()}")
+    
+    if hard_mask.sum() > 1 and easy_mask.sum() > 1:
+        # Compute within-group distances
+        hard_points = projections[hard_mask, :3]  # Use first 3 PCs
+        easy_points = projections[easy_mask, :3]
+        
+        hard_dists = []
+        for i in range(len(hard_points)):
+            for j in range(i+1, len(hard_points)):
+                hard_dists.append(np.linalg.norm(hard_points[i] - hard_points[j]))
+        
+        easy_dists = []
+        for i in range(len(easy_points)):
+            for j in range(i+1, len(easy_points)):
+                easy_dists.append(np.linalg.norm(easy_points[i] - easy_points[j]))
+        
+        cross_dists = []
+        for hp in hard_points:
+            for ep in easy_points:
+                cross_dists.append(np.linalg.norm(hp - ep))
+        
+        print(f"\nDistance analysis (in PC1-3 space):")
+        print(f"  Avg distance within hard tasks: {np.mean(hard_dists):.4f}")
+        print(f"  Avg distance within easy tasks: {np.mean(easy_dists):.4f}")
+        print(f"  Avg distance between hard/easy: {np.mean(cross_dists):.4f}")
+        
+        if np.mean(hard_dists) < np.mean(cross_dists) * 0.7:
+            print("\n  ✓ Hard tasks appear to CLUSTER together!")
+        else:
+            print("\n  ✗ Hard tasks do NOT strongly cluster together")
+    
+    # Correlation with PC dimensions
+    print(f"\nCorrelation of accuracy with PC dimensions:")
+    for i in range(min(5, projections.shape[1])):
+        corr, pval = stats.pearsonr(projections[valid_mask, i], perf_values[valid_mask])
+        sig = "**" if pval < 0.01 else "*" if pval < 0.05 else ""
+        print(f"  PC{i+1} vs Accuracy: r={corr:+.3f} (p={pval:.3f}){sig}")
+    
+    # Hardest tasks
+    print(f"\nHardest 5 tasks:")
+    sorted_indices = np.argsort(perf_values)
+    for idx in sorted_indices[:5]:
+        if not np.isnan(perf_values[idx]):
+            print(f"  {perf_values[idx]:5.1%}  {task_names[idx]:<40} [{categories[idx]}]")
+    
+    # Easiest tasks
+    print(f"\nEasiest 5 tasks:")
+    for idx in sorted_indices[-5:][::-1]:
+        if not np.isnan(perf_values[idx]):
+            print(f"  {perf_values[idx]:5.1%}  {task_names[idx]:<40} [{categories[idx]}]")
+    
+    # Category breakdown
+    print(f"\nAccuracy by category:")
+    from collections import defaultdict
+    cat_perfs = defaultdict(list)
+    for i, cat in enumerate(categories):
+        if valid_mask[i]:
+            cat_perfs[cat].append(perf_values[i])
+    
+    cat_stats = [(cat, np.mean(perfs), np.std(perfs), len(perfs)) 
+                 for cat, perfs in cat_perfs.items()]
+    cat_stats.sort(key=lambda x: x[1])  # Sort by mean accuracy
+    
+    for cat, mean, std, n in cat_stats:
+        print(f"  {mean:5.1%} ± {std:4.1%}  {cat:<25} (n={n})")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Analyze function vectors from real ICL tasks")
     parser.add_argument("--model", type=str, default="distilgpt2",
                        help="Model name (default: distilgpt2)")
+    parser.add_argument("--checkpoint", type=str, default="main",
+                       help="Model checkpoint/revision (default: main)")
     parser.add_argument("--device", type=str, default="cpu",
                        help="Device (cpu/cuda, default: cpu)")
     parser.add_argument("--layer", type=int, default=5,
@@ -1101,17 +1471,43 @@ def main():
                        default=[0.5, 0.3, 0.2, 0.15, 0.1, 0.05, 0.01],
                        help="Epsilon thresholds (default: 0.5 0.3 0.2 0.15 0.1 0.05 0.01)")
     
+    # Correct-instance filtering options
+    parser.add_argument("--only-correct", action="store_true",
+                       help="Only use correct instances for FV extraction (requires --results-dir)")
+    parser.add_argument("--results-dir", type=str, default=None,
+                       help="Path to evaluation results dir for correct-instance filtering "
+                            "(e.g., results/olmo2_continuous_1b_early_revised)")
+    
+    # Visualization options
+    parser.add_argument("--color-by", type=str, default="both",
+                       choices=["category", "performance", "both"],
+                       help="How to color tasks in visualizations (default: both)")
+    
     args = parser.parse_args()
+    
+    # Validate filtering args
+    if args.only_correct and not args.results_dir:
+        print("⚠️  Warning: --only-correct requires --results-dir. Disabling filtering.")
+        args.only_correct = False
+    
+    # Validate filtering args
+    if args.only_correct and not args.results_dir:
+        print("⚠️  Warning: --only-correct requires --results-dir. Disabling filtering.")
+        args.only_correct = False
     
     print("="*70)
     print("REAL TASK FUNCTION VECTOR ANALYSIS")
     print("="*70)
     print(f"\nConfiguration:")
     print(f"  Model: {args.model}")
+    print(f"  Checkpoint: {args.checkpoint}")
     print(f"  Device: {args.device}")
     print(f"  Layer: {args.layer}")
     print(f"  Heads: {args.num_heads}")
     print(f"  Samples per task: {args.num_samples}")
+    print(f"  Only correct instances: {args.only_correct}")
+    if args.only_correct:
+        print(f"  Results dir: {args.results_dir}")
     print(f"  Use synthetic tests: {args.use_synthetic_tests}")
     if not args.use_synthetic_tests:
         print(f"  Train ratio: {args.train_ratio}")
@@ -1184,22 +1580,23 @@ def main():
     
     print(f"\nTraining tasks ({len(train_tasks)}):")
     for task in train_tasks:
-        print(f"  • {task.config.name}")
+        print(f"  • {get_task_display_name(task)}")
     
     print(f"\nTest tasks ({len(test_tasks)}):")
     for task in test_tasks:
-        print(f"  • {task.config.name}")
+        print(f"  • {get_task_display_name(task)}")
     
     # Phase 3: Load model
     print("\n" + "="*70)
     print("LOADING MODEL")
     print("="*70)
     
-    print(f"\nLoading {args.model}...")
-    tokenizer = AutoTokenizer.from_pretrained(args.model)
+    print(f"\nLoading {args.model} (checkpoint: {args.checkpoint})...")
+    # Note: use_fast=False is a workaround for older tokenizers library versions
+    tokenizer = AutoTokenizer.from_pretrained(args.model, revision=args.checkpoint, trust_remote_code=True, use_fast=False)
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
-    model = AutoModelForCausalLM.from_pretrained(args.model).eval()
+    model = AutoModelForCausalLM.from_pretrained(args.model, revision=args.checkpoint, trust_remote_code=True).eval()
     if args.device == "cuda" and torch.cuda.is_available():
         model = model.cuda()
     print("✓ Model loaded")
@@ -1216,11 +1613,14 @@ def main():
     # Setup extraction config
     config = ExtractConfig(
         model_name=args.model,
+        checkpoint=args.checkpoint,
         device=args.device,
         batch_size=4,
         num_samples_per_task=args.num_samples,
         layers=[layer_idx],
-        topk_heads=args.num_heads
+        topk_heads=args.num_heads,
+        only_correct=args.only_correct,
+        results_dir=args.results_dir,
     )
     
     # Phase 3.5: Select informative heads
@@ -1228,9 +1628,15 @@ def main():
     print("SELECTING INFORMATIVE ATTENTION HEADS")
     print("="*70)
     print(f"\nSelecting top-{args.num_heads} most informative heads from layer {layer_idx}...")
-    print("(Using AIE metric on subset of training tasks)")
+    print("(Using AIE metric on training tasks with correct instances)")
     
-    headset = extract_informative_heads(config, train_tasks)
+    # Use all training tasks for screening, require at least 5 to succeed
+    headset = extract_informative_heads(
+        config, 
+        train_tasks, 
+        max_screen_tasks=None,  # Try all tasks
+        min_screen_tasks=5,     # Need at least 5 successful
+    )
     
     print(f"\n✓ Selected {len(headset.heads)} heads:")
     for layer, head in sorted(headset.heads):
@@ -1303,6 +1709,26 @@ def main():
     # Phase 9: Print summary
     print_summary(train_tasks, test_tasks, basis, results, similarity_matrix, test_vecs, train_vecs)
     
+    # Phase 9.1: Interpret principal components
+    interpret_principal_components(basis, train_vecs, test_vecs, n_components=10, top_k=5)
+    
+    # Phase 9.2: Load performance data if available
+    performance_data = None
+    if args.results_dir:
+        print("\n" + "="*70)
+        print("LOADING PERFORMANCE DATA")
+        print("="*70)
+        performance_data = load_task_performance(args.results_dir)
+        if performance_data:
+            print(f"✓ Loaded performance data for {len(performance_data)} tasks")
+            # Show some stats
+            accuracies = [v for v in performance_data.values() if v is not None]
+            if accuracies:
+                print(f"  Mean accuracy: {np.mean(accuracies):.1%}")
+                print(f"  Range: {min(accuracies):.1%} - {max(accuracies):.1%}")
+        else:
+            print("⚠️  No performance data found in results dir")
+    
     # Phase 9.5: Create visualizations
     output_dir = Path(args.output_dir)
     output_dir.mkdir(exist_ok=True)
@@ -1315,7 +1741,11 @@ def main():
     
     # Then try to generate interactive plotly plots (optional, won't crash if fails)
     try:
-        visualize_task_projections_interactive(train_tasks, test_tasks, basis, output_dir, model_name_sanitized)
+        visualize_task_projections_interactive(
+            train_tasks, test_tasks, basis, output_dir, model_name_sanitized,
+            performance=performance_data,
+            color_by=args.color_by
+        )
     except Exception as e:
         print(f"\n⚠️  Could not generate interactive plotly visualizations: {e}")
         print("   (This is optional - matplotlib plots were generated successfully)")
@@ -1350,8 +1780,8 @@ def main():
             "k_components": k,
             "seed": args.seed
         },
-        "train_tasks": [t.config.name for t in train_tasks],
-        "test_tasks": [t.config.name for t in test_tasks],
+        "train_tasks": [get_task_display_name(t) for t in train_tasks],
+        "test_tasks": [get_task_display_name(t) for t in test_tasks],
         "epsilon_ranks": {
             name: {str(eps): int(rank) for eps, rank in data['epsilon_ranks'].items()}
             for name, data in results.items()

@@ -680,6 +680,53 @@ def test_basis_formation_and_pca():
     # ============== END VISUALIZATION SECTION ================
 
 
+class CompositeReverseCapitalizeTask(BaseTask):
+    """Composite task: Reverse a string then capitalize it.
+    
+    This combines two operations:
+    1. Reverse the string (like ReverseStringTask)
+    2. Capitalize the result (like SimpleCapitalizationTask)
+    
+    Example: "hello" -> "olleh" -> "Olleh"
+    """
+    
+    def __init__(self):
+        config = TaskConfig(
+            name="composite_reverse_capitalize",
+            input_column="input",
+            output_column="output",
+            description="Reverse the string and capitalize the first letter."
+        )
+        super().__init__(config)
+        
+    def get_split(self, split_name: str):
+        words = ["cat", "dog", "sun", "moon", "tree", "bird", "fish", "star", "rock", "wave",
+                 "hello", "world", "python", "code", "data", "test", "base", "task", "fun", "epic"]
+        data = []
+        for word in words:
+            # Reverse then capitalize
+            reversed_word = word[::-1]
+            output = reversed_word.capitalize()
+            data.append({
+                "input": word,
+                "output": output
+            })
+        return data
+    
+    def build_prompt(self, row):
+        # Show the composite operation in examples
+        prompt = "cat -> taC\ndog -> goD\n"
+        prompt += f"{row['input']} ->"
+        return prompt
+    
+    def evaluate(self, predictions, split="test", **kwargs):
+        ground_truth = self.get_ground_truth(split)
+        processed_predictions = [self.preprocess_prediction(pred) for pred in predictions]
+        correct = sum(1 for pred, gt in zip(processed_predictions, ground_truth) 
+                     if pred.strip() == gt.strip())
+        return {"accuracy": correct / len(ground_truth)}
+
+
 if __name__ == "__main__":
     # Run basic tests
     test_basic_function_vector_extraction()

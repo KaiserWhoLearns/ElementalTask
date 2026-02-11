@@ -98,11 +98,16 @@ class TaskRegistry:
         
         return self._tasks[name]
     
-    def create_task(self, name: str, *args, **kwargs) -> BaseTask:
+    def create_task(self, name: str, spaced: bool = False, *args, **kwargs) -> BaseTask:
         """Create a task instance by name.
         
         If no config/args are provided, tries to use factory functions for proper defaults.
         Falls back to creating a basic TaskConfig if no factory is available.
+        
+        Args:
+            name: Task name, optionally with subtask filter (e.g., 'compositional:upper_reverse')
+            spaced: If True, use spaced version of task (adds spaces between characters)
+            *args, **kwargs: Additional arguments passed to task constructor
         """
         from .base_task import TaskConfig
         
@@ -111,7 +116,7 @@ class TaskRegistry:
         subtask_specs = None
         if isinstance(name, str) and ':' in name:
             base_name, spec = name.split(':', 1)
-            subtask_specs = [s.strip() for s in spec.split(',') if s.strip()]
+            subtask_specs = spec  # Keep as string for factory functions
 
         # If arguments are provided, use them directly (honor explicit kwargs)
         if args or kwargs:
@@ -122,15 +127,16 @@ class TaskRegistry:
             # If subtasks were requested, try to apply a simple post-filter
             if subtask_specs:
                 try:
-                    # If data is a DataFrame, filter by common category column names
+                    # Convert string to list for filtering
+                    filter_list = [s.strip() for s in subtask_specs.split(',') if s.strip()]
                     import pandas as pd
                     if hasattr(task_instance, 'data') and isinstance(task_instance.data, pd.DataFrame):
                         if 'category_id' in task_instance.data.columns:
-                            task_instance.data = task_instance.data[task_instance.data['category_id'].isin(subtask_specs)]
+                            task_instance.data = task_instance.data[task_instance.data['category_id'].isin(filter_list)]
                         elif 'category_name' in task_instance.data.columns:
-                            task_instance.data = task_instance.data[task_instance.data['category_name'].isin(subtask_specs)]
+                            task_instance.data = task_instance.data[task_instance.data['category_name'].isin(filter_list)]
                     elif hasattr(task_instance, 'data') and isinstance(task_instance.data, list):
-                        task_instance.data = [r for r in task_instance.data if r.get('category_id') in subtask_specs or r.get('category_name') in subtask_specs]
+                        task_instance.data = [r for r in task_instance.data if r.get('category_id') in filter_list or r.get('category_name') in filter_list]
                 except Exception:
                     pass
             return task_instance
@@ -144,26 +150,29 @@ class TaskRegistry:
             'ioi_task': lambda: self._import_and_call('tasks.implementations.ioi_task', 'create_ioi_task'),
             'token_reversal': lambda: self._import_and_call('tasks.implementations.token_reversal', 'create_token_reversal_task'),
             'part_of_speech': lambda: self._import_and_call('tasks.implementations.pos_id', 'create_pos_task'),
-            'textfrct': lambda: self._import_and_call('tasks.implementations.textfrct_task', 'create_textfrct_task', data_path="dataset/TextFRCT.csv"),
+            'textfrct': lambda: self._create_textfrct_task(subtask_specs),
             'simple_icl': lambda: self._create_simple_icl_task(),
             'simple': lambda: self._create_simple_task(),
             'math': lambda: self._create_math_task(),
+            'compositional': lambda: self._create_compositional_task(subtask_specs, spaced=spaced),
         }
         
         if base_name in factory_map:
             try:
                 task_instance = factory_map[base_name]()
-                # Apply post-filtering if subtasks were requested
-                if subtask_specs:
+                # Note: compositional and textfrct handle their own filtering via factory args
+                # For other tasks, apply post-filtering if subtasks were requested
+                if subtask_specs and base_name not in ('compositional', 'textfrct'):
                     try:
+                        filter_list = [s.strip() for s in subtask_specs.split(',') if s.strip()]
                         import pandas as pd
                         if hasattr(task_instance, 'data') and isinstance(task_instance.data, pd.DataFrame):
                             if 'category_id' in task_instance.data.columns:
-                                task_instance.data = task_instance.data[task_instance.data['category_id'].isin(subtask_specs)]
+                                task_instance.data = task_instance.data[task_instance.data['category_id'].isin(filter_list)]
                             elif 'category_name' in task_instance.data.columns:
-                                task_instance.data = task_instance.data[task_instance.data['category_name'].isin(subtask_specs)]
+                                task_instance.data = task_instance.data[task_instance.data['category_name'].isin(filter_list)]
                         elif hasattr(task_instance, 'data') and isinstance(task_instance.data, list):
-                            task_instance.data = [r for r in task_instance.data if r.get('category_id') in subtask_specs or r.get('category_name') in subtask_specs]
+                            task_instance.data = [r for r in task_instance.data if r.get('category_id') in filter_list or r.get('category_name') in filter_list]
                     except Exception:
                         pass
                 return task_instance
@@ -223,6 +232,81 @@ class TaskRegistry:
         task_class = self.get_task_class("math")
         return task_class(config)
     
+    def _create_compositional_task(self, category_filter=None, spaced=False):
+        """Create a CompositionalTask with optional category filtering and spacing.
+        
+        Supports:
+            - compositional (all categories)
+            - compositional:upper_reverse (single category)
+            - compositional:upper_reverse,lower_first (multiple categories)
+            - spaced=True for character-spaced input/output
+        """
+        task_name = "compositional"
+        if category_filter:
+            task_name = f"compositional:{category_filter}"
+        if spaced:
+            task_name += "_spaced"
+        
+        config = TaskConfig(
+            name=task_name,
+            description="Compositional task with chained string operations",
+            data_path="dataset/compositional_spaced.csv" if spaced else "dataset/compositional.csv",
+            data_format="csv",
+            input_column="input",
+            output_column="output",
+            evaluation_metrics=["accuracy"],
+        )
+        task_class = self.get_task_class("compositional")
+        task = task_class(config, spaced=spaced)
+        
+        # Filter by category if specified
+        if category_filter:
+            categories = [c.strip() for c in category_filter.split(",")]
+            if hasattr(task, 'data') and task.data:
+                if isinstance(task.data, list):
+                    task.data = [d for d in task.data if d.get('category_name') in categories]
+        
+        return task
+    
+    def _create_textfrct_task(self, category_filter=None):
+        """Create a TextFRCT task with optional category filtering.
+        
+        Supports:
+            - textfrct (all categories)
+            - textfrct:CV1 (single category)
+            - textfrct:CV1,CV2,FA1 (multiple categories)
+        """
+        from tasks.implementations.textfrct_task import TextFRCTTask
+        
+        # Parse category filter (can be single category or comma-separated list)
+        categories = None
+        if category_filter:
+            if isinstance(category_filter, list):
+                categories = category_filter
+            else:
+                categories = [c.strip() for c in str(category_filter).split(",")]
+        
+        task_name = f"textfrct:{','.join(categories)}" if categories else "textfrct"
+        
+        config = TaskConfig(
+            name=task_name,
+            description="TextFRCT evaluation dataset",
+            data_path="dataset/TextFRCT.csv",
+            data_format="csv",
+            input_column="question",
+            output_column="answer",
+            evaluation_metrics=["accuracy"],
+        )
+        
+        task = TextFRCTTask(config, skip_subjective=True, categories=categories)
+        
+        # Filter data by category_id if categories specified
+        if categories and hasattr(task, 'data') and task.data:
+            if isinstance(task.data, list):
+                task.data = [d for d in task.data if d.get('category_id') in categories]
+            
+        return task
+    
     def list_tasks(self) -> List[str]:
         """List all available task names."""
         if not self._discovered:
@@ -275,9 +359,23 @@ def get_task_class(name: str) -> Type[BaseTask]:
     """Get a task class by name."""
     return _task_registry.get_task_class(name)
 
-def get_task(name: str, *args, **kwargs) -> BaseTask:
-    """Create a task instance by name."""
-    return _task_registry.create_task(name, *args, **kwargs)
+def get_task(name: str, spaced: bool = False, *args, **kwargs) -> BaseTask:
+    """Create a task instance by name.
+    
+    Args:
+        name: Task name, optionally with subtask filter (e.g., 'compositional:upper_reverse')
+        spaced: If True, use spaced version (spaces between characters in input/output)
+        *args, **kwargs: Additional arguments passed to task constructor
+    
+    Returns:
+        Task instance
+    
+    Examples:
+        >>> task = get_task("compositional:upper_reverse")
+        >>> task = get_task("compositional:upper_reverse", spaced=True)
+        >>> task = get_task("textfrct:CV1")
+    """
+    return _task_registry.create_task(name, spaced=spaced, *args, **kwargs)
 
 def list_tasks() -> List[str]:
     """List all available task names."""
@@ -286,3 +384,119 @@ def list_tasks() -> List[str]:
 def get_task_info(name: str = None) -> Dict:
     """Get information about tasks."""
     return _task_registry.get_task_info(name)
+
+def list_all_tasks(include_compositional: bool = True, include_textfrct: bool = True, include_simple_icl: bool = True) -> Dict[str, List[str]]:
+    """List all available tasks including subtasks.
+    
+    Args:
+        include_compositional: If True, enumerate all compositional subtasks
+        include_textfrct: If True, enumerate all TextFRCT subtasks
+        include_simple_icl: If True, enumerate all simple_icl categories
+    
+    Returns:
+        Dictionary mapping task categories to lists of task names
+    """
+    if not _task_registry._discovered:
+        _task_registry.discover_tasks()
+    
+    result = {
+        "base_tasks": [],
+        "compositional_tasks": [],
+        "textfrct_tasks": [],
+        "simple_icl_tasks": [],
+    }
+    
+    for task_name in sorted(_task_registry._tasks.keys()):
+        if task_name == "compositional" and include_compositional:
+            # Add base compositional task
+            result["base_tasks"].append("compositional")
+            
+            # Enumerate all compositional subtasks
+            try:
+                from tasks.implementations.compositional_task import STRING_COMPOSITIONS, LOOKUP_COMPOSITIONS
+                
+                # Add all string compositions
+                for comp_name in sorted(STRING_COMPOSITIONS.keys()):
+                    result["compositional_tasks"].append(f"compositional:{comp_name}")
+                    result["compositional_tasks"].append(f"compositional:{comp_name} (spaced)")
+                
+                # Add all lookup-based compositions
+                for comp_name in sorted(LOOKUP_COMPOSITIONS.keys()):
+                    result["compositional_tasks"].append(f"compositional:{comp_name}")
+                    result["compositional_tasks"].append(f"compositional:{comp_name} (spaced)")
+                    
+            except Exception as e:
+                print(f"Warning: Could not enumerate compositional tasks: {e}")
+        
+        elif task_name == "textfrct" and include_textfrct:
+            # Add base textfrct task
+            result["base_tasks"].append("textfrct")
+            
+            # Enumerate all TextFRCT categories
+            try:
+                import pandas as pd
+                from pathlib import Path
+                csv_path = Path(__file__).parent.parent / "dataset" / "TextFRCT.csv"
+                if csv_path.exists():
+                    df = pd.read_csv(csv_path)
+                    categories = sorted(df["category_id"].unique())
+                    for cat in categories:
+                        result["textfrct_tasks"].append(f"textfrct:{cat}")
+            except Exception as e:
+                print(f"Warning: Could not enumerate TextFRCT tasks: {e}")
+        
+        elif task_name == "simple_icl" and include_simple_icl:
+            # Add base simple_icl task
+            result["base_tasks"].append("simple_icl")
+            
+            # Enumerate all simple_icl categories
+            try:
+                import pandas as pd
+                from pathlib import Path
+                csv_path = Path(__file__).parent.parent / "dataset" / "simple.csv"
+                if csv_path.exists():
+                    df = pd.read_csv(csv_path)
+                    categories = sorted(df["category_name"].unique())
+                    for cat in categories:
+                        result["simple_icl_tasks"].append(f"simple_icl:{cat}")
+            except Exception as e:
+                print(f"Warning: Could not enumerate simple_icl tasks: {e}")
+        
+        else:
+            # Regular task
+            result["base_tasks"].append(task_name)
+    
+    return result
+
+def print_all_tasks():
+    """Print a formatted list of all available tasks."""
+    tasks = list_all_tasks()
+    
+    print("\n" + "="*70)
+    print("AVAILABLE TASKS")
+    print("="*70)
+    
+    print("\n📋 BASE TASKS:")
+    for task in tasks["base_tasks"]:
+        print(f"  • {task}")
+    
+    if tasks["simple_icl_tasks"]:
+        print(f"\n🎯 SIMPLE_ICL TASKS ({len(tasks['simple_icl_tasks'])} total):")
+        for task in tasks["simple_icl_tasks"]:
+            print(f"  • {task}")
+    
+    if tasks["compositional_tasks"]:
+        print(f"\n🔗 COMPOSITIONAL TASKS ({len(tasks['compositional_tasks'])} total):")
+        for task in tasks["compositional_tasks"]:
+            print(f"  • {task}")
+    
+    if tasks["textfrct_tasks"]:
+        print(f"\n📝 TEXTFRCT TASKS ({len(tasks['textfrct_tasks'])} total):")
+        for task in tasks["textfrct_tasks"]:
+            print(f"  • {task}")
+    
+    print("\n" + "="*70)
+    total = (len(tasks["base_tasks"]) + len(tasks["compositional_tasks"]) + 
+             len(tasks["textfrct_tasks"]) + len(tasks["simple_icl_tasks"]))
+    print(f"TOTAL: {total} tasks available")
+    print("="*70 + "\n")

@@ -8,7 +8,7 @@ import vllm
 from datasets import Dataset
 sys.path.append(os.getcwd())
 from scripts.inference import load_model_revision
-from tasks.base_task import get_task
+from tasks.registry import get_task
 
 def preprocess_5shot(dataset):
     # Sample 5 instances from the dataset
@@ -35,13 +35,39 @@ def evaluate_model(
     use_vllm: bool = True,
     max_new_tokens: int = 100,
     preprocess_fn: callable = preprocess_5shot,
+    num_shots: int = 5,
+    spaced: bool = False,
 ):
-    # Load the dataset
-    task = get_task(task_name)
+    # Load the dataset with optional spaced mode
+    task = get_task(task_name, spaced=spaced)
     # pdb.set_trace()
-    dataset = Dataset.from_list(list(task.get_split("test")))
+    test_data = list(task.get_split("test"))
+    
+    # Build prompts using task's build_prompt method
+    prompts = []
 
-    if preprocess_fn:
+    for instance in test_data:
+        # Try to use task's build_prompt method if available
+        if hasattr(task, 'build_prompt'):
+            prompts.append(task.build_prompt(instance, num_shots=num_shots))
+        elif "prompt" in instance:
+            prompts.append(instance["prompt"])
+        elif "input" in instance:
+            prompts.append(instance["input"])
+        else:
+            # Fallback: try to find any text-like column
+            text_cols = [k for k, v in instance.items() if isinstance(v, str)]
+            if text_cols:
+                prompts.append(instance[text_cols[0]])
+            else:
+                raise ValueError(f"Cannot determine prompt for instance: {instance.keys()}")
+    
+    # Create dataset with prompts
+    dataset = Dataset.from_list([{**item, "prompt": prompt} for item, prompt in zip(test_data, prompts)])
+
+    # Don't apply preprocess_fn if we're already using task.build_prompt with num_shots
+    # (to avoid adding ICL examples twice)
+    if preprocess_fn and (not hasattr(task, 'build_prompt') or num_shots == 0):
         dataset = preprocess_fn(dataset)
 
     # Load the model
@@ -60,13 +86,13 @@ def evaluate_model(
             max_tokens=max_new_tokens,
         )
                 
-        outputs = model.generate(dataset["prompt"] if "prompt" in dataset else dataset["input"], sampling_params)
+        outputs = model.generate(dataset["prompt"], sampling_params)
         outputs = [it.outputs[0].text for it in outputs]
+        breakpoint()
     else:
         model, tokenizer = load_model_revision(model_id, chkpt)
         generated_texts = []
-        prompts = dataset["prompt"] if "prompt" in dataset else dataset["input"]
-        for prompt in prompts:
+        for prompt in dataset["prompt"]:
             inputs = tokenizer(prompt, return_tensors="pt", truncation=True, padding=True)
             # del inputs["token_type_ids"]
             inputs = {k: v.to(model.device) for k, v in inputs.items()}
@@ -74,17 +100,93 @@ def evaluate_model(
             # Generate output
             with torch.no_grad():
                 outputs = model.generate(**inputs, max_new_tokens=max_new_tokens)
-            generated_texts.append(tokenizer.decode(outputs[0], skip_special_tokens=True))
+            
+            # Extract only the newly generated tokens (excluding the input prompt)
+            input_length = inputs['input_ids'].shape[1]
+            generated_tokens = outputs[0][input_length:]
+            generated_texts.append(tokenizer.decode(generated_tokens, skip_special_tokens=True))
     dataset = dataset.add_column("predictions", generated_texts)
     # Save the predictions if output_path is provided
     if output_path:
-        file_name = os.path.join(output_path, f"{model_id.replace('/', '_')}_{chkpt}_{task_name}.jsonl")
+        # Sanitize task name for file path
+        task_name_safe = task_name.replace(':', '_').replace(',', '_')
+        if spaced:
+            task_name_safe += "_spaced"
+        
         os.makedirs(output_path, exist_ok=True)
-        dataset.to_json(file_name, orient="records", lines=True)
+        
+        # Get ground truth for computing correctness
+        ground_truth = task.get_ground_truth("test")
+        
+        # Group by category if present, and add correct field
+        category_items = {}  # category -> list of items
+        
+        for i, item in enumerate(dataset):
+            pred = item.get('predictions', '')
+            gt = ground_truth[i] if i < len(ground_truth) else ''
+            
+            # Compute correctness
+            pred_clean = pred.split('\n')[0].strip().lower() if pred else ""
+            gt_clean = gt.strip().lower() if gt else ""
+            is_correct = (pred_clean == gt_clean)
+            
+            # Create detailed item
+            detailed_item = {
+                "index": i,
+                "input": item.get('input', item.get('question', '')),
+                "prompt": item.get('prompt', ''),
+                "prediction": pred,
+                "target": gt,
+                "correct": is_correct,
+                "metadata": {
+                    "category_name": item.get('category_name', ''),
+                    "question": item.get('question', item.get('input', '')),
+                    "answer": item.get('answer', item.get('output', gt)),
+                }
+            }
+            
+            # Group by category
+            category = item.get('category_name', '')
+            if category:
+                if category not in category_items:
+                    category_items[category] = []
+                category_items[category].append(detailed_item)
+            else:
+                if '_default' not in category_items:
+                    category_items['_default'] = []
+                category_items['_default'].append(detailed_item)
+        
+        # Save files - one per category or single file if no categories
+        import json
+        
+        if len(category_items) == 1 and '_default' in category_items:
+            # No categories - save single file
+            file_name = os.path.join(output_path, f"{model_id.replace('/', '_')}_{chkpt}_{task_name_safe}_detailed.jsonl")
+            with open(file_name, 'w', encoding='utf-8') as f:
+                for item in category_items['_default']:
+                    f.write(json.dumps(item, default=str) + '\n')
+            print(f"Saved {len(category_items['_default'])} predictions to {file_name}")
+        else:
+            # Multiple categories - save separate files
+            for category, items in category_items.items():
+                if category == '_default':
+                    continue
+                category_safe = category.replace(':', '_').replace(',', '_').replace(' ', '_')
+                file_name = os.path.join(output_path, f"{model_id.replace('/', '_')}_{chkpt}_{task_name_safe}_{category_safe}_detailed.jsonl")
+                with open(file_name, 'w', encoding='utf-8') as f:
+                    for item in items:
+                        f.write(json.dumps(item, default=str) + '\n')
+                
+                # Count correct
+                num_correct = sum(1 for item in items if item['correct'])
+                print(f"  Saved {category}: {num_correct}/{len(items)} correct -> {os.path.basename(file_name)}")
+        
         print(f"Predictions saved to {output_path}")
     # Evaluate the model
     metrics = task.evaluate(dataset["predictions"], split="test", updated_dataset=dataset.to_list())
     print(f"Metrics for {model_id} at {chkpt}: {metrics}")
+    
+    return metrics
 
 def main():
     parser = argparse.ArgumentParser(description="Evaluate a model on a dataset.")

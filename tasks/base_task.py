@@ -160,7 +160,13 @@ class BaseTask(ABC):
         # For now, return all data as test split
         # Subclasses can override this for proper train/val/test splits
         if split == "all" or split == "test":
-            return self.data.to_dict('records')
+            # Handle both DataFrame and list data
+            if hasattr(self.data, 'to_dict'):
+                return self.data.to_dict('records')
+            elif isinstance(self.data, list):
+                return self.data
+            else:
+                return list(self.data)
         else:
             # Return empty for train/val if not implemented
             return []
