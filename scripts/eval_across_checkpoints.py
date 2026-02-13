@@ -116,6 +116,7 @@ def run_single_evaluation(
     skip_existing: bool = True,
     eval_mode: str = "exact_match",
     spaced: bool = False,
+    quantization: str = None,
 ) -> Dict[str, Any]:
     """Run evaluation for a single model checkpoint."""
     
@@ -134,13 +135,14 @@ def run_single_evaluation(
     evaluator = None
     if eval_mode in ["continuous", "all"]:
         from tasks.evaluator import TaskEvaluator, ModelConfig, EvaluationConfig
-        
+
         backend = "vllm" if load_vllm else "transformers"
         model_config = ModelConfig(
             model_id=model_id,
             backend=backend,
             checkpoint=checkpoint,
             max_tokens=max_new_tokens,
+            quantization=quantization,
         )
         eval_config = EvaluationConfig(
             output_dir=str(output_dir),
@@ -149,7 +151,25 @@ def run_single_evaluation(
             save_detailed_results=True,
         )
         evaluator = TaskEvaluator(model_config, eval_config)
-    
+
+    # Load vLLM model once and reuse across all tasks for this checkpoint
+    # (avoids gloo process group errors from repeated init/teardown on multi-GPU)
+    vllm_model = None
+    if eval_mode == "exact_match" and load_vllm:
+        import vllm as _vllm
+        import torch
+        vllm_model = _vllm.LLM(
+            model=model_id,
+            tokenizer=model_id,
+            revision=checkpoint,
+            tokenizer_mode="auto",
+            tensor_parallel_size=torch.cuda.device_count(),
+            trust_remote_code=True,
+            quantization=quantization,
+            gpu_memory_utilization=0.9,
+            max_model_len=1024,  # prompts are short; avoids KV cache OOM on large models
+        )
+
     results = []
     for i, task_name in enumerate(tasks, 1):
         display_name = f"{task_name} (spaced)" if spaced else task_name
@@ -187,6 +207,8 @@ def run_single_evaluation(
                     preprocess_fn=None,
                     num_shots=num_shots,
                     spaced=spaced,
+                    quantization=quantization,
+                    model=vllm_model,
                 )
             else:
                 # Use new evaluator for continuous/all modes
@@ -227,6 +249,43 @@ def run_single_evaluation(
                 "cached": False,
             })
     
+    # CRITICAL CLEANUP: Destroy vLLM engine to free GPU memory and tear down
+    # distributed process groups before the next checkpoint iteration.
+    # Without this, gloo/nccl can fail to rebind on subsequent inits.
+    if vllm_model is not None:
+        import gc
+        import contextlib
+        del vllm_model
+        try:
+            from vllm.distributed.parallel_state import destroy_model_parallel
+            destroy_model_parallel()
+        except Exception as e:
+            print(f"  ⚠️  destroy_model_parallel failed: {e}")
+        try:
+            import torch.distributed
+            if torch.distributed.is_initialized():
+                torch.distributed.destroy_process_group()
+        except Exception as e:
+            print(f"  ⚠️  destroy_process_group failed: {e}")
+        gc.collect()
+        try:
+            import torch
+            torch.cuda.empty_cache()
+        except Exception:
+            pass
+        print("  ✓ vLLM engine cleaned up")
+
+    if evaluator is not None:
+        import gc
+        del evaluator
+        gc.collect()
+        try:
+            import torch
+            torch.cuda.empty_cache()
+        except Exception:
+            pass
+        print("  ✓ Evaluator cleaned up")
+
     return {
         "model_id": model_id,
         "checkpoint": checkpoint,
@@ -270,7 +329,9 @@ def main():
                         help="Evaluation mode: exact_match (default), continuous (loss/perplexity), or all")
     parser.add_argument("--spaced", action="store_true",
                         help="Use spaced version of tasks (add spaces between characters for reversal/letter tasks)")
-    
+    parser.add_argument("--quantization", type=str, default=None,
+                        help="Quantization method for vLLM (e.g., bitsandbytes, awq, gptq). Useful for large models.")
+
     args = parser.parse_args()
     
     # Validate input
@@ -296,6 +357,7 @@ def main():
         "num_shots": args.num_shots,
         "eval_mode": args.eval_mode,
         "spaced": args.spaced,
+        "quantization": args.quantization,
         "timestamp": datetime.now().isoformat(),
     }
     
@@ -312,6 +374,7 @@ def main():
     print(f"  load_vllm: {args.load_vllm}")
     print(f"  eval_mode: {args.eval_mode}")
     print(f"  spaced: {args.spaced}")
+    print(f"  quantization: {args.quantization}")
     
     # Discover tasks
     print("\n" + "="*70)
@@ -374,6 +437,7 @@ def main():
                 skip_existing=not args.force_reeval,
                 eval_mode=args.eval_mode,
                 spaced=args.spaced,
+                quantization=args.quantization,
             )
             all_results.append(result)
     

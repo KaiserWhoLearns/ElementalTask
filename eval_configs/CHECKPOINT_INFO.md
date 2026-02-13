@@ -42,3 +42,54 @@ Both models with 7 checkpoints each (10k, 100k, 200k, 300k, 400k, 500k, main)
 - The `main` branch always comes last and represents the final trained model
 - 7B checkpoints are ~14GB each, 1B checkpoints are ~2GB each
 - Make sure to set `HF_HOME` to a directory with sufficient space
+
+---
+
+# LLM360 K2-V2 Checkpoints
+
+## Model Overview
+- **Model:** `LLM360/K2-V2` ([HuggingFace](https://huggingface.co/LLM360/K2-V2))
+- **Parameters:** 70B
+- **Architecture:** Decoder-only transformer with grouped-query attention, RMSNorm, 80 layers
+- **Vocab Size:** 250,000
+- **Pre-training Tokens:** ~12T tokens
+- **Pre-training Sequence Length:** 8,192
+- **License:** Apache 2.0
+
+## Checkpoint Format
+Pretrain checkpoints are stored as branches/tags on the HuggingFace repo with format `base_XXXXXXX` (step number, zero-padded to 7 digits). The final pretrain checkpoint is `base_final`.
+
+All checkpoints: https://huggingface.co/LLM360/K2-V2/tree/base_final
+
+## Available Configuration
+
+### `k2v2_checkpoints.json`
+11 checkpoints sampled uniformly across training, from early (step 20k) to final:
+
+| Checkpoint | Step |
+|-----------|------|
+| `base_0020000` | 20,000 |
+| `base_0125000` | 125,000 |
+| `base_0265000` | 265,000 |
+| `base_0405000` | 405,000 |
+| `base_0545000` | 545,000 |
+| `base_0685000` | 685,000 |
+| `base_0825000` | 825,000 |
+| `base_0965000` | 965,000 |
+| `base_1105000` | 1,105,000 |
+| `base_1245000` | 1,245,000 |
+| `base_final` | Final |
+
+## Loading
+```python
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+model = AutoModelForCausalLM.from_pretrained("LLM360/K2-V2", revision="base_0720000", device_map="auto")
+tokenizer = AutoTokenizer.from_pretrained("LLM360/K2-V2")
+```
+
+## Notes
+- 70B checkpoints are very large (~140GB each); ensure sufficient disk space and set `HF_HOME` appropriately
+- The tokenizer is the same across all checkpoints; loading from `main` is sufficient
+- This is a base (pretrained) model, not instruction-tuned. For instruction-tuned variant, see `LLM360/K2-V2-Instruct`
+- K2-V2 also has mid-training checkpoints (`mid_1_*`, `mid_2_*`, `mid_3_*`, `mid_4_*`) which are not included in the default config
