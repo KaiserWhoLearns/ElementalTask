@@ -88,8 +88,25 @@ def load_task_performance(
     return performance
 
 
-def discover_icl_tasks() -> List[BaseTask]:
-    """Discover all tasks that support ICL format, including subtasks."""
+def discover_icl_tasks(
+    results_dir: str = None,
+    checkpoint: str = "main",
+    holdout_compositional: bool = False
+) -> List[BaseTask]:
+    """Discover all tasks that support ICL format, including subtasks.
+    
+    Args:
+        results_dir: If provided, dynamically discover compositional tasks
+            from the evaluation results directory.
+        checkpoint: Checkpoint name to look for results (default: "main")
+        holdout_compositional: If True, return (non_comp_tasks, comp_tasks)
+            instead of a single list. Used for train/test splitting where
+            compositional tasks are held out.
+    
+    Returns:
+        If holdout_compositional: tuple of (train_tasks, test_tasks)
+        Otherwise: list of all tasks
+    """
     print("\n" + "="*70)
     print("DISCOVERING ICL TASKS")
     print("="*70)
@@ -101,35 +118,38 @@ def discover_icl_tasks() -> List[BaseTask]:
     base_tasks = list_tasks()
     print(f"\nFound {len(base_tasks)} registered base tasks")
     
-    # Define all tasks to try, including subtasks
-    # These are the tasks we want to analyze
-    task_names_to_try = [
+    # ── Non-compositional tasks ──────────────────────────────────────
+    non_comp_names = [
         # Base tasks
         "basic_arithmetic",
         "copying",
+        "math",
         "token_reversal",
         "string_analogy",
-        # "ignoring_context",  # May have format issues
-        # "ioi_task",  # Known incompatible format
+        # "ignoring_context",  # Format issues, only 1 instance
+        # "ioi_task",  # 0% accuracy, incompatible format
+        # "part_of_speech",  # 0% accuracy
         
-        # simple_icl subtasks
+        # simple_icl subtasks (all that have individual detailed JSONL files)
         "simple_icl:uppercase",
         "simple_icl:lowercase",
         "simple_icl:first_letter",
-        "simple_icl:last_letter",
+        # "simple_icl:last_letter",  # No individual detailed file
         "simple_icl:translate_eng_fr",
         "simple_icl:translate_fr_eng",
-        "simple_icl:translate_eng_sp",
+        # "simple_icl:translate_eng_sp",  # No individual detailed file
         "simple_icl:translate_sp_eng",
-        "simple_icl:present_to_gerund",
+        # "simple_icl:present_to_gerund",  # No individual detailed file
         "simple_icl:singular_to_plural",
         "simple_icl:country_to_capital",
         "simple_icl:country_to_currency",
         
-        # textfrct subtasks (objective ones with enough data)
+        # textfrct subtasks (all with detailed JSONL files)
         "textfrct:CV1",
         "textfrct:CV2",
         "textfrct:CV3",
+        # "textfrct:FA3",  # 0 instances
+        # "textfrct:FE1",  # 0 instances
         "textfrct:I1",
         "textfrct:I2",
         "textfrct:MA2",
@@ -139,13 +159,78 @@ def discover_icl_tasks() -> List[BaseTask]:
         "textfrct:RG3",
         "textfrct:RL1",
         "textfrct:RL3",
+        "textfrct:RL4",
         "textfrct:V1",
         "textfrct:V2",
         "textfrct:V3",
         "textfrct:V4",
         "textfrct:V5",
-        
-        # compositional subtasks
+    ]
+    
+    # ── Compositional tasks included in training ─────────────────────
+    # A few string-only compositions to teach the basis what "composition" 
+    # looks like, while still holding out the majority for testing.
+    comp_train_names = [
+        "compositional:lower_reverse_first",   # lower→reverse→first (26/26 correct)
+        "compositional:upper_reverse_last",     # upper→reverse→last  (26/26 correct)
+    ]
+    
+    # ── Compositional tasks ──────────────────────────────────────────
+    # Dynamically discover from results dir if available, otherwise use static list
+    comp_names = _discover_compositional_tasks(results_dir, checkpoint)
+    
+    # Remove comp_train tasks from the test set
+    comp_test_names = [c for c in comp_names if c not in set(comp_train_names)]
+    
+    all_train_names = non_comp_names + comp_train_names
+    
+    print(f"\nAttempting to load {len(non_comp_names)} non-compositional "
+          f"+ {len(comp_train_names)} compositional-train "
+          f"+ {len(comp_test_names)} compositional-test tasks...")
+    
+    def _load_tasks(names: List[str], label: str) -> List[BaseTask]:
+        tasks = []
+        for task_name in names:
+            try:
+                task = get_task(task_name)
+                task._full_name = task_name
+                try:
+                    sample_data = task.get_split("test")
+                    n_examples = len(sample_data) if sample_data else 0
+                    if n_examples > 0:
+                        tasks.append(task)
+                        print(f"  ✓ [{label}] {task_name} ({n_examples} examples)")
+                    else:
+                        print(f"  ✗ [{label}] {task_name} (no data)")
+                except Exception as data_err:
+                    print(f"  ✗ [{label}] {task_name} (data error: {data_err})")
+            except Exception as e:
+                print(f"  ✗ [{label}] {task_name} (error: {e})")
+        return tasks
+    
+    train_tasks = _load_tasks(all_train_names, "TRAIN")
+    comp_tasks = _load_tasks(comp_test_names, "TEST/COMP")
+    
+    print(f"\n✓ Loaded {len(train_tasks)} training ({len(non_comp_names)} non-comp + {len(comp_train_names)} comp)"
+          f" + {len(comp_tasks)} compositional test tasks")
+    
+    if holdout_compositional:
+        return train_tasks, comp_tasks
+    else:
+        return train_tasks + comp_tasks
+
+
+def _discover_compositional_tasks(
+    results_dir: str = None, 
+    checkpoint: str = "main"
+) -> List[str]:
+    """Discover compositional tasks from evaluation results directory.
+    
+    Looks for detailed JSONL files matching compositional task patterns.
+    Falls back to a static list if no results_dir is provided.
+    """
+    # Static fallback list (original 14 tasks)
+    static_comp_names = [
         "compositional:upper_reverse",
         "compositional:lower_reverse",
         "compositional:reverse_upper",
@@ -162,34 +247,55 @@ def discover_icl_tasks() -> List[BaseTask]:
         "compositional:plural_reverse",
     ]
     
-    print(f"\nAttempting to load {len(task_names_to_try)} tasks...")
+    if not results_dir:
+        return static_comp_names
     
-    icl_tasks = []
-    for task_name in task_names_to_try:
-        try:
-            task = get_task(task_name)
-            
-            # Store the full task name (including subtask) as an attribute
-            # This is needed because task.config.name doesn't include the subtask
-            task._full_name = task_name
-            
-            # Try to get sample data to verify task works
-            try:
-                sample_data = task.get_split("test")
-                n_examples = len(sample_data) if sample_data else 0
-                if n_examples > 0:
-                    icl_tasks.append(task)
-                    print(f"  ✓ {task_name} ({n_examples} examples)")
-                else:
-                    print(f"  ✗ {task_name} (no data)")
-            except Exception as data_err:
-                print(f"  ✗ {task_name} (data error: {data_err})")
-                
-        except Exception as e:
-            print(f"  ✗ {task_name} (error: {e})")
+    results_path = Path(results_dir)
     
-    print(f"\n✓ Found {len(icl_tasks)} ICL-compatible tasks")
-    return icl_tasks
+    # Find the checkpoint directory
+    checkpoint_dirs = list(results_path.glob(f"*_{checkpoint}"))
+    if not checkpoint_dirs:
+        print(f"  ⚠️  No checkpoint dir for '{checkpoint}' in {results_path}, using static list")
+        return static_comp_names
+    
+    checkpoint_dir = checkpoint_dirs[0]
+    
+    # Find all compositional detailed JSONL files
+    # Pattern: *_compositional_<subtask>_<subtask>_detailed.jsonl  (new tasks, doubled name)
+    # or:      *_compositional_<subtask>_detailed.jsonl  (could exist for old-style)
+    import re
+    comp_names = set()
+    
+    for f in checkpoint_dir.glob("*_compositional_*_detailed.jsonl"):
+        fname = f.name
+        # Skip the aggregate file
+        if fname.endswith("_compositional_detailed.jsonl"):
+            continue
+        
+        # Extract the subtask name
+        # New pattern: ..._compositional_<name>_<name>_detailed.jsonl
+        # Old pattern: ..._compositional_<name>_detailed.jsonl
+        match = re.search(r'_compositional_(.+?)_detailed\.jsonl$', fname)
+        if match:
+            subtask_raw = match.group(1)
+            
+            # Handle doubled name pattern: "gerund_lower_gerund_lower" -> "gerund_lower"
+            # Try splitting in half
+            parts = subtask_raw
+            half = len(parts) // 2
+            if half > 0 and parts[:half] == parts[half+1:] and parts[half] == '_':
+                subtask = parts[:half]
+            else:
+                subtask = subtask_raw
+            
+            comp_names.add(f"compositional:{subtask}")
+    
+    if comp_names:
+        print(f"\n  📦 Discovered {len(comp_names)} compositional tasks from results dir")
+        return sorted(comp_names)
+    else:
+        print(f"  ⚠️  No compositional tasks found in {checkpoint_dir}, using static list")
+        return static_comp_names
 
 
 def get_task_display_name(task: BaseTask) -> str:
@@ -1483,12 +1589,14 @@ def main():
                        choices=["category", "performance", "both"],
                        help="How to color tasks in visualizations (default: both)")
     
-    args = parser.parse_args()
+    # Compositional holdout
+    parser.add_argument("--holdout-compositional", action="store_true",
+                       help="Hold out compositional tasks for testing. All non-compositional "
+                            "tasks are used to build the basis, compositional tasks are tested "
+                            "for reconstruction quality. Overrides --train-ratio and "
+                            "--use-synthetic-tests.")
     
-    # Validate filtering args
-    if args.only_correct and not args.results_dir:
-        print("⚠️  Warning: --only-correct requires --results-dir. Disabling filtering.")
-        args.only_correct = False
+    args = parser.parse_args()
     
     # Validate filtering args
     if args.only_correct and not args.results_dir:
@@ -1508,75 +1616,80 @@ def main():
     print(f"  Only correct instances: {args.only_correct}")
     if args.only_correct:
         print(f"  Results dir: {args.results_dir}")
-    print(f"  Use synthetic tests: {args.use_synthetic_tests}")
-    if not args.use_synthetic_tests:
-        print(f"  Train ratio: {args.train_ratio}")
+    print(f"  Holdout compositional: {args.holdout_compositional}")
+    if not args.holdout_compositional:
+        print(f"  Use synthetic tests: {args.use_synthetic_tests}")
+        if not args.use_synthetic_tests:
+            print(f"  Train ratio: {args.train_ratio}")
     print(f"  Seed: {args.seed}")
     
     # Phase 1: Discover ICL tasks
-    icl_tasks = discover_icl_tasks()
-    
-    if len(icl_tasks) < 2:
-        print("\n❌ Need at least 2 ICL tasks to perform analysis!")
-        return
-    
-    # Phase 2: Split into train/test
-    print("\n" + "="*70)
-    print("SPLITTING TASKS")
-    print("="*70)
-    
-    if args.use_synthetic_tests:
-        # Use ALL real tasks for training basis, PLUS some simple ICL test tasks
-        print("\nAdding simple ICL test tasks to basis...")
-        from tests.test_basic_icl_tasks import (
-            SimpleArithmeticTask,
-            SimpleNegationTask,
-            SimpleCapitalizationTask,
-            SimpleRhymingTask,
-            FirstCharacterTask,
-            LastCharacterTask,
-            ReverseStringTask,
-            AddOneTask,
-            StringLengthTask,
-            VowelCountTask,
-            #ReverseCapitalizeTask,
+    if args.holdout_compositional:
+        train_tasks, test_tasks = discover_icl_tasks(
+            results_dir=args.results_dir,
+            checkpoint=args.checkpoint,
+            holdout_compositional=True
+        )
+        print(f"\n{'='*70}")
+        print("COMPOSITIONAL HOLDOUT MODE")
+        print(f"{'='*70}")
+        print(f"  Training (non-compositional): {len(train_tasks)} tasks")
+        print(f"  Testing  (compositional):     {len(test_tasks)} tasks")
+    else:
+        icl_tasks = discover_icl_tasks(
+            results_dir=args.results_dir,
+            checkpoint=args.checkpoint,
+            holdout_compositional=False
         )
         
-        # Add non-test simple ICL tasks to training
-        # Excluding test tasks (see below)
-        train_tasks = icl_tasks + [
-            SimpleArithmeticTask(),
-            SimpleCapitalizationTask(),  # Component of composite task
-            FirstCharacterTask(),
-            StringLengthTask(),
-        ]
+        if len(icl_tasks) < 2:
+            print("\n❌ Need at least 2 ICL tasks to perform analysis!")
+            return
+    
+    # Phase 2: Split into train/test (only if not using holdout mode)
+    if not args.holdout_compositional:
+        print("\n" + "="*70)
+        print("SPLITTING TASKS")
+        print("="*70)
         
-        # Test tasks covering different transformation types
-        # Held out from training to measure generalization
-        test_tasks = [
-            # Arithmetic operations
-            AddOneTask(),              # Increment: tests numeric transformation
+        if args.use_synthetic_tests:
+            # Use ALL real tasks for training basis, PLUS some simple ICL test tasks
+            print("\nAdding simple ICL test tasks to basis...")
+            from tests.test_basic_icl_tasks import (
+                SimpleArithmeticTask,
+                SimpleNegationTask,
+                SimpleCapitalizationTask,
+                SimpleRhymingTask,
+                FirstCharacterTask,
+                LastCharacterTask,
+                ReverseStringTask,
+                AddOneTask,
+                StringLengthTask,
+                VowelCountTask,
+                #ReverseCapitalizeTask,
+            )
             
-            # Semantic operations
-            SimpleNegationTask(),      # Semantic opposites: tests word meanings
+            train_tasks = icl_tasks + [
+                SimpleArithmeticTask(),
+                SimpleCapitalizationTask(),
+                FirstCharacterTask(),
+                StringLengthTask(),
+            ]
             
-            # String manipulations
-            ReverseStringTask(),       # Reverse: tests position manipulation (component of composite)
-            LastCharacterTask(),       # Extract last char: tests indexing
-            VowelCountTask(),          # Count vowels: tests counting/filtering
+            test_tasks = [
+                AddOneTask(),
+                SimpleNegationTask(),
+                ReverseStringTask(),
+                LastCharacterTask(),
+                VowelCountTask(),
+                SimpleRhymingTask(),
+            ]
             
-            # Pattern recognition
-            SimpleRhymingTask(),       # Rhyme detection: tests phonetic patterns
-            
-            # Composite task (should need multiple components)
-           #CompositeReverseCapitalizeTask(),  # Reverse + Capitalize: tests composition
-        ]
-        
-        print(f"\nUsing {len(icl_tasks)} real tasks + {len(train_tasks) - len(icl_tasks)} simple ICL tasks for basis training")
-        print(f"Testing with {len(test_tasks)} held-out synthetic tasks (including 1 composite)")
-    else:
-        # Original behavior: split real tasks
-        train_tasks, test_tasks = split_tasks(icl_tasks, args.train_ratio, args.seed)
+            print(f"\nUsing {len(icl_tasks)} real tasks + {len(train_tasks) - len(icl_tasks)} simple ICL tasks for basis training")
+            print(f"Testing with {len(test_tasks)} held-out synthetic tasks")
+        else:
+            # Original behavior: split real tasks
+            train_tasks, test_tasks = split_tasks(icl_tasks, args.train_ratio, args.seed)
     
     print(f"\nTraining tasks ({len(train_tasks)}):")
     for task in train_tasks:

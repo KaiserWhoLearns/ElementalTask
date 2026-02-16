@@ -447,10 +447,16 @@ def _sample_task_prompts(
             n = min(n, len(correct_instances))
             instances = correct_instances[:n]
             
-            # Build prompts using task's build_prompt if possible
+            # Build prompts — prefer the original eval prompt from JSONL
+            # (it already has proper demonstrations), fall back to build_prompt
             prompts = []
             for inst in instances:
-                # Create a row dict that build_prompt expects
+                # 1) Use the stored prompt from the JSONL if available
+                if inst.get('prompt'):
+                    prompts.append(inst['prompt'])
+                    continue
+                    
+                # 2) Fall back to build_prompt with category_name included
                 row = {
                     task.config.input_column: inst['question'],
                     task.config.output_column: inst['expected'],
@@ -458,6 +464,7 @@ def _sample_task_prompts(
                     'answer': inst['expected'],
                     'input': inst['question'],
                     'output': inst['expected'],
+                    'category_name': inst.get('category_name', ''),
                 }
                 try:
                     prompts.append(task.build_prompt(row))
@@ -529,27 +536,31 @@ def load_correct_instances_from_detailed_results(
     # Naming patterns:
     # - For tasks with categories: {model}_{checkpoint}_{task}_{category}_detailed.jsonl
     # - For simple tasks: {model}_{checkpoint}_{task}_detailed.jsonl
+    # - New compositional tasks:  {model}_{checkpoint}_{task}_{category}_{category}_detailed.jsonl
+    #   (doubled name, e.g., compositional_gerund_lower_gerund_lower_detailed.jsonl)
     task_sanitized = base_task.replace(":", "_").replace(",", "_")
     
+    candidates = []
     if category:
         category_sanitized = category.replace(":", "_").replace(",", "_").replace(" ", "_")
-        pattern = f"*_{task_sanitized}_{category_sanitized}_detailed.jsonl"
-    else:
-        pattern = f"*_{task_sanitized}_detailed.jsonl"
+        # Try standard pattern first
+        candidates.append(f"*_{task_sanitized}_{category_sanitized}_detailed.jsonl")
+        # Try doubled-name pattern (new compositional tasks)
+        candidates.append(f"*_{task_sanitized}_{category_sanitized}_{category_sanitized}_detailed.jsonl")
+    # Fallback: just the base task
+    candidates.append(f"*_{task_sanitized}_detailed.jsonl")
     
-    jsonl_files = list(checkpoint_dir.glob(pattern))
-    
-    if not jsonl_files:
-        # Try alternative pattern without category suffix
-        pattern = f"*_{task_sanitized}_detailed.jsonl"
+    jsonl_files = []
+    matched_pattern = None
+    for pattern in candidates:
         jsonl_files = list(checkpoint_dir.glob(pattern))
+        if jsonl_files:
+            matched_pattern = pattern
+            break
     
     if not jsonl_files:
-        print(f"  ⚠️  No detailed JSONL file found matching '{pattern}' in {checkpoint_dir}")
-        # List available files for debugging
-        available = list(checkpoint_dir.glob("*_detailed.jsonl"))
-        if available:
-            print(f"      Available files: {[f.name for f in available[:5]]}...")
+        print(f"  ⚠️  No detailed JSONL file found for '{task_name}' in {checkpoint_dir.name}")
+        print(f"      Tried patterns: {candidates}")
         return None
     
     jsonl_file = jsonl_files[0]
@@ -598,6 +609,7 @@ def load_correct_instances_from_detailed_results(
                         'question': question,
                         'expected': expected,
                         'category_name': item_category or category,
+                        'prompt': item.get('prompt', None),  # Use original eval prompt if available
                         'metadata': metadata
                     })
         
@@ -647,24 +659,29 @@ def _sample_prompts_and_answers(
             n = min(n, len(correct_instances))
             instances = correct_instances[:n]
             
-            # Build prompts using task's build_prompt if possible
+            # Build prompts — prefer the original eval prompt from JSONL
             texts = []
             answers = []
             for inst in instances:
-                # Create a row dict that build_prompt expects
-                row = {
-                    task.config.input_column: inst['question'],
-                    task.config.output_column: inst['expected'],
-                    'question': inst['question'],
-                    'answer': inst['expected'],
-                    'input': inst['question'],
-                    'output': inst['expected'],
-                }
-                try:
-                    texts.append(task.build_prompt(row))
-                except:
-                    # Fallback: just use the question directly
-                    texts.append(inst['question'])
+                # 1) Use the stored prompt from the JSONL if available
+                if inst.get('prompt'):
+                    texts.append(inst['prompt'])
+                else:
+                    # 2) Fall back to build_prompt with category_name included
+                    row = {
+                        task.config.input_column: inst['question'],
+                        task.config.output_column: inst['expected'],
+                        'question': inst['question'],
+                        'answer': inst['expected'],
+                        'input': inst['question'],
+                        'output': inst['expected'],
+                        'category_name': inst.get('category_name', ''),
+                    }
+                    try:
+                        texts.append(task.build_prompt(row))
+                    except:
+                        # Fallback: just use the question directly
+                        texts.append(inst['question'])
                 answers.append(inst['expected'])
             
             return texts, answers
@@ -933,7 +950,7 @@ def extract_informative_heads(
         
         print(f"  [{tasks_tried}] Screening: {t.config.name} ({len(icl)} samples)")
         
-        ctrl = get_shuffled_prompts(t, config.num_samples_per_task)
+        ctrl = get_shuffled_prompts(t, len(icl))
         for li in layers:
             aie = compute_aie_for_layer(model, tok, icl, answers, ctrl, li, config.device, config.score_metric)  # (H,)
             aie_np = aie.detach().cpu().numpy()
