@@ -41,16 +41,35 @@ MODEL_COLORS = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd']
 MODEL_MARKERS = ['o', 's', '^', 'D', 'v']
 
 
-def extract_tokens_from_checkpoint(checkpoint: str) -> Optional[float]:
+def extract_tokens_from_checkpoint(checkpoint: str, model_id: Optional[str] = None) -> Optional[float]:
     """Extract token count (in billions) from checkpoint name.
 
     Supports multiple formats:
     - OLMo: 'stage1-step100000-tokens210B' -> 210
-    - K2-V2: 'base_1245000' -> 12450B (12.45T) - checkpoint number in units of 10M tokens
+    - Amber: 'ckpt_XXX' where XXX is checkpoint index (~3.5B tokens per ckpt)
+    - K2-V2: 'base_1245000' -> checkpoint number in units of ~9.8M tokens/step
     - Crystal: 'CrystalCoder_phase{N}_checkpoint_{XXXXXX}' -> cumulative tokens in B
     - Generic: 'tokens100B' -> 100
+    - 'main': Resolves to final token count if model_id is known.
+
+    Args:
+        checkpoint: Checkpoint name string
+        model_id: Optional model identifier (e.g. 'LLM360/Amber') to resolve 'main'
     """
+    # Known final token counts (in B) for 'main' branch by model
+    MAIN_TOKENS = {
+        'LLM360/Amber': 1259,
+        'llm360/amber': 1259,
+        'amber': 1259,
+        'allenai/OLMo-2-0425-1B': 4001,
+        'allenai/OLMo-2-1124-7B': 4001,
+    }
+
     if checkpoint in ("main", "base_final", "final"):
+        if model_id and model_id.lower() in {k.lower() for k in MAIN_TOKENS}:
+            for k, v in MAIN_TOKENS.items():
+                if k.lower() == model_id.lower():
+                    return v
         return None
 
     # Try explicit token count first (e.g., 'tokens210B')
@@ -58,19 +77,30 @@ def extract_tokens_from_checkpoint(checkpoint: str) -> Optional[float]:
     if match:
         return int(match.group(1))
 
+    # Amber-style: ckpt_XXX
+    # LLM360/Amber has 360 checkpoints over ~1.26T tokens (~3.5B per ckpt)
+    match = re.search(r'ckpt_(\d+)', checkpoint)
+    if match:
+        ckpt_idx = int(match.group(1))
+        AMBER_CKPT_TO_TOKENS = {
+            0: 3, 32: 115, 65: 231, 97: 343, 130: 458,
+            163: 574, 195: 686, 228: 801, 261: 916,
+            293: 1028, 326: 1144, 358: 1256,
+        }
+        if ckpt_idx in AMBER_CKPT_TO_TOKENS:
+            return AMBER_CKPT_TO_TOKENS[ckpt_idx]
+        return max(1, int(round(ckpt_idx * 3.5)))
+
     # Try K2-V2 format: 'base_XXXXXXX' (step number)
     # K2-V2 tech report: batch_size B = 9.8×10^6 tokens/step, T = 1.25×10^6 steps, D = 12.25T
-    # e.g., base_1245000 = 1,245,000 * 9.8M = 12.201T tokens = 12201B
     match = re.search(r'base_(\d+)', checkpoint)
     if match:
         checkpoint_num = int(match.group(1))
-        # Each step = 9.8M tokens = 0.0098B tokens
         tokens_b = checkpoint_num * 9.8e6 / 1e9
         return tokens_b
 
     # Try Crystal format: 'CrystalCoder_phase{N}_checkpoint_{XXXXXX}'
     # 3-phase training: Phase 1 (345B), Phase 2 (927B), Phase 3 (110B)
-    # Tokens per step: ~4.33M (phase 1-2), ~3.97M (phase 3)
     match = re.search(r'CrystalCoder_phase(\d+)_checkpoint_(\d+)', checkpoint)
     if match:
         phase = int(match.group(1))
@@ -88,7 +118,6 @@ def extract_tokens_from_checkpoint(checkpoint: str) -> Optional[float]:
     # Try generic step format: 'step100000'
     match = re.search(r'step(\d+)', checkpoint)
     if match:
-        # If no token info, return step number as proxy (will be sorted correctly)
         return int(match.group(1))
 
     return None
@@ -107,8 +136,11 @@ def load_accuracy_data(pivot_file: Path) -> Tuple[np.ndarray, np.ndarray, str]:
     # Get task name from column (third column after model, checkpoint)
     task_name = [c for c in df.columns if c not in ['model', 'checkpoint']][0]
     
-    # Extract tokens and filter out None/main
-    df['tokens'] = df['checkpoint'].apply(extract_tokens_from_checkpoint)
+    # Detect model_id from the data (for resolving 'main' checkpoint)
+    model_id = df['model'].iloc[0] if 'model' in df.columns and len(df) > 0 else None
+    
+    # Extract tokens and filter out None
+    df['tokens'] = df['checkpoint'].apply(lambda ckpt: extract_tokens_from_checkpoint(ckpt, model_id=model_id))
     df = df[df['tokens'].notna() & (df['tokens'] > 0)]
     df = df.sort_values('tokens')
     
