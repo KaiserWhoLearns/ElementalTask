@@ -35,6 +35,7 @@ from scipy.ndimage import gaussian_filter1d
 
 from get_emergence_point import (
     load_accuracy_data,
+    load_combined_pivot,
     extract_tokens_from_checkpoint,
     smooth_trajectory,
 )
@@ -182,23 +183,45 @@ def normalize_task_name(task_name: str) -> str:
 def load_all_trajectories(results_dir: Path) -> Dict[str, TaskTrajectory]:
     """Load accuracy trajectories for all tasks."""
     trajectories = {}
-    
-    for pivot_file in results_dir.glob("accuracy_pivot_*.csv"):
-        try:
-            tokens, accuracy, task_name = load_accuracy_data(pivot_file)
-            task_name = normalize_task_name(task_name)
-            
-            if len(tokens) == 0:
-                continue
-            
-            trajectories[task_name] = TaskTrajectory(
-                task_name=task_name,
-                tokens=tokens,
-                accuracy=accuracy
-            )
-        except Exception as e:
-            print(f"Warning: Failed to load {pivot_file.name}: {e}")
-    
+
+    # First try per-task pivot files
+    pivot_files = list(results_dir.glob("accuracy_pivot_*.csv"))
+
+    if pivot_files:
+        for pivot_file in pivot_files:
+            try:
+                tokens, accuracy, task_name = load_accuracy_data(pivot_file)
+                task_name = normalize_task_name(task_name)
+
+                if len(tokens) == 0:
+                    continue
+
+                trajectories[task_name] = TaskTrajectory(
+                    task_name=task_name,
+                    tokens=tokens,
+                    accuracy=accuracy
+                )
+            except Exception as e:
+                print(f"Warning: Failed to load {pivot_file.name}: {e}")
+    else:
+        # Try combined pivot file
+        combined_file = results_dir / "accuracy_pivot.csv"
+        if combined_file.exists():
+            print(f"  Using combined pivot file: {combined_file}")
+            task_data = load_combined_pivot(combined_file)
+
+            for task_name, (tokens, accuracy) in task_data.items():
+                task_name = normalize_task_name(task_name)
+
+                if len(tokens) == 0:
+                    continue
+
+                trajectories[task_name] = TaskTrajectory(
+                    task_name=task_name,
+                    tokens=tokens,
+                    accuracy=accuracy
+                )
+
     return trajectories
 
 

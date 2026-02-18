@@ -34,13 +34,36 @@ import numpy as np
 import pandas as pd
 
 
-def extract_tokens_from_checkpoint(checkpoint: str) -> Optional[int]:
-    """Extract token count (in billions) from checkpoint name."""
-    if checkpoint == "main":
+def extract_tokens_from_checkpoint(checkpoint: str) -> Optional[float]:
+    """Extract token count (in billions) from checkpoint name.
+
+    Supports multiple formats:
+    - OLMo: 'stage1-step100000-tokens210B' -> 210
+    - K2-V2: 'base_1245000' -> 12450B (12.45T) - checkpoint number in units of 10M tokens
+    - Generic: 'tokens100B' -> 100
+    """
+    if checkpoint in ("main", "base_final", "final"):
         return None
+
+    # Try explicit token count first (e.g., 'tokens210B')
     match = re.search(r'tokens(\d+)B', checkpoint)
     if match:
         return int(match.group(1))
+
+    # Try K2-V2 format: 'base_XXXXXXX' (checkpoint number in units of ~10M tokens)
+    # e.g., base_1245000 = 1,245,000 * 10M = 12.45T tokens = 12450B
+    match = re.search(r'base_(\d+)', checkpoint)
+    if match:
+        checkpoint_num = int(match.group(1))
+        # Each unit = 10M tokens = 0.01B tokens
+        tokens_b = checkpoint_num * 0.01
+        return tokens_b
+
+    # Try generic step format: 'step100000'
+    match = re.search(r'step(\d+)', checkpoint)
+    if match:
+        return int(match.group(1))
+
     return None
 
 
