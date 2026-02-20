@@ -1596,7 +1596,27 @@ def main():
                             "for reconstruction quality. Overrides --train-ratio and "
                             "--use-synthetic-tests.")
     
+    # Model dtype
+    parser.add_argument("--dtype", type=str, default=None,
+                       choices=["float32", "float16", "bfloat16"],
+                       help="Model dtype (default: None = model default). "
+                            "Use bfloat16 for 7B+ models to reduce memory.")
+    
+    # Cache management
+    parser.add_argument("--cleanup-cache", action="store_true",
+                       help="Delete downloaded model files from HF cache after analysis. "
+                            "Useful for large models to reclaim disk space.")
+    
     args = parser.parse_args()
+    
+    # Parse dtype
+    torch_dtype = None
+    if args.dtype == "bfloat16":
+        torch_dtype = torch.bfloat16
+    elif args.dtype == "float16":
+        torch_dtype = torch.float16
+    elif args.dtype == "float32":
+        torch_dtype = torch.float32
     
     # Validate filtering args
     if args.only_correct and not args.results_dir:
@@ -1705,13 +1725,32 @@ def main():
     print("="*70)
     
     print(f"\nLoading {args.model} (checkpoint: {args.checkpoint})...")
+    if torch_dtype:
+        print(f"  Using dtype: {torch_dtype}")
     # Note: use_fast=False is a workaround for older tokenizers library versions
     tokenizer = AutoTokenizer.from_pretrained(args.model, revision=args.checkpoint, trust_remote_code=True, use_fast=False)
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
-    model = AutoModelForCausalLM.from_pretrained(args.model, revision=args.checkpoint, trust_remote_code=True).eval()
-    if args.device == "cuda" and torch.cuda.is_available():
-        model = model.cuda()
+    dtype_kwargs = {"torch_dtype": torch_dtype} if torch_dtype is not None else {}
+
+    # Multi-GPU: use device_map="auto" to shard across all available GPUs
+    n_gpus = torch.cuda.device_count() if torch.cuda.is_available() else 0
+    if args.device == "cuda" and n_gpus > 1:
+        print(f"  Using device_map='auto' to shard across {n_gpus} GPUs")
+        model = AutoModelForCausalLM.from_pretrained(
+            args.model, revision=args.checkpoint, trust_remote_code=True,
+            device_map="auto", **dtype_kwargs
+        ).eval()
+        # With device_map="auto", inputs go to model.device (first shard)
+        effective_device = str(model.device)
+        print(f"  Input device: {effective_device}")
+    else:
+        model = AutoModelForCausalLM.from_pretrained(
+            args.model, revision=args.checkpoint, trust_remote_code=True, **dtype_kwargs
+        ).eval()
+        if args.device == "cuda" and torch.cuda.is_available():
+            model = model.cuda()
+        effective_device = args.device
     print("✓ Model loaded")
     
     # Normalize layer index (support negative indexing)
@@ -1727,13 +1766,14 @@ def main():
     config = ExtractConfig(
         model_name=args.model,
         checkpoint=args.checkpoint,
-        device=args.device,
+        device=effective_device,
         batch_size=4,
         num_samples_per_task=args.num_samples,
         layers=[layer_idx],
         topk_heads=args.num_heads,
         only_correct=args.only_correct,
         results_dir=args.results_dir,
+        torch_dtype=torch_dtype,
     )
     
     # Phase 3.5: Select informative heads
@@ -1749,6 +1789,8 @@ def main():
         train_tasks, 
         max_screen_tasks=None,  # Try all tasks
         min_screen_tasks=5,     # Need at least 5 successful
+        model=model,
+        tokenizer=tokenizer,
     )
     
     print(f"\n✓ Selected {len(headset.heads)} heads:")
@@ -1918,6 +1960,47 @@ def main():
     print(f"    --basis {basis_path} \\")
     print(f"    --vecs {test_vec_dir}/*.npz \\")
     print(f"    --output {output_dir}/visualizations")
+
+    # ── Cleanup model cache ──
+    if args.cleanup_cache:
+        print("\n" + "="*70)
+        print("CLEANING UP MODEL CACHE")
+        print("="*70)
+        _cleanup_model_cache(args.model)
+
+
+def _cleanup_model_cache(model_name: str):
+    """Delete downloaded model files from the HuggingFace cache."""
+    import shutil
+    
+    # Determine HF cache directory
+    cache_root = Path(os.environ.get("HF_HOME", 
+                      os.environ.get("TRANSFORMERS_CACHE",
+                      Path.home() / ".cache" / "huggingface")))
+    
+    # HF hub stores models as models--{org}--{name}
+    model_dir_name = "models--" + model_name.replace("/", "--")
+    
+    # Check both hub/ subdirectory and direct path
+    candidates = [
+        cache_root / "hub" / model_dir_name,
+        cache_root / model_dir_name,
+    ]
+    
+    deleted = False
+    for model_cache_dir in candidates:
+        if model_cache_dir.exists():
+            size_bytes = sum(f.stat().st_size for f in model_cache_dir.rglob("*") if f.is_file())
+            size_gb = size_bytes / (1024 ** 3)
+            print(f"  Deleting {model_cache_dir} ({size_gb:.1f} GB)...")
+            shutil.rmtree(model_cache_dir)
+            print(f"  ✓ Freed {size_gb:.1f} GB")
+            deleted = True
+    
+    if not deleted:
+        print(f"  ⚠️  No cache found for {model_name} in {cache_root}")
+    else:
+        print(f"  ✓ Cache cleanup complete")
 
 
 if __name__ == "__main__":
