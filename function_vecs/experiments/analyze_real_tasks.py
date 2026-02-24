@@ -20,8 +20,12 @@ import numpy as np
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
+import io
+import contextlib
+
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
 
 from tasks.base_task import BaseTask, TaskConfig
 from function_vecs.extract_function_vecs import (
@@ -165,6 +169,16 @@ def discover_icl_tasks(
         "textfrct:V3",
         "textfrct:V4",
         "textfrct:V5",
+
+        # New elemental tasks (subtask variants with detailed JSONL results)
+        "multistep_arithmetic:two_step",
+        "multistep_arithmetic:three_step",
+        "logical_ops:negation",
+        "logical_ops:conjunction",
+        "logical_ops:conditional",
+        "fact_extraction:extract_entity",
+        "fact_extraction:extract_number",
+        "fact_extraction:extract_location",
     ]
     
     # ── Compositional tasks included in training ─────────────────────
@@ -1161,12 +1175,101 @@ def visualize_task_projections_interactive(
     task_names = basis.task_names
     var_ratios = basis.explained_variance_ratio()
     
+    # TextFRCT category_id → (display_name, category, color)
+    TEXTFRCT_ID_MAP = {
+        'cv1': ('Scrambled Words',    'String Manipulation', '#3498db'),
+        'cv2': ('Hidden Words',       'String Manipulation', '#3498db'),
+        'cv3': ('Incomplete Words',   'String Manipulation', '#3498db'),
+        'i1':  ('Letter Sets',        'Pattern Recognition', '#e67e22'),
+        'i2':  ('Locations Test',     'Pattern Recognition', '#e67e22'),
+        'ma2': ('Object-Number',      'Associative Memory',  '#8e44ad'),
+        'ma3': ('Name Recall',        'Associative Memory',  '#8e44ad'),
+        'rg1': ('Arith Aptitude',     'Math',               '#e74c3c'),
+        'rg2': ('Math Aptitude',      'Math',               '#e74c3c'),
+        'rg3': ('Arith Ops',          'Math',               '#e74c3c'),
+        'rl1': ('Syllogisms',         'Logic',              '#f39c12'),
+        'rl3': ('Inference',          'Logic',              '#f39c12'),
+        'rl4': ('Decipher Language',  'String Manipulation', '#3498db'),
+        'v1':  ('Vocab I',            'Vocabulary',         '#1abc9c'),
+        'v2':  ('Vocab II',           'Vocabulary',         '#1abc9c'),
+        'v3':  ('Vocab III',          'Vocabulary',         '#1abc9c'),
+        'v4':  ('Vocab IV',           'Vocabulary',         '#1abc9c'),
+        'v5':  ('Vocab V',            'Vocabulary',         '#1abc9c'),
+        'fa3': ('Figures of Speech',  'Vocabulary',         '#1abc9c'),
+        'xu1': ('Combining Objects',  'Semantic Reasoning', '#16a085'),
+        'xu2': ('Substitute Uses',    'Semantic Reasoning', '#16a085'),
+    }
+
+    # Task display names (for point labels in plot)
+    DISPLAY_NAME_MAP = {
+        # New elemental tasks
+        'multistep_arithmetic:two_step':       '2-Step Arith',
+        'multistep_arithmetic:three_step':     '3-Step Arith',
+        'logical_ops:negation':                'Negation',
+        'logical_ops:conjunction':             'Conjunction',
+        'logical_ops:conditional':             'Conditional',
+        'fact_extraction:extract_entity':      'Extract Entity',
+        'fact_extraction:extract_number':      'Extract Number',
+        'fact_extraction:extract_location':    'Extract Location',
+        # simple_icl
+        'simple_icl:uppercase':                'Uppercase',
+        'simple_icl:lowercase':                'Lowercase',
+        'simple_icl:first_letter':             'First Letter',
+        'simple_icl:last_letter':              'Last Letter',
+        'simple_icl:translate_eng_fr':         'Eng→Fr',
+        'simple_icl:translate_fr_eng':         'Fr→Eng',
+        'simple_icl:translate_eng_sp':         'Eng→Sp',
+        'simple_icl:translate_sp_eng':         'Sp→Eng',
+        'simple_icl:present_to_gerund':        '→Gerund',
+        'simple_icl:singular_to_plural':       '→Plural',
+        'simple_icl:country_to_capital':       '→Capital',
+        'simple_icl:country_to_currency':      '→Currency',
+        # base tasks
+        'basic_arithmetic':  'Arithmetic',
+        'copying':           'Copying',
+        'math':              'Math',
+        'token_reversal':    'Reversal',
+        'string_analogy':    'Str. Analogy',
+    }
+
+    def get_display_name(name):
+        """Return a short human-readable label for a task."""
+        if name in DISPLAY_NAME_MAP:
+            return DISPLAY_NAME_MAP[name]
+        # textfrct:XY → look up in TEXTFRCT_ID_MAP
+        if name.startswith('textfrct:'):
+            tid = name.split(':', 1)[1].lower()
+            if tid in TEXTFRCT_ID_MAP:
+                return TEXTFRCT_ID_MAP[tid][0]
+            return name.split(':', 1)[1]  # fallback: keep the ID
+        # compositional: strip prefix, shorten
+        if name.startswith('compositional:'):
+            return name.replace('compositional:', '').replace('_', '→')[:20]
+        return name
+
     # Categorize tasks
     def categorize_task(name):
         name_lower = name.lower()
-        
+
+        # ── TextFRCT by category_id ──────────────────────────────────
+        if name_lower.startswith('textfrct:'):
+            tid = name_lower.split(':', 1)[1]
+            if tid in TEXTFRCT_ID_MAP:
+                _, cat, color = TEXTFRCT_ID_MAP[tid]
+                return cat, color
+            return 'Other', '#95a5a6'
+
+        # ── New elemental tasks ──────────────────────────────────────
+        if name_lower.startswith('logical_ops'):
+            return 'Logic', '#f39c12'
+        if name_lower.startswith('fact_extraction'):
+            return 'Reading Comprehension', '#27ae60'
+        if name_lower.startswith('multistep_arithmetic'):
+            return 'Math', '#e74c3c'
+
+        # ── Existing task rules ──────────────────────────────────────
         if any(kw in name_lower for kw in ['arithmetic', 'add_one', 'math']):
-            return 'Arithmetic', '#e74c3c'
+            return 'Math', '#e74c3c'
         if any(kw in name_lower for kw in [
             'capitalization', 'uppercase', 'lowercase',
             'first_letter', 'last_letter', 'first_character', 'last_character',
@@ -1183,12 +1286,12 @@ def visualize_task_projections_interactive(
         ]):
             return 'Grammatical', '#9b59b6'
         if any(kw in name_lower for kw in [
-            'opposites', 'nonsense_syllogisms', 'inference', 
+            'opposites', 'nonsense_syllogisms', 'inference',
             'analogy', 'rhyming', 'deciphering_languages'
         ]):
-            return 'Semantic Reasoning', '#f39c12'
+            return 'Semantic Reasoning', '#16a085'
         if any(kw in name_lower for kw in [
-            'vocabulary_test', 'controlled_association', 
+            'vocabulary_test', 'controlled_association',
             'first_and_last_name', 'objest-number'
         ]):
             return 'Vocabulary', '#1abc9c'
@@ -1200,17 +1303,19 @@ def visualize_task_projections_interactive(
             'ignoring_context', 'ioi_task'
         ]):
             return 'Meta-Cognitive', '#34495e'
-        
+
         # Default
         return 'Other', '#95a5a6'
     
     # Build data for plotly
     categories = []
     cat_colors = []
+    display_names = []
     for name in task_names:
         cat, color = categorize_task(name)
         categories.append(cat)
         cat_colors.append(color)
+        display_names.append(get_display_name(name))
     
     # Get performance values if available
     perf_values = []
@@ -1249,7 +1354,7 @@ def visualize_task_projections_interactive(
         # Build hover text with performance info
         hover_texts = []
         for i, name in enumerate(task_names):
-            text = f'<b>{name}</b><br>Category: {categories[i]}'
+            text = f'<b>{display_names[i]}</b><br><i>{name}</i><br>Category: {categories[i]}'
             if has_performance and not np.isnan(perf_values[i]):
                 text += f'<br>Accuracy: {perf_values[i]:.1%}'
             hover_texts.append(text)
@@ -1260,7 +1365,7 @@ def visualize_task_projections_interactive(
             z=projections[:, 2],
             mode='markers+text',
             marker=marker_dict,
-            text=task_names,
+            text=display_names,
             textposition='top center',
             textfont=dict(size=8),
             customdata=hover_texts,
@@ -1370,10 +1475,11 @@ def visualize_task_projections_interactive(
                 y=projections[:, 1],
                 mode='markers+text',
                 marker=marker_dict,
-                text=task_names,
+                text=display_names,
+                customdata=task_names,
                 textposition='top center',
                 textfont=dict(size=7),
-                hovertemplate='<b>%{text}</b><br>C1: %{x:.3f}<br>C2: %{y:.3f}<extra></extra>',
+                hovertemplate='<b>%{text}</b><br><i>%{customdata}</i><br>C1: %{x:.3f}<br>C2: %{y:.3f}<extra></extra>',
                 showlegend=False
             ),
             row=1, col=1
@@ -1386,10 +1492,11 @@ def visualize_task_projections_interactive(
                 y=projections[:, 2],
                 mode='markers+text',
                 marker=marker_dict,
-                text=task_names,
+                text=display_names,
+                customdata=task_names,
                 textposition='top center',
                 textfont=dict(size=7),
-                hovertemplate='<b>%{text}</b><br>C1: %{x:.3f}<br>C3: %{y:.3f}<extra></extra>',
+                hovertemplate='<b>%{text}</b><br><i>%{customdata}</i><br>C1: %{x:.3f}<br>C3: %{y:.3f}<extra></extra>',
                 showlegend=False
             ),
             row=1, col=2
@@ -1402,10 +1509,11 @@ def visualize_task_projections_interactive(
                 y=projections[:, 2],
                 mode='markers+text',
                 marker=marker_dict,
-                text=task_names,
+                text=display_names,
+                customdata=task_names,
                 textposition='top center',
                 textfont=dict(size=7),
-                hovertemplate='<b>%{text}</b><br>C2: %{x:.3f}<br>C3: %{y:.3f}<extra></extra>',
+                hovertemplate='<b>%{text}</b><br><i>%{customdata}</i><br>C2: %{x:.3f}<br>C3: %{y:.3f}<extra></extra>',
                 showlegend=False
             ),
             row=1, col=3
@@ -1622,7 +1730,7 @@ def main():
     if args.only_correct and not args.results_dir:
         print("⚠️  Warning: --only-correct requires --results-dir. Disabling filtering.")
         args.only_correct = False
-    
+
     print("="*70)
     print("REAL TASK FUNCTION VECTOR ANALYSIS")
     print("="*70)
@@ -1727,22 +1835,25 @@ def main():
     print(f"\nLoading {args.model} (checkpoint: {args.checkpoint})...")
     if torch_dtype:
         print(f"  Using dtype: {torch_dtype}")
-    # Note: use_fast=False is a workaround for older tokenizers library versions
-    tokenizer = AutoTokenizer.from_pretrained(args.model, revision=args.checkpoint, trust_remote_code=True, use_fast=False)
+    # Note: use_fast=False is a workaround for older tokenizers library versions;
+    # fall back to fast tokenizer if the slow one doesn't exist (e.g. GPTNeoX/Pythia)
+    try:
+        tokenizer = AutoTokenizer.from_pretrained(args.model, revision=args.checkpoint, trust_remote_code=True, use_fast=False)
+    except ValueError:
+        tokenizer = AutoTokenizer.from_pretrained(args.model, revision=args.checkpoint, trust_remote_code=True, use_fast=True)
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
     dtype_kwargs = {"torch_dtype": torch_dtype} if torch_dtype is not None else {}
 
-    # Multi-GPU: use device_map="auto" to shard across all available GPUs
+    # FV extraction requires all tensors on one device — always load on a single GPU
     n_gpus = torch.cuda.device_count() if torch.cuda.is_available() else 0
     if args.device == "cuda" and n_gpus > 1:
-        print(f"  Using device_map='auto' to shard across {n_gpus} GPUs")
+        print(f"  {n_gpus} GPUs available; loading on cuda:0 for FV extraction (single-device required)")
         model = AutoModelForCausalLM.from_pretrained(
             args.model, revision=args.checkpoint, trust_remote_code=True,
-            device_map="auto", **dtype_kwargs
+            device_map={"":0}, **dtype_kwargs
         ).eval()
-        # With device_map="auto", inputs go to model.device (first shard)
-        effective_device = str(model.device)
+        effective_device = "cuda:0"
         print(f"  Input device: {effective_device}")
     else:
         model = AutoModelForCausalLM.from_pretrained(
@@ -1773,7 +1884,6 @@ def main():
         topk_heads=args.num_heads,
         only_correct=args.only_correct,
         results_dir=args.results_dir,
-        torch_dtype=torch_dtype,
     )
     
     # Phase 3.5: Select informative heads
@@ -1949,7 +2059,15 @@ def main():
     with open(summary_path, 'w') as f:
         json.dump(summary, f, indent=2)
     print(f"✓ Saved summary to: {summary_path}")
-    
+
+    # Save human-readable summary.md by re-running the print functions into a file
+    summary_md_path = output_dir / "summary.md"
+    with open(summary_md_path, 'w') as f:
+        with contextlib.redirect_stdout(f):
+            print_summary(train_tasks, test_tasks, basis, results, similarity_matrix, test_vecs, train_vecs)
+            interpret_principal_components(basis, train_vecs, test_vecs, n_components=10, top_k=5)
+    print(f"✓ Saved console summary to: {summary_md_path}")
+
     print("\n" + "="*70)
     print("✓ ANALYSIS COMPLETE!")
     print("="*70)

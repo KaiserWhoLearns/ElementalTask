@@ -81,6 +81,9 @@ def load_basis_and_coords(result_dir: str) -> Tuple[Dict[str, np.ndarray], List[
             data = np.load(f, allow_pickle=True)
             name = str(data["task_name"])
             fv = data["function_vec"]  # (d_model,)
+            if fv.shape[0] != U.shape[0]:
+                print(f"  Warning: skipping {f.name} — dim {fv.shape[0]} != {U.shape[0]}")
+                continue
             if has_mean:
                 fv_centered = fv - mean.flatten()
             else:
@@ -385,6 +388,10 @@ def main():
                         help="Comma-separated task subset to compare (default: all shared)")
     parser.add_argument("--exclude_pattern", default=None,
                         help="Regex pattern to exclude tasks")
+    parser.add_argument("--max_k", type=int, default=None,
+                        help="Truncate basis coordinates to this many dims (default: min(k_a, k_b)). "
+                             "SVD components are ordered by variance, so truncating keeps the most "
+                             "informative dimensions and enables fair comparison across models.")
     args = parser.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
@@ -397,6 +404,16 @@ def main():
     print(f"Loading {args.label_b} from {args.dir_b}...")
     coords_b, U_b, S_b = load_basis_and_coords(args.dir_b)
     print(f"  {len(coords_b)} tasks, basis dim k={U_b.shape[1]}")
+
+    # Truncate to common dimension for fair comparison
+    k_a, k_b = U_a.shape[1], U_b.shape[1]
+    max_k = args.max_k if args.max_k is not None else min(k_a, k_b)
+    max_k = min(max_k, k_a, k_b)  # can't exceed either model's actual k
+    if max_k < k_a or max_k < k_b:
+        print(f"\nTruncating coordinates to top-{max_k} basis dims "
+              f"(from {k_a} and {k_b}) for fair comparison")
+        coords_a = {t: c[:max_k] for t, c in coords_a.items()}
+        coords_b = {t: c[:max_k] for t, c in coords_b.items()}
 
     # Find shared tasks
     shared = sorted(set(coords_a.keys()) & set(coords_b.keys()))
@@ -494,20 +511,17 @@ def main():
     print(f"ORTHOGONAL PROCRUSTES ANALYSIS")
     print(f"{'='*60}")
 
-    # Build coordinate matrices (n_tasks × k) and zero-pad to same k
+    # Build coordinate matrices (n_tasks × max_k) — already truncated to same dim above
     k_a = next(iter(coords_a.values())).shape[0]
     k_b = next(iter(coords_b.values())).shape[0]
-    k_max = max(k_a, k_b)
+    assert k_a == k_b, f"coords should be same dim after truncation: {k_a} vs {k_b}"
 
-    X = np.zeros((n, k_max))
-    Y = np.zeros((n, k_max))
-    for i, t in enumerate(shared):
-        X[i, :k_a] = coords_a[t]
-        Y[i, :k_b] = coords_b[t]
+    X = np.array([coords_a[t] for t in shared])
+    Y = np.array([coords_b[t] for t in shared])
 
     Q, X_aligned, Y_norm, disparity, proc_dist = orthogonal_procrustes(X, Y)
 
-    print(f"  Basis dims: {args.label_a}={k_a}, {args.label_b}={k_b} (padded to {k_max})")
+    print(f"  Basis dims (after truncation): {args.label_a}={k_a}, {args.label_b}={k_b}")
     print(f"  Disparity (||XQ - Y||²):  {disparity:.4f}")
     print(f"  Procrustes distance:      {proc_dist:.4f}  (0=identical, 1=orthogonal)")
     print(f"  Procrustes similarity:    {1-proc_dist:.4f}")

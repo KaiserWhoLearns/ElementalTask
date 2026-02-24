@@ -902,6 +902,114 @@ def analyze_compositional_predictions(
     
     print(f"\n✅ All plots saved to: {output_dir}")
 
+    # Write human-readable summary.md
+    write_summary_md(results_df, compositional_tasks, output_dir, results_dir, smooth_sigma)
+
+
+def write_summary_md(
+    results_df: pd.DataFrame,
+    compositional_tasks: Dict[str, List[str]],
+    output_dir: Path,
+    results_dir: Path,
+    smooth_sigma: float,
+):
+    """Write a human-readable summary.md of the prediction results."""
+    lines = []
+    lines.append("# Compositional Task Prediction — Summary\n")
+    lines.append(f"> `results_dir`: `{results_dir}`  \n")
+    lines.append(f"> `output_dir`: `{output_dir}`  \n")
+    lines.append(f"> smoothing σ = {smooth_sigma}  \n")
+    lines.append("\n---\n")
+
+    methods = ['multiplicative', 'min', 'mean', 'harmonic_mean', 'geometric_mean']
+    available = [m for m in methods if f'{m}_r2' in results_df.columns]
+
+    # ── Overall method comparison ──────────────────────────────────────────
+    lines.append("## Method Comparison (across all compositional tasks)\n")
+    header = f"{'Method':<18} {'Mean R²':>8} {'Mean MAE':>9} {'Best task':>35} {'Worst task':>35}"
+    lines.append("```\n")
+    lines.append(header + "\n")
+    lines.append("-" * len(header) + "\n")
+    for m in available:
+        r2s = results_df[f'{m}_r2']
+        maes = results_df[f'{m}_mae']
+        best_task  = results_df.loc[r2s.idxmax(), 'task']
+        worst_task = results_df.loc[r2s.idxmin(), 'task']
+        lines.append(
+            f"{m:<18} {r2s.mean():>8.3f} {maes.mean():>9.3f}"
+            f" {best_task:>35} {worst_task:>35}\n"
+        )
+    lines.append("```\n")
+
+    # Best method distribution
+    if 'best_method' in results_df.columns:
+        lines.append("\n### Winning method per task\n")
+        lines.append("```\n")
+        for method, count in results_df['best_method'].value_counts().items():
+            pct = count / len(results_df) * 100
+            lines.append(f"  {method:<18}: {count:2d} tasks ({pct:5.1f}%)\n")
+        lines.append("```\n")
+
+    # ── Per-task breakdown ─────────────────────────────────────────────────
+    lines.append("\n---\n")
+    lines.append("## Per-Task Results\n")
+
+    col_header = f"{'Task':<42} {'Components':<40} {'Best Method':<18}"
+    for m in available:
+        col_header += f" {m[:4]:>7}"
+    col_header += f" {'Best R²':>8}"
+    lines.append("```\n")
+    lines.append(col_header + "\n")
+    lines.append("-" * len(col_header) + "\n")
+
+    for _, row in results_df.sort_values(f"{available[0]}_r2" if available else 'task', ascending=False).iterrows():
+        best_r2 = max(row[f'{m}_r2'] for m in available)
+        col_line = f"{row['task']:<42} {row['components']:<40} {row['best_method']:<18}"
+        for m in available:
+            col_line += f" {row[f'{m}_r2']:>7.3f}"
+        col_line += f" {best_r2:>8.3f}"
+        lines.append(col_line + "\n")
+    lines.append("```\n")
+
+    # ── Emergence predictions ──────────────────────────────────────────────
+    for pred_col, pred_name in [('max_pred_emergence', 'MAX'), ('sum_pred_emergence', 'SUM')]:
+        if pred_col not in results_df.columns:
+            continue
+        valid = results_df[['actual_emergence', pred_col]].notna().all(axis=1)
+        if valid.sum() == 0:
+            continue
+        errors = results_df.loc[valid, pred_col] - results_df.loc[valid, 'actual_emergence']
+        lines.append(f"\n## Emergence Prediction ({pred_name} method)\n")
+        lines.append("```\n")
+        lines.append(f"  Predicted {valid.sum()}/{len(results_df)} emergences\n")
+        lines.append(f"  Mean error : {errors.mean():+.1f}B tokens\n")
+        lines.append(f"  MAE        : {errors.abs().mean():.1f}B tokens\n")
+        lines.append(f"  Max overest: {errors.max():+.1f}B tokens\n")
+        lines.append(f"  Max underest: {errors.min():+.1f}B tokens\n")
+        lines.append("```\n")
+        lines.append("\n| Task | Actual | Predicted | Error |\n")
+        lines.append("|------|--------|-----------|-------|\n")
+        for _, row in results_df[valid].iterrows():
+            err = row[pred_col] - row['actual_emergence']
+            lines.append(
+                f"| {row['task']} | {row['actual_emergence']:.0f}B"
+                f" | {row[pred_col]:.0f}B | {err:+.0f}B |\n"
+            )
+
+    # ── Task structure ─────────────────────────────────────────────────────
+    lines.append("\n---\n")
+    lines.append("## Task → Component Mapping\n")
+    lines.append("```\n")
+    for comp_task, components in sorted(compositional_tasks.items()):
+        lines.append(f"  {comp_task}\n")
+        for i, c in enumerate(components, 1):
+            lines.append(f"    {i}. {c}\n")
+    lines.append("```\n")
+
+    md_path = output_dir / "summary.md"
+    md_path.write_text("".join(lines))
+    print(f"✅ Saved summary to: {md_path}")
+
 
 def main():
     parser = argparse.ArgumentParser(

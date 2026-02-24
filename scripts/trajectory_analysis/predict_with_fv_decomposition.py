@@ -26,6 +26,7 @@ Usage:
 """
 
 import argparse
+import contextlib
 import sys
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
@@ -653,9 +654,9 @@ def main():
                         help="Minimum |weight| to include a discovered component")
     parser.add_argument("--smooth_sigma", type=float, default=1.0,
                         help="Gaussian smoothing sigma (0 = no smoothing)")
-    parser.add_argument("--exclude_pattern", type=str, nargs='*', default=[],
+    parser.add_argument("--exclude_pattern", type=str, nargs='*', default=['reverse', 'last'],
                         help="Exclude compositional tasks whose name contains any of these substrings "
-                             "(e.g., --exclude_pattern reverse)")
+                             "(e.g., --exclude_pattern reverse). Default: ['reverse', 'last']")
 
     args = parser.parse_args()
 
@@ -988,7 +989,155 @@ def main():
             cat = "FV" if method.startswith('fv_') else ("DISC" if method.startswith('discovered') else "BASE")
             print(f"  [{cat:4s}] {method:25s}: {count:2d} tasks ({pct:5.1f}%)")
 
+    # ── Write summary.md ──────────────────────────────────────────────
+    write_summary_md(results_df, output_dir, args)
+
     print(f"\n✅ All results saved to: {output_dir}")
+
+
+# ============================================================================
+# Summary Writer
+# ============================================================================
+
+def write_summary_md(results_df: pd.DataFrame, output_dir: Path, args) -> None:
+    """Write a markdown summary of FV prediction results to summary.md."""
+    baseline_methods = ['product', 'min', 'mean']
+    fv_methods = ['fv_product', 'fv_min', 'fv_mean', 'fv_logit']
+    discovered_methods = ['discovered_product', 'discovered_min']
+    all_methods = baseline_methods + fv_methods + discovered_methods
+
+    summary_path = output_dir / "summary.md"
+    buf = []
+    w = buf.append
+
+    w("# FV-Weighted Compositional Prediction — Summary")
+    w("")
+    w(f"**FV dir:** `{args.fv_dir}`  ")
+    w(f"**Results dir:** `{args.results_dir}`  ")
+    w(f"**Weight method:** `{args.weight_method}`  ")
+    w(f"**Smoothing σ:** `{args.smooth_sigma}`  ")
+    w(f"**Tasks evaluated:** {len(results_df)}")
+    w("")
+
+    # ── Method comparison table ──
+    w("## Method Comparison (all tasks)")
+    w("")
+    w(f"| Category | Method | Mean R² | Mean MAE | N | # Best |")
+    w(f"|----------|--------|--------:|---------:|--:|-------:|")
+    for method in all_methods:
+        r2_col = f'{method}_r2'
+        mae_col = f'{method}_mae'
+        if r2_col not in results_df.columns:
+            continue
+        r2 = results_df[r2_col].dropna()
+        mae = results_df[mae_col].dropna() if mae_col in results_df.columns else pd.Series()
+        n_best = (results_df.get('best_method', pd.Series()) == method).sum()
+        if method.startswith('fv_'):
+            cat = 'FV+known'
+        elif method.startswith('discovered'):
+            cat = 'FV-disc'
+        else:
+            cat = 'Baseline'
+        mean_r2 = f'{r2.mean():.3f}' if len(r2) > 0 else 'N/A'
+        mean_mae = f'{mae.mean():.3f}' if len(mae) > 0 else 'N/A'
+        w(f"| {cat} | `{method}` | {mean_r2} | {mean_mae} | {len(r2)} | {n_best} |")
+    w("")
+
+    # ── Fair comparison ──
+    r2_cols = [f'{m}_r2' for m in all_methods if f'{m}_r2' in results_df.columns]
+    fair_mask = results_df[r2_cols].notna().all(axis=1)
+    n_fair = fair_mask.sum()
+    if n_fair > 0:
+        fair_df = results_df[fair_mask]
+        w(f"## Fair Comparison ({n_fair} tasks with all methods)")
+        w("")
+        fair_tasks_short = [t.split(':')[-1] for t in fair_df['task'].tolist()]
+        w(f"Tasks: {', '.join(f'`{t}`' for t in fair_tasks_short)}")
+        w("")
+        w(f"| Category | Method | Mean R² | Mean MAE |")
+        w(f"|----------|--------|--------:|---------:|")
+        for method in all_methods:
+            r2_col = f'{method}_r2'
+            mae_col = f'{method}_mae'
+            if r2_col not in fair_df.columns:
+                continue
+            r2 = fair_df[r2_col]
+            mae = fair_df[mae_col] if mae_col in fair_df.columns else pd.Series()
+            if method.startswith('fv_'):
+                cat = 'FV+known'
+            elif method.startswith('discovered'):
+                cat = 'FV-disc'
+            else:
+                cat = 'Baseline'
+            w(f"| {cat} | `{method}` | {r2.mean():.3f} | {mae.mean():.3f} |")
+        w("")
+
+        # Per-task breakdown
+        w("### Per-Task R² (fair subset)")
+        w("")
+        present_methods = [m for m in all_methods if f'{m}_r2' in fair_df.columns]
+        header = '| Task | ' + ' | '.join(f'`{m}`' for m in present_methods) + ' | Best |'
+        sep = '|------|' + '|'.join(['------:'] * len(present_methods)) + '|------|'
+        w(header)
+        w(sep)
+        for _, row in fair_df.iterrows():
+            task_short = row['task'].split(':')[-1] if ':' in row['task'] else row['task']
+            r2_vals = {m: row[f'{m}_r2'] for m in present_methods if f'{m}_r2' in fair_df.columns}
+            best_m = max(r2_vals, key=r2_vals.get) if r2_vals else ''
+            vals_str = ' | '.join(f'{r2_vals[m]:.3f}' for m in present_methods)
+            w(f'| `{task_short}` | {vals_str} | `{best_m}` |')
+        w("")
+
+    # ── Improvement over baselines ──
+    w("## FV Weighting vs Baseline")
+    w("")
+    w("| Baseline | FV Method | Improved (N/Total) | Mean ΔR² |")
+    w("|----------|-----------|-------------------:|---------:|")
+    for baseline, fv_method in [('product', 'fv_product'), ('min', 'fv_min'), ('mean', 'fv_mean')]:
+        b_col = f'{baseline}_r2'
+        f_col = f'{fv_method}_r2'
+        if b_col in results_df.columns and f_col in results_df.columns:
+            valid = results_df[[b_col, f_col]].notna().all(axis=1)
+            if valid.sum() > 0:
+                diff = results_df.loc[valid, f_col] - results_df.loc[valid, b_col]
+                n_improved = (diff > 0).sum()
+                n_total = valid.sum()
+                w(f"| `{baseline}` | `{fv_method}` | {n_improved}/{n_total} ({n_improved/n_total*100:.0f}%) | {diff.mean():+.4f} |")
+    w("")
+
+    # ── Best method distribution ──
+    if 'best_method' in results_df.columns:
+        w("## Best Method Distribution")
+        w("")
+        w("| Method | Category | Count | % |")
+        w("|--------|----------|------:|--:|")
+        method_counts = results_df['best_method'].value_counts()
+        for method, count in method_counts.items():
+            pct = count / len(results_df) * 100
+            cat = 'FV+known' if method.startswith('fv_') else ('FV-disc' if method.startswith('discovered') else 'Baseline')
+            w(f"| `{method}` | {cat} | {count} | {pct:.1f}% |")
+        w("")
+
+    # ── Per-task FV weights for known components ──
+    fv_weight_cols = [c for c in results_df.columns if c.startswith('fv_weight_')]
+    if fv_weight_cols:
+        w("## Per-Task FV Weights (Known Components)")
+        w("")
+        w("| Task | Known Components | " + " | ".join(c.replace('fv_weight_', '') for c in fv_weight_cols) + " |")
+        w("|------|-----------------|" + "|".join(["------:"] * len(fv_weight_cols)) + "|")
+        for _, row in results_df.iterrows():
+            task_short = row['task'].split(':')[-1] if ':' in row['task'] else row['task']
+            comp_str = row.get('known_components', '')
+            vals = ' | '.join(
+                f'{row[c]:.3f}' if pd.notna(row.get(c)) else 'N/A'
+                for c in fv_weight_cols
+            )
+            w(f"| `{task_short}` | {comp_str} | {vals} |")
+        w("")
+
+    with open(summary_path, 'w') as f:
+        f.write('\n'.join(buf) + '\n')
+    print(f"✅ Saved summary to: {summary_path}")
 
 
 if __name__ == "__main__":

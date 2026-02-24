@@ -580,9 +580,14 @@ def load_correct_instances_from_detailed_results(
                 # Get item's category from metadata
                 metadata = item.get('metadata', {})
                 item_category = metadata.get('category_name', '')
+                item_category_id = metadata.get('category_id', '')
                 
                 # If we're filtering by category, skip non-matching items
-                if category and item_category and item_category != category:
+                # Match against both category_name and category_id (e.g., "Scrambled Words" vs "CV1")
+                if category and item_category and item_category_id:
+                    if item_category != category and item_category_id != category:
+                        continue
+                elif category and item_category and item_category != category:
                     continue
                 
                 category_instances += 1
@@ -886,6 +891,8 @@ def extract_informative_heads(
     tasks: List[BaseTask],
     max_screen_tasks: int = None,  # None = use all tasks
     min_screen_tasks: int = 5,     # Minimum tasks to successfully screen
+    model=None,       # Pre-loaded model (optional, avoids reloading)
+    tokenizer=None,   # Pre-loaded tokenizer (optional)
 ) -> Headset:
     """
     Select informative attention heads using AIE metric.
@@ -895,19 +902,25 @@ def extract_informative_heads(
         tasks: List of tasks to screen
         max_screen_tasks: Maximum number of tasks to try screening (None = all)
         min_screen_tasks: Minimum number of tasks that must be successfully screened
+        model: Pre-loaded model (if None, loads from config)
+        tokenizer: Pre-loaded tokenizer (if None, loads from config)
     
     Returns:
         Headset with top-k informative heads
     """
     from transformers import AutoTokenizer, AutoModelForCausalLM
-    tok = AutoTokenizer.from_pretrained(config.model_name, revision=config.checkpoint, trust_remote_code=True, use_fast=False)
-    if tok.pad_token_id is None:
-        tok.pad_token = tok.eos_token
-    model = AutoModelForCausalLM.from_pretrained(
-        config.model_name,
-        revision=config.checkpoint,
-        trust_remote_code=True
-    ).to(config.device).eval()
+    if tokenizer is None:
+        tok = AutoTokenizer.from_pretrained(config.model_name, revision=config.checkpoint, trust_remote_code=True, use_fast=False)
+        if tok.pad_token_id is None:
+            tok.pad_token = tok.eos_token
+    else:
+        tok = tokenizer
+    if model is None:
+        model = AutoModelForCausalLM.from_pretrained(
+            config.model_name,
+            revision=config.checkpoint,
+            trust_remote_code=True
+        ).to(config.device).eval()
 
     blocks = get_blocks(model)
     layers = config.layers if config.layers is not None else [len(blocks)-1]
@@ -953,7 +966,7 @@ def extract_informative_heads(
         ctrl = get_shuffled_prompts(t, len(icl))
         for li in layers:
             aie = compute_aie_for_layer(model, tok, icl, answers, ctrl, li, config.device, config.score_metric)  # (H,)
-            aie_np = aie.detach().cpu().numpy()
+            aie_np = aie.detach().cpu().float().numpy()
             if aie_accum is None:
                 aie_accum = {li: aie_np.copy()}
             else:
@@ -1038,7 +1051,7 @@ def extract_task_function_vec(
         batch_means = contribs_accum.mean(dim=0).transpose(1, 0).contiguous()  # (d, H)
 
         # accumulate
-        m_np = batch_means.detach().cpu().numpy()
+        m_np = batch_means.detach().cpu().float().numpy()
         if means_sum is None:
             means_sum = np.zeros_like(m_np, dtype=np.float64)
         means_sum += m_np
@@ -1082,7 +1095,7 @@ def get_task_head_means(
         contribs = get_contribution_of_attn_head(
             model, tokenizer, batch, head_set, device=config.device)
         if isinstance(contribs, torch.Tensor):
-            contribs = contribs.detach().cpu().numpy()
+            contribs = contribs.detach().cpu().float().numpy()
         
         assert contribs.ndim == 3
         B, d_model, _ = contribs.shape
