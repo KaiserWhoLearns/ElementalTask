@@ -40,6 +40,7 @@ def extract_tokens_from_checkpoint(checkpoint: str) -> Optional[float]:
     Supports multiple formats:
     - OLMo: 'stage1-step100000-tokens210B' -> 210
     - K2-V2: 'base_1245000' -> 12450B (12.45T) - checkpoint number in units of 10M tokens
+    - Crystal: 'CrystalCoder_phase{N}_checkpoint_{XXXXXX}' -> cumulative tokens in B
     - Generic: 'tokens100B' -> 100
     """
     if checkpoint in ("main", "base_final", "final"):
@@ -57,6 +58,23 @@ def extract_tokens_from_checkpoint(checkpoint: str) -> Optional[float]:
         checkpoint_num = int(match.group(1))
         # Each unit = 10M tokens = 0.01B tokens
         tokens_b = checkpoint_num * 0.01
+        return tokens_b
+
+    # Try Crystal format: 'CrystalCoder_phase{N}_checkpoint_{XXXXXX}'
+    # 3-phase training: Phase 1 (345B), Phase 2 (927B), Phase 3 (110B)
+    # Tokens per step: ~4.33M (phase 1-2), ~3.97M (phase 3)
+    match = re.search(r'CrystalCoder_phase(\d+)_checkpoint_(\d+)', checkpoint)
+    if match:
+        phase = int(match.group(1))
+        step = int(match.group(2))
+        if phase == 1:
+            tokens_b = step * 4.33e6 / 1e9
+        elif phase == 2:
+            tokens_b = 345 + step * 4.32e6 / 1e9
+        elif phase == 3:
+            tokens_b = 345 + 927 + step * 3.97e6 / 1e9
+        else:
+            return None
         return tokens_b
 
     # Try generic step format: 'step100000'

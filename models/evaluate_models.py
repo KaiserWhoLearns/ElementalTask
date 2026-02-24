@@ -7,8 +7,23 @@ import torch
 import vllm
 from datasets import Dataset
 sys.path.append(os.getcwd())
-# from scripts.inference import load_model_revision  # TODO: restore when scripts/inference.py is back
+from transformers import AutoModelForCausalLM, AutoTokenizer
 from tasks.registry import get_task
+
+
+def load_model_revision(model_id, revision):
+    """Load a HuggingFace model and tokenizer at a specific revision."""
+    tokenizer = AutoTokenizer.from_pretrained(
+        model_id, revision=revision, trust_remote_code=True
+    )
+    # Decoder-only models often lack a pad token; use eos_token as fallback
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+    model = AutoModelForCausalLM.from_pretrained(
+        model_id, revision=revision, trust_remote_code=True,
+        torch_dtype="auto", device_map="auto",
+    )
+    return model, tokenizer
 
 def preprocess_5shot(dataset):
     # Sample 5 instances from the dataset
@@ -39,6 +54,7 @@ def evaluate_model(
     spaced: bool = False,
     quantization: str = None,
     model=None,
+    tokenizer=None,
 ):
     # Load the dataset with optional spaced mode
     task = get_task(task_name, spaced=spaced)
@@ -96,7 +112,8 @@ def evaluate_model(
         # TODO: restore original lines above when debugging is needed
         generated_texts = [it.outputs[0].text for it in outputs]
     else:
-        model, tokenizer = load_model_revision(model_id, chkpt)
+        if model is None or tokenizer is None:
+            model, tokenizer = load_model_revision(model_id, chkpt)
         generated_texts = []
         for prompt in dataset["prompt"]:
             inputs = tokenizer(prompt, return_tensors="pt", truncation=True, padding=True)
