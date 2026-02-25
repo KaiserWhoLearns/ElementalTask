@@ -170,6 +170,7 @@ def run_single_evaluation(
             quantization=quantization,
             gpu_memory_utilization=0.9,
             max_model_len=1024,  # prompts are short; avoids KV cache OOM on large models
+            dtype="bfloat16",  # avoid float16 overflow (NaN logits) at early K2-V2 checkpoints
         )
     elif eval_mode == "exact_match" and not load_vllm:
         from models.evaluate_models import load_model_revision

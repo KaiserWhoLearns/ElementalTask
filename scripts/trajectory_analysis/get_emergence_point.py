@@ -58,13 +58,14 @@ def extract_tokens_from_checkpoint(checkpoint: str) -> Optional[float]:
     if match:
         return int(match.group(1))
 
-    # Try K2-V2 format: 'base_XXXXXXX' (checkpoint number in units of ~10M tokens)
-    # e.g., base_1245000 = 1,245,000 * 10M = 12.45T tokens = 12450B
+    # Try K2-V2 format: 'base_XXXXXXX' (step number)
+    # K2-V2 tech report: batch_size B = 9.8×10^6 tokens/step, T = 1.25×10^6 steps, D = 12.25T
+    # e.g., base_1245000 = 1,245,000 * 9.8M = 12.201T tokens = 12201B
     match = re.search(r'base_(\d+)', checkpoint)
     if match:
         checkpoint_num = int(match.group(1))
-        # Each unit = 10M tokens = 0.01B tokens
-        tokens_b = checkpoint_num * 0.01
+        # Each step = 9.8M tokens = 0.0098B tokens
+        tokens_b = checkpoint_num * 9.8e6 / 1e9
         return tokens_b
 
     # Try Crystal format: 'CrystalCoder_phase{N}_checkpoint_{XXXXXX}'

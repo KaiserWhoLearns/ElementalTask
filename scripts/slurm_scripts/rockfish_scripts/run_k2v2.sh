@@ -64,12 +64,12 @@ echo "============================================"
 echo "Step 1: Running evaluation across checkpoints"
 echo "============================================"
 
-# python scripts/eval_across_checkpoints.py \
-#     --model_configs eval_configs/k2v2_checkpoints.json \
-#     --output_path "${RESULTS_DIR}" \
-#     --load_vllm \
-#     --max_new_tokens 20 \
-#     --force_reeval
+python scripts/eval_across_checkpoints.py \
+    --model_configs eval_configs/k2v2_checkpoints.json \
+    --output_path "${RESULTS_DIR}" \
+    --load_vllm \
+    --max_new_tokens 20 \
+    --force_reeval
 
 # echo "Evaluation complete."
 

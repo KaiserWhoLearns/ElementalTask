@@ -21,7 +21,7 @@ def load_model_revision(model_id, revision):
         tokenizer.pad_token = tokenizer.eos_token
     model = AutoModelForCausalLM.from_pretrained(
         model_id, revision=revision, trust_remote_code=True,
-        torch_dtype="auto", device_map="auto",
+        torch_dtype=torch.bfloat16, device_map="auto",
     )
     return model, tokenizer
 
@@ -99,6 +99,7 @@ def evaluate_model(
                 tensor_parallel_size=torch.cuda.device_count(),
                 trust_remote_code=True,
                 quantization=quantization,
+                dtype="bfloat16",  # avoid float16 overflow (NaN logits) at early K2-V2 checkpoints
             )
 
         sampling_params = vllm.SamplingParams(
@@ -128,6 +129,24 @@ def evaluate_model(
             input_length = inputs['input_ids'].shape[1]
             generated_tokens = outputs[0][input_length:]
             generated_texts.append(tokenizer.decode(generated_tokens, skip_special_tokens=True))
+    # Check for float16 overflow: if all outputs are empty, the model likely
+    # produced NaN logits due to float16 intermediate activation overflow.
+    # This is a known issue with early K2-V2 checkpoints.
+    empty_count = sum(1 for t in generated_texts if not t.strip())
+    if empty_count == len(generated_texts) and len(generated_texts) > 0:
+        raise RuntimeError(
+            f"All {len(generated_texts)} generated outputs are empty for "
+            f"{model_id} @ {chkpt}. This is likely caused by float16 overflow "
+            f"producing NaN logits. Use dtype='bfloat16' when loading the model "
+            f"to avoid this issue."
+        )
+    elif empty_count > len(generated_texts) * 0.9:
+        print(
+            f"WARNING: {empty_count}/{len(generated_texts)} outputs are empty for "
+            f"{model_id} @ {chkpt}. Possible float16 overflow — consider using "
+            f"dtype='bfloat16'."
+        )
+
     dataset = dataset.add_column("predictions", generated_texts)
     # Save the predictions if output_path is provided
     if output_path:

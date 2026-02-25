@@ -56,6 +56,12 @@ Both models with 7 checkpoints each (10k, 100k, 200k, 300k, 400k, 500k, main)
 - **Pre-training Sequence Length:** 8,192
 - **License:** Apache 2.0
 
+## Token Calculation
+- Global token batch size: **B = 9.8 × 10^6 tokens/step** (1200 sequences × 8192 seq_len)
+- Total training steps: **T = 1.25 × 10^6**
+- Total tokens: **D = 12.25T**
+- Formula: `tokens = step_number × 9.8M`
+
 ## Checkpoint Format
 Pretrain checkpoints are stored as branches/tags on the HuggingFace repo with format `base_XXXXXXX` (step number, zero-padded to 7 digits). The final pretrain checkpoint is `base_final`.
 
