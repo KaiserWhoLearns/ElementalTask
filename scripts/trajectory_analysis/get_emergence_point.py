@@ -47,9 +47,10 @@ def extract_tokens_from_checkpoint(checkpoint: str, model_id: Optional[str] = No
     Supports multiple formats:
     - OLMo: 'stage1-step100000-tokens210B' -> 210
     - Amber: 'ckpt_XXX' where XXX is checkpoint index (~3.5B tokens per ckpt)
+    - Pythia: 'stepXXX' where XXX is training step number.
+      Each step = 2,097,152 tokens (batch size 2M). 143K steps ≈ 300B total.
     - K2-V2: 'base_1245000' -> checkpoint number in units of ~9.8M tokens/step
     - Crystal: 'CrystalCoder_phase{N}_checkpoint_{XXXXXX}' -> cumulative tokens in B
-    - Generic: 'tokens100B' -> 100
     - 'main': Resolves to final token count if model_id is known.
 
     Args:
@@ -57,12 +58,16 @@ def extract_tokens_from_checkpoint(checkpoint: str, model_id: Optional[str] = No
         model_id: Optional model identifier (e.g. 'LLM360/Amber') to resolve 'main'
     """
     # Known final token counts (in B) for 'main' branch by model
+    # Amber: 360 ckpts over ~1.26T tokens, main = ckpt_358 ≈ 1259B
+    # OLMo-2: both 1B and 7B trained on 4T tokens (stage1) + 50B (stage2)
+    # Pythia: 143K steps × 2M tokens/step ≈ 300B total; main = step143000
     MAIN_TOKENS = {
         'LLM360/Amber': 1259,
         'llm360/amber': 1259,
         'amber': 1259,
         'allenai/OLMo-2-0425-1B': 4001,
         'allenai/OLMo-2-1124-7B': 4001,
+        'EleutherAI/pythia-6.9b': 300,
     }
 
     if checkpoint in ("main", "base_final", "final"):
@@ -91,6 +96,15 @@ def extract_tokens_from_checkpoint(checkpoint: str, model_id: Optional[str] = No
             return AMBER_CKPT_TO_TOKENS[ckpt_idx]
         return max(1, int(round(ckpt_idx * 3.5)))
 
+    # Pythia-style: stepXXX
+    # Each step = 2,097,152 tokens (2M batch size)
+    # Convert to billions: step * 2_097_152 / 1e9
+    match = re.search(r'^step(\d+)$', checkpoint)
+    if match:
+        step_num = int(match.group(1))
+        tokens_b = int(round(step_num * 2_097_152 / 1e9))
+        return max(0, tokens_b)
+
     # Try K2-V2 format: 'base_XXXXXXX' (step number)
     # K2-V2 tech report: batch_size B = 9.8×10^6 tokens/step, T = 1.25×10^6 steps, D = 12.25T
     match = re.search(r'base_(\d+)', checkpoint)
@@ -114,11 +128,6 @@ def extract_tokens_from_checkpoint(checkpoint: str, model_id: Optional[str] = No
         else:
             return None
         return tokens_b
-
-    # Try generic step format: 'step100000'
-    match = re.search(r'step(\d+)', checkpoint)
-    if match:
-        return int(match.group(1))
 
     return None
 
