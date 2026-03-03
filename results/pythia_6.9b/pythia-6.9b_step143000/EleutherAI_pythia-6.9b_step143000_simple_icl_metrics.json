@@ -1,0 +1,1731 @@
+{
+  "task_name": "simple_icl",
+  "model_id": "EleutherAI/pythia-6.9b",
+  "backend": "transformers",
+  "checkpoint": "step143000",
+  "split": "test",
+  "eval_mode": "all",
+  "num_examples": 184,
+  "metrics": {
+    "exact_match": {
+      "accuracy": 0.7771739130434783,
+      "correct": 143,
+      "total": 184,
+      "accuracy_country_to_capital": 0.7771739130434783,
+      "correct_country_to_capital": 143,
+      "total_country_to_capital": 184
+    },
+    "continuous": {
+      "mean_loss": 2.989061438519022,
+      "mean_perplexity": 186.49386152772112,
+      "mean_probability": 0.0010257709573604288,
+      "mean_normalized_probability": 0.0827309599972446,
+      "num_valid_examples": 184,
+      "num_total_examples": 184
+    }
+  },
+  "config": {
+    "model_config": {
+      "model_id": "EleutherAI/pythia-6.9b",
+      "backend": "transformers",
+      "checkpoint": "step143000",
+      "local_path": null,
+      "api_key": null,
+      "temperature": 0.0,
+      "max_tokens": 50,
+      "top_p": 1.0,
+      "tensor_parallel_size": null,
+      "trust_remote_code": true,
+      "quantization": null,
+      "generation_kwargs": {}
+    },
+    "eval_config": {
+      "output_dir": "results/pythia_6.9b/pythia-6.9b_step143000",
+      "save_predictions": true,
+      "save_detailed_results": true,
+      "batch_size": 1,
+      "retry_attempts": 3,
+      "retry_delay": 1.0,
+      "eval_mode": "all",
+      "compute_loss": true,
+      "compute_perplexity": true
+    },
+    "task_config": {
+      "name": "simple_icl",
+      "description": "Simple ICL task with category-based demonstrations",
+      "data_path": "dataset/simple.csv",
+      "data_format": "csv",
+      "input_column": "question",
+      "output_column": "answer",
+      "demonstrations_path": null,
+      "num_demonstrations": 5,
+      "prompt_template": null,
+      "evaluation_metrics": [
+        "accuracy"
+      ],
+      "metadata": {},
+      "in_memory_data": null,
+      "in_memory_demonstrations": null
+    }
+  },
+  "predictions": [
+    " Kabul\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\ndef get_country_name(ip_address):\n    ip_address = ip_address.",
+    " Tirana\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\ncountry = re.search(r'",
+    " Algiers\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.split",
+    " Andorra\n\nA:\n\nYou can use the following regex:\n(?<country>[^ ]+)\\s+(?<city>[^ ]+)\\s+(?<city_name>[^ ]+)\\s+(?",
+    " Luanda\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table_name WHERE city LIKE '%London%'\n\nBut it doesn't work.\n\nA:",
+    " Antigua\nBahamas -> Nassau\nBahrain -> Manama\nBarbados -> Bridgetown\nBelarus -> Minsk\nBelgium -> Brussels\nBermuda -> Hamilton\nBolivia -> La P",
+    " Buenos Aires\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table_name WHERE city LIKE '%$city%'\n\nBut it doesn't work.\n\nA",
+    " Yerevan\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\ncountry = re.search(r",
+    " Sydney\nCanada -> Toronto\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '74.125.224.100'\n\nip_address = ip",
+    " Vienna\nBelgium -> Brussels\nFrance -> Paris\nGermany -> Berlin\nItaly -> Rome\nSpain -> Madrid\nUnited Kingdom -> London\nAustria -> Vienna\nBelgium -> Brussels\nFrance -> Paris\nGermany -> Berlin\nItaly ->",
+    " Baku\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table_name WHERE city LIKE '%$city%'\n\nBut it doesn't work.\n\nA",
+    " Nassau\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.split('",
+    " Manama\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.split('",
+    " Dhaka\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table_name WHERE city LIKE '%Paris%'\n\nBut it returns Paris, France.\nHow can",
+    " Bridgetown\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.split",
+    " Brussels\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.split('.'",
+    " Belize City\n\nA:\n\nYou can use the following regex to match the city name:\n(?<city>.*?)(?<country>.*?)(?<city_country>.*?)(?<city_country",
+    " Cotonou\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table_name WHERE city LIKE '%Paris%'\n\nBut it returns Paris, France.\nHow",
+    " Thimphu\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table_name WHERE city LIKE '%London%'\n\nBut it returns the country name from the",
+    " La Paz\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.split",
+    " Sarajevo\n\nA:\n\nYou can use the following code to get the country name:\nimport java.util.Locale;\n\npublic class Country {\n    public static void main(String[] args) {\n        Locale",
+    " Gaborone\n\nI have a list of countries and I want to get the city name for each country.\nI have tried this:\n$country = 'France';\n$city = 'Paris';\n\n$country_list =",
+    " Rio de Janeiro\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table WHERE city LIKE '%$city%'\n\nBut it doesn't work.\n\nA:",
+    " Bandar Seri Begawan\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '74.125.224.100'\n\ncountry = re",
+    " Sofia\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.split('",
+    " Ouagadougou\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address =",
+    " Bujumbura\n\nI want to get the country name from the country code.\nI have tried this:\n$country = 'FR';\n$country_code = 'FR';\n$country_code = str_replace('",
+    " Yaounde\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\ncountry = re.search(r",
+    " Toronto\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '74.125.224.0'\n\nip_address = re.findall(",
+    " Praia\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.split('",
+    " Bangui\n\nI want to get the country name from the country code.\nI have tried this:\n$country = 'FR';\n$country_code = 'FR';\n$country_code = str_replace('-",
+    " N'Djamena\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '74.125.224.0'\n\nip_address = re",
+    " Beijing\nIndia -> Delhi\n\nA:\n\nYou can use the following code to get the country name from the IP address.\n$ip = '74.125.225.1';\n$country = gethostbyaddr($",
+    " Moroni\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.split('",
+    " Brazzaville\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\ndef get_country_name(ip_address):\n    ip_address = ip_",
+    " San Jose\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table WHERE city LIKE '%$city%'\n\nBut it doesn't work.\n\nA:\n",
+    " Zagreb\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.split('",
+    " Havana\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table WHERE city LIKE '%$city%'\n\nBut it doesn't work.\n\nA:\n",
+    " Nicosia\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.split",
+    " Prague\n\nA:\n\nYou can use the following code to get the country name from the IP address:\n$ip = '74.125.225.1';\n$country = gethostbyaddr($ip, 4);",
+    " Kinshasa\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.",
+    " Copenhagen\nSweden -> Stockholm\nNorway -> Oslo\nFinland -> Helsinki\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\ndef get_country_name(",
+    " Djibouti\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\ncountry = re.search(",
+    " Dominica\n\nI want to get the country name from the country code.\nI have tried this:\n$country = 'FR';\n$country_code = 'FR';\n$country_code = str_replace('-',",
+    " Santo Domingo\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table WHERE city LIKE '%$city%'\n\nBut it doesn't work.\n\nA",
+    " Quito\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table_name WHERE city LIKE '%Paris%'\n\nBut it returns the country name from the city",
+    " Cairo\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.split('.'",
+    " San Salvador\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\ndef get_country_name(ip_address):\n    ip_address = ip_address.",
+    " Malabo\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '74.125.224.100'\n\ncountry = re.search(r'",
+    " Asmara\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.split",
+    " Tallinn\nFinland -> Helsinki\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address",
+    " Eswatini\n\nA:\n\nYou can use the following regex to match the country name:\n(?<country>[^ ]+)\\s+(?<city>[^ ]+)\\s+(?<state>[^ ]+",
+    " Addis Ababa\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table_name WHERE city LIKE '%$city%'\n\nBut it doesn't work.\n",
+    " Suva\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table_name WHERE city LIKE '%$city%'\n\nBut it doesn't work.\n\nA",
+    " Helsinki\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table WHERE city LIKE '%$city%'\n\nBut it doesn't work.\n\nA:\n\n",
+    " Paris\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table WHERE city LIKE '%$city%'\n\nBut it doesn't work.\n\nA:\n\n",
+    " Libreville\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\ncountry = re.search(r",
+    " Banjul\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\ncountry = re.search(r",
+    " Tbilisi\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\ndef get_country_name(ip_address):\n    ip_address = ip_address",
+    " Berlin\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table_name WHERE city LIKE '%Paris%'\n\nBut it returns Paris, France.\nHow can I",
+    " Accra\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table_name WHERE city LIKE '%$city%'\n\nBut it doesn't work.\n\nA",
+    " Athens\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table_name WHERE city LIKE '%Paris%'\n\nBut it returns the country name from the city name.",
+    " St. George's\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '74.125.224.100'\n\ncountry = re.search(",
+    " Guatemala City\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table WHERE city LIKE '%' + city + '%'\n\nBut it doesn't work.\n\nA",
+    " Conakry\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '74.125.224.100'\n\ncountry = re.search(r",
+    " Bissau\n\nI want to get the country name from the country code.\nI have tried this:\n$country = 'fr';\n$country_code = 'FR';\n$country_name = 'France';\n\n",
+    " Georgetown\n\nA:\n\nYou can use the following regex to match the country name:\n(?<country>[^ ]+)\\s+(?<city>[^ ]+)\\s+(?<state>[^ ]+)\\s",
+    " Port-au-Prince\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table_name WHERE city LIKE '%Paris%'\n\nBut it returns Paris, France.",
+    " Tegucigalpa\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table WHERE city LIKE '%$city%'\n\nBut it doesn't work.\n",
+    " Budapest\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table WHERE city LIKE '%$city%'\n\nBut it doesn't work.\n\nA:\n\n",
+    " Reykjavik\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.",
+    " Delhi\n\nI want to get the country name from the city name.\nI have tried this:\n$city = 'Paris';\n$country = 'France';\n\n$city_array = explode(' ', $city);\n$",
+    " Jakarta\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table WHERE city LIKE '%$city%'\n\nBut it doesn't work.\n\nA:\n",
+    " Tehran\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.split('.'",
+    " Baghdad\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.split('.'",
+    " Dublin\n\nI want to get the country name from the city name.\nI have tried this:\n$city = 'Berlin';\n$country = 'Germany';\n\n$city = str_replace(' ', '', $city);",
+    " Tel Aviv\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '74.125.224.100'\n\nip_address = ip.split('",
+    " Rome\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table_name WHERE city LIKE '%Paris%'\n\nBut it returns Paris, France.\nHow can I",
+    " Abidjan\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table WHERE city LIKE '%Paris%'\n\nBut it doesn't work.\n\nA:\n",
+    " Kingston\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table WHERE city LIKE '%$city%'\n\nBut it doesn't work.\n\nA:\n\n",
+    " Tokyo\n\nI want to get the country name from the city name.\nFor example, if I enter \"Paris\" in the textbox, I want to get \"France\" in the label.\nI have tried this code:\nprivate",
+    " Amman\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '74.125.224.100'\n\nip_address = ip.split('",
+    " Nairobi\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.split",
+    " Tarawa\n\nA:\n\nYou can use the following code to get the country name from the ISO 3166-1 alpha-2 country code:\nimport java.util.Locale;\n\npublic class Country {\n    public static",
+    " Pristina\n\nA:\n\nYou can use the following code to get the country name from the IP address:\n$ip = '74.125.225.1';\n$country = gethostbyaddr($ip,",
+    " Kuwait City\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.split('",
+    " Bishkek\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.",
+    " Riga\nLithuania -> Vilnius\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '74.125.224.100'\n",
+    " Beirut\n\nA:\n\nYou can use the following code to get the country name from the IP address:\n$ip = '74.125.225.1';\n$country = gethostbyaddr($ip,",
+    " Maseru\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\ncountry = re.search(r",
+    " Monrovia\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.split",
+    " Tripoli\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\ndef get_country_name(ip_address):\n    ip_address = ip_address",
+    " Vienna\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '74.125.224.1'\n\ncountry = re.search(r'([",
+    " Vilnius\n\nA:\n\nYou can use the following code to get the country name:\n$country = 'France';\n$country_name = substr($country, 0, strpos($country, ' '));\n\n",
+    " Luxembourg\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table WHERE city LIKE '%Paris%'\n\nBut it returns Paris, France.\nHow can I get",
+    " Antananarivo\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\ncountry = re.search(",
+    " Lilongwe\n\nI want to get the country name from the country code.\nI have tried this:\n$country = 'fr';\n$country_code = 'FR';\n$country_name = 'France';\n\n",
+    " Kuala Lumpur\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address =",
+    " Male\n\nI want to get the country name from the country code.\nI have tried this:\n$country = 'FR';\n$country_code = 'FR';\n$country_code = str_replace('-', '',",
+    " Bamako\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table WHERE city LIKE '%$city%'\n\nBut it doesn't work.\n\nA:",
+    " Valletta\n\nA:\n\nYou can use the following code to get the country name from the IP address:\n$ip = '74.125.225.1';\n$country = gethostbyaddr($ip,",
+    " Majuro\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.split('",
+    " Nouakchott\n\nA:\n\nYou can use the following code to get the country name:\nimport java.util.Locale;\n\npublic class Country {\n    public static void main(String[] args) {\n",
+    " Port Louis\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.split('",
+    " Mexico City\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table WHERE city LIKE '%$city%'\n\nBut it doesn't work.\n\nA:\n",
+    " Noumea\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\ncountry = re.search(",
+    " Chisinau\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\ndef get_country_name(ip_address):\n    ip_address = ip_",
+    " Monaco\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '74.125.224.100'\n\ncountry = re.search(r'",
+    " Podgorica\n\nA:\n\nYou can use the following code to get the country name from the IP address:\n$ip = '74.125.225.1';\n$country = gethostbyaddr($ip,",
+    " Casablanca\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table_name WHERE city LIKE '%$city%'\n\nBut it doesn't work.\n\n",
+    " Maputo\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table_name WHERE city LIKE '%London%'\n\nBut it doesn't work.\n\nA:",
+    " Windhoek\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.split",
+    " Nauru\n\nA:\n\nYou can use the following regex to match the country name:\n(?<country>[^ ]+)\\s+(?<city>[^ ]+)\\s+(?<state>[^ ]+)\\",
+    " Amsterdam\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table WHERE city LIKE '%$city%'\n\nBut it doesn't work.\n\nA:\n\n",
+    " Auckland\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '74.125.224.100'\n\ncountry = re.search(r'([",
+    " Managua\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table WHERE city LIKE '%$city%'\n\nBut it doesn't work.\n\nA:\n",
+    " Niamey\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table WHERE city LIKE '%Paris%'\n\nBut it returns Paris, France.\nHow can I",
+    " Lagos\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\ndef get_country_name(ip_address):\n    ip_address = ip_address.",
+    " Pyongyang\nSouth Korea -> Seoul\nChina -> Beijing\nJapan -> Tokyo\n\nA:\n\nYou can use the following regex to match the country name:\n(?<country>[^ ]+)\\s+(?<city>[^",
+    " Skopje\n\nA:\n\nYou can use the following code to get the country name:\n$country = 'United Kingdom';\n$country_name = substr($country, 0, strpos($country, ' '));\n",
+    " Oslo\nSweden -> Stockholm\nFinland -> Helsinki\nDenmark -> Copenhagen\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\ndef get_country_name(",
+    " Muscat\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\ncountry = re.search(r'",
+    " Karachi\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.split('",
+    " Palau\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '74.125.224.100'\n\ncountry = re.search(r'",
+    " Jerusalem\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '74.125.224.100'\n\ncountry = re.search(r'([",
+    " Panama City\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '74.125.224.1'\n\nip_address = ip.split('",
+    " Port Moresby\n\nA:\n\nYou can use the following regex to match the country name:\n(?<country>[^ ]+)\\s+(?<city>[^ ]+)\\s+(?<state>[^ ]+",
+    " Asuncion\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table_name WHERE city LIKE '%Paris%'\n\nBut it doesn't work.\n\nA",
+    " Manila\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '74.125.224.1'\n\nip_address = ip.split('.'",
+    " Warsaw\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table_name WHERE city LIKE '%Paris%'\n\nBut it returns Paris, France.\nHow can I",
+    " Lisbon\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table WHERE city LIKE '%$city%'\n\nBut it doesn't work.\n\nA:\n\n",
+    " Doha\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table WHERE city LIKE '%$city%'\n\nBut it doesn't work.\n\nA:\n",
+    " Bucharest\n\nA:\n\nYou can use the following code to get the country name from the IP address:\n$ip = '74.125.225.1';\n$country = gethostbyaddr($ip, 4",
+    " Moscow\n\nI want to get the country name from the city name.\nI have tried this:\n$city = 'Berlin';\n$country = 'Germany';\n\n$city_array = explode(' ', $city);\n",
+    " Kigali\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table WHERE city LIKE '%Rome%'\n\nBut it returns the country name from the city name",
+    " Saint Kitts\nSaint Lucia -> Saint Lucia\nSaint Vincent and the Grenadines -> Saint Vincent\nTrinidad and Tobago -> Port of Spain\nUnited States -> New York\n\nA:\n\nI think you can use the following",
+    " Saint Lucia\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '74.125.224.1'\n\nip_address = ip.split('",
+    " Kingstown\n\nI have a list of countries and their capital cities. I want to find the shortest distance between each country and its capital city.\nI have tried the following code:\nimport math\n\ndef distance(country, city):",
+    " Apia\n\nA:\n\nYou can use the following code to get the country name from the IP address:\n$ip = '74.125.225.1';\n$country = gethostbyaddr($ip, 4",
+    " San Marino\n\nA:\n\nYou can use the following code to get the country name:\nimport java.util.Locale;\n\npublic class Main {\n    public static void main(String[] args) {\n        String",
+    " Sao Tome\n\nI have a list of countries and cities, and I want to find the shortest distance between each pair of cities.\nI have tried to use the following code:\nfrom itertools import combinations\n\ndef distance",
+    " Riyadh\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table_name WHERE city LIKE '%Riyadh%'\n\nBut it returns the country name from",
+    " Dakar\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table WHERE city LIKE '%Paris%'\n\nBut it returns Paris, France.\nHow can I get",
+    " Belgrade\n\nA:\n\nYou can use the following code to get the country name from the IP address:\n$ip = '74.125.225.1';\n$country = gethostbyaddr($ip, 4",
+    " Seychelles\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.split",
+    " Freetown\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\ncountry = re.search(r",
+    " Singapore\n\nI want to get the country name from the city name.\nFor example, if I enter \"Paris\" in the textbox, I want to get \"France\" in the label.\nI have tried this code:\nprivate",
+    " Bratislava\n\nA:\n\nYou can use the following code to get the country name:\n$country = 'France';\n$country_name = substr($country, 0, strpos($country, ' '));\n",
+    " Ljubljana\n\nA:\n\nYou can use the following code to get the country name:\nimport java.util.Locale;\n\npublic class Main {\n    public static void main(String[] args) {\n",
+    " Honiara\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.split",
+    " Mogadishu\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip",
+    " Cape Town\n\nI have a list of countries and cities, and I want to find the shortest distance between each pair of cities.\nI have tried to use the following code:\nfrom itertools import combinations\n\ndef distance(c",
+    " Seoul\n\nI want to get the country name from the city name.\nI have tried this:\n$city = 'Berlin';\n$country = 'Germany';\n\n$city_array = explode(' ', $city);\n",
+    " Juba\n\nI want to get the country name from the country code.\nI have tried this:\n$country = 'fr';\n$country_code = 'FR';\n$country_name = 'France';\n\n$",
+    " Madrid\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table WHERE city LIKE '%$city%'\n\nBut it doesn't work.\n\nA:\n\n",
+    " Khartoum\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\ncountry = re.search(",
+    " Paramaribo\n\nA:\n\nYou can use the following code to get the country name:\nimport java.util.Locale;\n\npublic class Country {\n    public static void main(String[] args) {\n        Locale",
+    " Stockholm\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table WHERE city LIKE '%$city%'\n\nBut it doesn't work.\n\nA:\n\n",
+    " Zurich\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table_name WHERE city LIKE '%$city%'\n\nBut it doesn't work.\n\nA",
+    " Damascus\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '74.125.224.100'\n\ncountry = re.search(r'^(",
+    " Taipei\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.split('",
+    " Dushanbe\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\nip_address = ip.",
+    " Dar es Salaam\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table_name WHERE city LIKE '%$city%'\n\nBut it doesn't work.",
+    " Bangkok\n\nI want to get the country name from the city name.\nFor example, if I type \"Paris\" in the search box, I want to get \"France\" as the result.\nI have tried the following code:\n",
+    " Dili\n\nA:\n\nYou can use the following code to get the country name:\nimport java.util.Locale;\n\npublic class Country {\n    public static void main(String[] args) {\n        Locale locale",
+    " Lome\n\nA:\n\nYou can use the following code to get the country name from the ISO 3166-1 alpha-2 country code:\nNSLocale *locale = [NSLocale currentLocale];\nNSString *countryCode =",
+    " Nuku'alofa\n\nA:\n\nYou can use the following code to get the country name:\nNSLocale *locale = [NSLocale currentLocale];\nNSString *country = [locale objectForKey:NSLocaleCountry",
+    " Port of Spain\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '74.125.224.0'\n\nip_address = re.find",
+    " Tunis\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '74.125.224.100'\n\ncountry = re.search(r'",
+    " Istanbul\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\ndef get_country_name(ip_address):\n    ip_address = ip_address.split",
+    " Ashgabat\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '192.168.1.1'\n\ncountry = re.search(",
+    " Tuvalu\n\nA:\n\nYou can use the following regex to match the country name:\n(?<country>[^ ]+)\\s+(?<city>[^ ]+)\\s+(?<state>[^ ]+)\\",
+    " Kampala\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table_name WHERE city LIKE '%Paris%'\n\nBut it returns Paris, France.\nHow can",
+    " Kiev\n\nA:\n\nYou can use the following code to get the country name from the IP address:\n$ip = '74.125.225.1';\n$country = gethostbyaddr($ip, 4",
+    " Dubai\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table_name WHERE city LIKE '%London%'\n\nBut it returns the country name from the city name.",
+    " London\n\nI want to get the country name from the city name.\nFor example, if I enter \"Paris\" in the textbox, I want to get \"France\" in the label.\nI have tried this code:\nprivate",
+    " Montevideo\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\ndef get_country_name(ip_address):\n    ip_address = ip_address.",
+    " Tashkent\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table_name WHERE city LIKE '%London%'\n\nBut it returns the country name from the",
+    " Port Vila\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '74.125.224.0'\n\nip_address = re.find",
+    " Vatican City\n\nA:\n\nYou can use the following regex to match the city name:\n(?<city>.*?)(?<country>.*?)(?<city>.*?)(?<city>.*?)(?",
+    " Hanoi\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table_name WHERE city LIKE '%Paris%'\n\nBut it returns Paris, France.\nHow can",
+    " Sanaa\n\nA:\n\nYou can use the following code to get the country name from the IP address:\nimport re\n\nip = '74.125.224.100'\n\ncountry = re.search(r",
+    " Lusaka\n\nI want to get the country name from the city name.\nI have tried this:\nSELECT city, country FROM table WHERE city LIKE '%London%'\n\nBut it returns the city name and not the country name",
+    " Harare\n\nI want to get the country name from the country code.\nI have tried this:\n$country = 'FR';\n$country_code = 'FR';\n$country_code = str_replace('-',"
+  ],
+  "target_metrics": [
+    {
+      "loss": 3.587890625,
+      "perplexity": 36.15772522700737,
+      "probability": 0.000764887915927178,
+      "normalized_probability": 0.027656607093553214,
+      "total_log_prob": -7.17578125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.7890625,
+      "perplexity": 16.265763498233948,
+      "probability": 0.00023236817104587491,
+      "normalized_probability": 0.06147882330322674,
+      "total_log_prob": -8.3671875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.359375,
+      "perplexity": 10.584334175890335,
+      "probability": 0.0008433529536363545,
+      "normalized_probability": 0.09447925428109244,
+      "total_log_prob": -7.078125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.2509765625,
+      "perplexity": 3.4937531603733594,
+      "probability": 0.0005487802334320488,
+      "normalized_probability": 0.28613198650702465,
+      "total_log_prob": -7.5078125,
+      "num_target_tokens": 6
+    },
+    {
+      "loss": 3.74609375,
+      "perplexity": 42.3553080116137,
+      "probability": 0.0005574222646262701,
+      "normalized_probability": 0.02360979171077691,
+      "total_log_prob": -7.4921875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.818359375,
+      "perplexity": 45.529450258314064,
+      "probability": 1.0616246940951275e-05,
+      "normalized_probability": 0.021978109728165753,
+      "total_log_prob": -11.453125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.03515625,
+      "perplexity": 7.653447883289393,
+      "probability": 0.00223063551456612,
+      "normalized_probability": 0.13066006527377144,
+      "total_log_prob": -6.10546875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.27734375,
+      "perplexity": 9.750745562159219,
+      "probability": 0.001074459537113779,
+      "normalized_probability": 0.1024228104038648,
+      "total_log_prob": -6.8359375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.654296875,
+      "perplexity": 38.64034257045414,
+      "probability": 1.736702091334178e-05,
+      "normalized_probability": 0.02589654198369936,
+      "total_log_prob": -10.9609375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.6796875,
+      "perplexity": 39.634006510082365,
+      "probability": 0.0006365962078591196,
+      "normalized_probability": 0.025230858246582093,
+      "total_log_prob": -7.359375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.109375,
+      "perplexity": 60.908637772317434,
+      "probability": 0.000269551794148722,
+      "normalized_probability": 0.016418032590682783,
+      "total_log_prob": -8.21875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.197265625,
+      "perplexity": 24.465540688808968,
+      "probability": 6.81533666810071e-05,
+      "normalized_probability": 0.040847213757760854,
+      "total_log_prob": -9.59375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.755859375,
+      "perplexity": 42.77096031537661,
+      "probability": 0.0005466407420597946,
+      "normalized_probability": 0.023380349485407497,
+      "total_log_prob": -7.51171875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.56640625,
+      "perplexity": 13.018953406185608,
+      "probability": 0.00045318109235131115,
+      "normalized_probability": 0.07681108986263648,
+      "total_log_prob": -7.69921875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.52734375,
+      "perplexity": 12.520205133467638,
+      "probability": 4.069623402073416e-05,
+      "normalized_probability": 0.07987089583116412,
+      "total_log_prob": -10.109375,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 4.29296875,
+      "perplexity": 73.18340956555208,
+      "probability": 0.0001867130708422013,
+      "normalized_probability": 0.013664299134686758,
+      "total_log_prob": -8.5859375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.4453125,
+      "perplexity": 11.534153458662256,
+      "probability": 0.0006542433048022244,
+      "normalized_probability": 0.08681200011778054,
+      "total_log_prob": -7.33203125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.8076171875,
+      "perplexity": 6.095904714873729,
+      "probability": 0.00011868204873612653,
+      "normalized_probability": 0.16401252206793304,
+      "total_log_prob": -9.0390625,
+      "num_target_tokens": 5
+    },
+    {
+      "loss": 1.3291015625,
+      "perplexity": 3.7776478819534516,
+      "probability": 0.004910368691874568,
+      "normalized_probability": 0.26471498436293966,
+      "total_log_prob": -5.31640625,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 2.28515625,
+      "perplexity": 9.827221607438576,
+      "probability": 0.0010495697087443705,
+      "normalized_probability": 0.10162574976974255,
+      "total_log_prob": -6.859375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.09375,
+      "perplexity": 8.115290514356445,
+      "probability": 0.0018710603064642196,
+      "normalized_probability": 0.12322417764723749,
+      "total_log_prob": -6.28125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.9609375,
+      "perplexity": 7.105985805076854,
+      "probability": 0.0027869359846894454,
+      "normalized_probability": 0.14072642803276533,
+      "total_log_prob": -5.8828125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.966796875,
+      "perplexity": 19.429584428039178,
+      "probability": 7.016910756215174e-06,
+      "normalized_probability": 0.05146790471528986,
+      "total_log_prob": -11.8671875,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 1.03515625,
+      "perplexity": 2.8155461303392597,
+      "probability": 0.000710174388842549,
+      "normalized_probability": 0.354972738393122,
+      "total_log_prob": -7.25,
+      "num_target_tokens": 7
+    },
+    {
+      "loss": 3.005859375,
+      "perplexity": 20.203571081597193,
+      "probability": 0.00012149651241487151,
+      "normalized_probability": 0.04952843482961056,
+      "total_log_prob": -9.015625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.1025390625,
+      "perplexity": 3.011803481129053,
+      "probability": 0.001337186498919149,
+      "normalized_probability": 0.33191891117944744,
+      "total_log_prob": -6.6171875,
+      "num_target_tokens": 6
+    },
+    {
+      "loss": 3.919921875,
+      "perplexity": 50.396507397123145,
+      "probability": 7.827929614309958e-06,
+      "normalized_probability": 0.01985556748516689,
+      "total_log_prob": -11.7578125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.033203125,
+      "perplexity": 20.763634702888442,
+      "probability": 0.00011149146690418283,
+      "normalized_probability": 0.0481297799982946,
+      "total_log_prob": -9.1015625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.80078125,
+      "perplexity": 121.60538462411665,
+      "probability": 6.762299297372325e-05,
+      "normalized_probability": 0.008223320070003553,
+      "total_log_prob": -9.6015625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.03125,
+      "perplexity": 56.33128135834348,
+      "probability": 5.5943690102245385e-06,
+      "normalized_probability": 0.01775212592162854,
+      "total_log_prob": -12.09375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.92578125,
+      "perplexity": 18.648789727196185,
+      "probability": 0.00015358598268134713,
+      "normalized_probability": 0.05355300685024736,
+      "total_log_prob": -8.78125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.78515625,
+      "perplexity": 5.960511204701965,
+      "probability": 0.0001323993928760769,
+      "normalized_probability": 0.167639824971403,
+      "total_log_prob": -8.9296875,
+      "num_target_tokens": 5
+    },
+    {
+      "loss": 4.05078125,
+      "perplexity": 57.442316329639176,
+      "probability": 0.0003030652285138832,
+      "normalized_probability": 0.017408768724808864,
+      "total_log_prob": -8.1015625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.58203125,
+      "perplexity": 35.94648303373688,
+      "probability": 0.0007739041726384842,
+      "normalized_probability": 0.027819133211487452,
+      "total_log_prob": -7.1640625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 1.8955078125,
+      "perplexity": 6.655927509772899,
+      "probability": 0.0005095251980991962,
+      "normalized_probability": 0.15024202089516447,
+      "total_log_prob": -7.58203125,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 4.25390625,
+      "perplexity": 70.37979717263202,
+      "probability": 0.0002018849656009158,
+      "normalized_probability": 0.014208622931196246,
+      "total_log_prob": -8.5078125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.869140625,
+      "perplexity": 17.6218678981495,
+      "probability": 0.00018238786721464442,
+      "normalized_probability": 0.05671074008674863,
+      "total_log_prob": -8.609375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.77734375,
+      "perplexity": 16.076261613516785,
+      "probability": 0.0002397443285892053,
+      "normalized_probability": 0.06212257476387809,
+      "total_log_prob": -8.3359375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.91796875,
+      "perplexity": 18.503663694167408,
+      "probability": 0.00015722816930033686,
+      "normalized_probability": 0.053973028288671426,
+      "total_log_prob": -8.7578125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.79296875,
+      "perplexity": 44.387981683814154,
+      "probability": 0.0005075387476061422,
+      "normalized_probability": 0.022528620632567414,
+      "total_log_prob": -7.5859375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 1.970703125,
+      "perplexity": 7.175720143204601,
+      "probability": 0.0003771707708502542,
+      "normalized_probability": 0.1393588350776192,
+      "total_log_prob": -7.8828125,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 3.9453125,
+      "perplexity": 51.692489491288626,
+      "probability": 0.000374235604625066,
+      "normalized_probability": 0.01934517005934727,
+      "total_log_prob": -7.890625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 1.45703125,
+      "perplexity": 4.293195167468473,
+      "probability": 0.0006856410965623564,
+      "normalized_probability": 0.23292675058834106,
+      "total_log_prob": -7.28515625,
+      "num_target_tokens": 5
+    },
+    {
+      "loss": 3.63671875,
+      "perplexity": 37.9670527218579,
+      "probability": 0.0006937232168439065,
+      "normalized_probability": 0.02633862594828945,
+      "total_log_prob": -7.2734375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 1.6591796875,
+      "perplexity": 5.254998335064318,
+      "probability": 0.0013113229708030822,
+      "normalized_probability": 0.1902950174745889,
+      "total_log_prob": -6.63671875,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 2.462890625,
+      "perplexity": 11.738694709013188,
+      "probability": 0.0006194251112483582,
+      "normalized_probability": 0.08524382637466263,
+      "total_log_prob": -7.38671875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.943359375,
+      "perplexity": 51.591626129191596,
+      "probability": 0.00037570032136803805,
+      "normalized_probability": 0.019382990516636955,
+      "total_log_prob": -7.88671875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.248046875,
+      "perplexity": 25.740017318702005,
+      "probability": 0.0015093234876058213,
+      "normalized_probability": 0.03885001271049755,
+      "total_log_prob": -6.49609375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.8984375,
+      "perplexity": 49.32531805312982,
+      "probability": 0.00041101740353382464,
+      "normalized_probability": 0.020273564154677504,
+      "total_log_prob": -7.796875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 1.81640625,
+      "perplexity": 6.149718140775787,
+      "probability": 0.004299662490261638,
+      "normalized_probability": 0.1626090785152391,
+      "total_log_prob": -5.44921875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.046875,
+      "perplexity": 7.743664305075443,
+      "probability": 0.002162006074720725,
+      "normalized_probability": 0.12930608713959887,
+      "total_log_prob": -6.13671875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.5859375,
+      "perplexity": 13.275729253905588,
+      "probability": 0.000427390475530988,
+      "normalized_probability": 0.07532542889919286,
+      "total_log_prob": -7.7578125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.1572265625,
+      "perplexity": 3.181098452624184,
+      "probability": 0.009765434206994737,
+      "normalized_probability": 0.31435682198866555,
+      "total_log_prob": -4.62890625,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 3.646484375,
+      "perplexity": 38.33964103892552,
+      "probability": 0.0006803053952175938,
+      "normalized_probability": 0.026082664649486904,
+      "total_log_prob": -7.29296875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.25,
+      "perplexity": 25.790339917193062,
+      "probability": 5.829466373086881e-05,
+      "normalized_probability": 0.03877420783172201,
+      "total_log_prob": -9.75,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 7.6875,
+      "perplexity": 2180.9154525530494,
+      "probability": 0.0004585230476630206,
+      "normalized_probability": 0.0004585230476630206,
+      "total_log_prob": -7.6875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.044921875,
+      "perplexity": 21.008389858307645,
+      "probability": 0.00010722029588095494,
+      "normalized_probability": 0.04750715251567949,
+      "total_log_prob": -9.140625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.390625,
+      "perplexity": 10.920317008742302,
+      "probability": 0.0007678816025863563,
+      "normalized_probability": 0.09157243321777621,
+      "total_log_prob": -7.171875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.40234375,
+      "perplexity": 11.049042250008942,
+      "probability": 0.0007413547887659687,
+      "normalized_probability": 0.09050558205614526,
+      "total_log_prob": -7.20703125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.2421875,
+      "perplexity": 25.58963789966816,
+      "probability": 0.0015271149152663852,
+      "normalized_probability": 0.039078317712849225,
+      "total_log_prob": -6.484375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.9921875,
+      "perplexity": 19.929230034775262,
+      "probability": 0.0025177868436031133,
+      "normalized_probability": 0.050177553184697174,
+      "total_log_prob": -5.984375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.16015625,
+      "perplexity": 64.08153455750669,
+      "probability": 0.00024351975241113875,
+      "normalized_probability": 0.01560511942956986,
+      "total_log_prob": -8.3203125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.52734375,
+      "perplexity": 34.03344610288473,
+      "probability": 2.5268866326407045e-05,
+      "normalized_probability": 0.02934462648860905,
+      "total_log_prob": -10.5859375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.716796875,
+      "perplexity": 5.5666691396332775,
+      "probability": 0.0010414018924707435,
+      "normalized_probability": 0.17964063875832906,
+      "total_log_prob": -6.8671875,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 2.548828125,
+      "perplexity": 12.792104248423877,
+      "probability": 0.00047865462692700886,
+      "normalized_probability": 0.07822413218400577,
+      "total_log_prob": -7.64453125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.02734375,
+      "perplexity": 7.593888279339626,
+      "probability": 0.002283533511383005,
+      "normalized_probability": 0.13168484486671447,
+      "total_log_prob": -6.08203125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.171875,
+      "perplexity": 64.83690740886694,
+      "probability": 0.00023787862342236765,
+      "normalized_probability": 0.015423314281384779,
+      "total_log_prob": -8.34375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 1.640625,
+      "perplexity": 5.15839250025867,
+      "probability": 0.0002737966172519944,
+      "normalized_probability": 0.19385884264329528,
+      "total_log_prob": -8.203125,
+      "num_target_tokens": 5
+    },
+    {
+      "loss": 1.126953125,
+      "perplexity": 3.086238776325239,
+      "probability": 0.001152726814831155,
+      "normalized_probability": 0.3238081181148572,
+      "total_log_prob": -6.765625,
+      "num_target_tokens": 6
+    },
+    {
+      "loss": 3.1484375,
+      "perplexity": 23.299630451611073,
+      "probability": 0.0018420522051362717,
+      "normalized_probability": 0.042919135652250404,
+      "total_log_prob": -6.296875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.08203125,
+      "perplexity": 8.020744516090527,
+      "probability": 0.00024162466666302507,
+      "normalized_probability": 0.12467670526020198,
+      "total_log_prob": -8.328125,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 4.4609375,
+      "perplexity": 86.56862915519338,
+      "probability": 0.00013343781418447866,
+      "normalized_probability": 0.011551528651415736,
+      "total_log_prob": -8.921875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.525390625,
+      "perplexity": 12.495775472672934,
+      "probability": 0.0005135214537570228,
+      "normalized_probability": 0.08007916402056198,
+      "total_log_prob": -7.57421875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.984375,
+      "perplexity": 7.274499402230307,
+      "probability": 0.0025977099773754862,
+      "normalized_probability": 0.13746650383851944,
+      "total_log_prob": -5.953125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.41796875,
+      "perplexity": 30.507383918455513,
+      "probability": 0.001074459537113779,
+      "normalized_probability": 0.03277894960357606,
+      "total_log_prob": -6.8359375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.12890625,
+      "perplexity": 62.10995300937982,
+      "probability": 0.00025922542707870625,
+      "normalized_probability": 0.01610047909469486,
+      "total_log_prob": -8.2578125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.6875,
+      "perplexity": 108.5813867407896,
+      "probability": 8.481823524646916e-05,
+      "normalized_probability": 0.00920968160396814,
+      "total_log_prob": -9.375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.912109375,
+      "perplexity": 50.004318665090636,
+      "probability": 0.0003999309103099356,
+      "normalized_probability": 0.019998272683157802,
+      "total_log_prob": -7.82421875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.59765625,
+      "perplexity": 13.432219349369987,
+      "probability": 2.295924415792108e-06,
+      "normalized_probability": 0.07450604618828009,
+      "total_log_prob": -12.984375,
+      "num_target_tokens": 5
+    },
+    {
+      "loss": 4.65625,
+      "perplexity": 105.24068867470233,
+      "probability": 9.028854143505791e-05,
+      "normalized_probability": 0.00950202828005989,
+      "total_log_prob": -9.3125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.34375,
+      "perplexity": 28.325147094540903,
+      "probability": 0.0012463948683920495,
+      "normalized_probability": 0.03530431798508576,
+      "total_log_prob": -6.6875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.7734375,
+      "perplexity": 43.5294404008871,
+      "probability": 0.0005277567928384327,
+      "normalized_probability": 0.022972957860023874,
+      "total_log_prob": -7.546875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.388671875,
+      "perplexity": 10.899009079882486,
+      "probability": 0.0007708870062038323,
+      "normalized_probability": 0.09169174581747853,
+      "total_log_prob": -7.16796875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.169921875,
+      "perplexity": 23.80562446936611,
+      "probability": 7.426932832618075e-05,
+      "normalized_probability": 0.042034236695952396,
+      "total_log_prob": -9.5078125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.9130859375,
+      "perplexity": 6.773960596463945,
+      "probability": 0.00322029840937764,
+      "normalized_probability": 0.14767218668841478,
+      "total_log_prob": -5.73828125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.5703125,
+      "perplexity": 13.069908149118522,
+      "probability": 3.4269664912242954e-05,
+      "normalized_probability": 0.07651163180266446,
+      "total_log_prob": -10.28125,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 1.8955078125,
+      "perplexity": 6.655927509772899,
+      "probability": 0.0005095251980991962,
+      "normalized_probability": 0.15024202089516447,
+      "total_log_prob": -7.58203125,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 4.07421875,
+      "perplexity": 58.80452160545304,
+      "probability": 0.0002891868612714227,
+      "normalized_probability": 0.017005495031648526,
+      "total_log_prob": -8.1484375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.591796875,
+      "perplexity": 13.35374506875535,
+      "probability": 0.00041912399543313347,
+      "normalized_probability": 0.0748366218667166,
+      "total_log_prob": -7.77734375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.380859375,
+      "perplexity": 10.814192318320675,
+      "probability": 0.000792256781208319,
+      "normalized_probability": 0.09253129814836521,
+      "total_log_prob": -7.140625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.279296875,
+      "perplexity": 9.769808597270561,
+      "probability": 0.0010702706163592639,
+      "normalized_probability": 0.10228953415670482,
+      "total_log_prob": -6.83984375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.15625,
+      "perplexity": 8.638681785041102,
+      "probability": 0.0015572345581208596,
+      "normalized_probability": 0.11590922739459636,
+      "total_log_prob": -6.46484375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.3544921875,
+      "perplexity": 3.874792788732315,
+      "probability": 0.017205950425851383,
+      "normalized_probability": 0.25816234012045264,
+      "total_log_prob": -4.0625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.67578125,
+      "perplexity": 5.3429677124787425,
+      "probability": 0.0012270713070337978,
+      "normalized_probability": 0.18716190211377373,
+      "total_log_prob": -6.703125,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 2.29296875,
+      "perplexity": 9.904297461775021,
+      "probability": 0.00010392147417820859,
+      "normalized_probability": 0.10096627285877,
+      "total_log_prob": -9.171875,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 1.94140625,
+      "perplexity": 6.968543598017082,
+      "probability": 6.0616859136975e-05,
+      "normalized_probability": 0.14338994095992375,
+      "total_log_prob": -9.7109375,
+      "num_target_tokens": 5
+    },
+    {
+      "loss": 2.580078125,
+      "perplexity": 13.198169226352599,
+      "probability": 3.295681466627126e-05,
+      "normalized_probability": 0.07576808441001909,
+      "total_log_prob": -10.3203125,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 1.2412109375,
+      "perplexity": 3.4598005313189666,
+      "probability": 0.0005841735176520654,
+      "normalized_probability": 0.28912810572915854,
+      "total_log_prob": -7.4453125,
+      "num_target_tokens": 6
+    },
+    {
+      "loss": 5.296875,
+      "perplexity": 199.71173463253027,
+      "probability": 2.507222244856129e-05,
+      "normalized_probability": 0.005007217036294841,
+      "total_log_prob": -10.59375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.787109375,
+      "perplexity": 16.23402543319486,
+      "probability": 0.00023419065719907224,
+      "normalized_probability": 0.061639133051632954,
+      "total_log_prob": -8.359375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.62890625,
+      "perplexity": 13.85860376179437,
+      "probability": 0.00037570032136803805,
+      "normalized_probability": 0.07215734118590046,
+      "total_log_prob": -7.88671875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.498046875,
+      "perplexity": 12.158723248329283,
+      "probability": 0.0005574222646262701,
+      "normalized_probability": 0.08229904022018016,
+      "total_log_prob": -7.4921875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.5498046875,
+      "perplexity": 4.710550063429016,
+      "probability": 0.00043074254057568753,
+      "normalized_probability": 0.21224797382674304,
+      "total_log_prob": -7.75,
+      "num_target_tokens": 5
+    },
+    {
+      "loss": 2.892578125,
+      "perplexity": 18.039758452611142,
+      "probability": 0.0030728302086381184,
+      "normalized_probability": 0.055433114729718354,
+      "total_log_prob": -5.78515625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.611328125,
+      "perplexity": 37.01518097066168,
+      "probability": 0.0007298611480969934,
+      "normalized_probability": 0.027015942480265117,
+      "total_log_prob": -7.22265625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.265625,
+      "perplexity": 71.20941195067294,
+      "probability": 2.769413480712634e-06,
+      "normalized_probability": 0.014043087460021496,
+      "total_log_prob": -12.796875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.7041015625,
+      "perplexity": 5.496445235692905,
+      "probability": 0.00020031388433428086,
+      "normalized_probability": 0.18211352912101367,
+      "total_log_prob": -8.515625,
+      "num_target_tokens": 5
+    },
+    {
+      "loss": 3.251953125,
+      "perplexity": 25.840760898054555,
+      "probability": 0.0014975778390400082,
+      "normalized_probability": 0.03869855086485808,
+      "total_log_prob": -6.50390625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.513671875,
+      "perplexity": 12.350195278830133,
+      "probability": 0.0005318960406660279,
+      "normalized_probability": 0.08102311186573216,
+      "total_log_prob": -7.5390625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.2109375,
+      "perplexity": 24.80232751057381,
+      "probability": 6.554245220489287e-05,
+      "normalized_probability": 0.040318796676387596,
+      "total_log_prob": -9.6328125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.009765625,
+      "perplexity": 20.282645623050005,
+      "probability": 0.002430808769620451,
+      "normalized_probability": 0.04930323285161381,
+      "total_log_prob": -6.01953125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 1.8720703125,
+      "perplexity": 6.501743115074814,
+      "probability": 0.0036348497612726936,
+      "normalized_probability": 0.1537548491919035,
+      "total_log_prob": -5.6171875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 5.92578125,
+      "perplexity": 374.5709546383618,
+      "probability": 7.127411021982831e-06,
+      "normalized_probability": 0.0026697211506040907,
+      "total_log_prob": -11.8515625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.806640625,
+      "perplexity": 44.99901609609206,
+      "probability": 0.0004938487558008839,
+      "normalized_probability": 0.022222708111319014,
+      "total_log_prob": -7.61328125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 5.6796875,
+      "perplexity": 292.8578975283812,
+      "probability": 1.1659666261085199e-05,
+      "normalized_probability": 0.0034146253471040128,
+      "total_log_prob": -11.359375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.01953125,
+      "perplexity": 55.6750020519895,
+      "probability": 0.00032261125644370356,
+      "normalized_probability": 0.017961382364498107,
+      "total_log_prob": -8.0390625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 1.99609375,
+      "perplexity": 7.360248899236344,
+      "probability": 0.0025079709229469055,
+      "normalized_probability": 0.13586497055877472,
+      "total_log_prob": -5.98828125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.1796875,
+      "perplexity": 24.039240115615065,
+      "probability": 7.198430131596974e-05,
+      "normalized_probability": 0.04159865266915964,
+      "total_log_prob": -9.5390625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.427734375,
+      "perplexity": 11.333176243677455,
+      "probability": 0.0006883246199401248,
+      "normalized_probability": 0.0882939815039525,
+      "total_log_prob": -7.28125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.931640625,
+      "perplexity": 6.900822621470601,
+      "probability": 0.0030489172542387077,
+      "normalized_probability": 0.14500463329211719,
+      "total_log_prob": -5.79296875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.15625,
+      "perplexity": 63.83170433047907,
+      "probability": 0.0002454297015009895,
+      "normalized_probability": 0.015666196140128895,
+      "total_log_prob": -8.3125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.2421875,
+      "perplexity": 25.58963789966816,
+      "probability": 0.0015271149152663852,
+      "normalized_probability": 0.039078317712849225,
+      "total_log_prob": -6.484375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.3671875,
+      "perplexity": 28.996858600549206,
+      "probability": 0.001189318291849483,
+      "normalized_probability": 0.03448649433980617,
+      "total_log_prob": -6.734375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.3203125,
+      "perplexity": 75.21212841006654,
+      "probability": 3.1249889399070745e-08,
+      "normalized_probability": 0.013295727978177492,
+      "total_log_prob": -17.28125,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 3.09765625,
+      "perplexity": 22.145985754016134,
+      "probability": 9.171037907429409e-05,
+      "normalized_probability": 0.04509615309529618,
+      "total_log_prob": -9.296875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.38671875,
+      "perplexity": 10.877742727456024,
+      "probability": 0.0007739041726384842,
+      "normalized_probability": 0.09181121387331481,
+      "total_log_prob": -7.1640625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.82421875,
+      "perplexity": 6.197950977946148,
+      "probability": 0.0006776531358341546,
+      "normalized_probability": 0.16134364462678857,
+      "total_log_prob": -7.296875,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 3.185546875,
+      "perplexity": 24.18050850623376,
+      "probability": 7.031678677199808e-05,
+      "normalized_probability": 0.04127492938579755,
+      "total_log_prob": -9.5625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.873046875,
+      "perplexity": 48.08868329990042,
+      "probability": 0.00043242841921281946,
+      "normalized_probability": 0.020794913301401846,
+      "total_log_prob": -7.74609375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.248046875,
+      "perplexity": 25.740017318702005,
+      "probability": 5.875187444512721e-05,
+      "normalized_probability": 0.03887531392270062,
+      "total_log_prob": -9.7421875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.79296875,
+      "perplexity": 16.329425896569767,
+      "probability": 0.00023055986759244163,
+      "normalized_probability": 0.06131893048501018,
+      "total_log_prob": -8.375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.46875,
+      "perplexity": 32.09659661306934,
+      "probability": 0.0009706932995199089,
+      "normalized_probability": 0.031155951269699805,
+      "total_log_prob": -6.9375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.25,
+      "perplexity": 25.790339917193062,
+      "probability": 5.829466373086881e-05,
+      "normalized_probability": 0.03877420783172201,
+      "total_log_prob": -9.75,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.40234375,
+      "perplexity": 81.641993024771,
+      "probability": 0.0001500281672245135,
+      "normalized_probability": 0.01224859858206291,
+      "total_log_prob": -8.8046875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.037109375,
+      "perplexity": 7.6684106309882125,
+      "probability": 0.0022219390908479924,
+      "normalized_probability": 0.13049004569429784,
+      "total_log_prob": -6.109375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.98046875,
+      "perplexity": 19.697047472120772,
+      "probability": 6.643477577660964e-06,
+      "normalized_probability": 0.05076903030341991,
+      "total_log_prob": -11.921875,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 4.25,
+      "perplexity": 70.10541234668786,
+      "probability": 0.00020346836901064417,
+      "normalized_probability": 0.014264233908999256,
+      "total_log_prob": -8.5,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.841796875,
+      "perplexity": 17.14654807625046,
+      "probability": 0.003401312984477682,
+      "normalized_probability": 0.05832077661072152,
+      "total_log_prob": -5.68359375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.3046875,
+      "perplexity": 74.04607243930377,
+      "probability": 0.00018238786721464442,
+      "normalized_probability": 0.013505105227825677,
+      "total_log_prob": -8.609375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.34375,
+      "perplexity": 10.42023928423861,
+      "probability": 0.0008803805947117196,
+      "normalized_probability": 0.09584221021871984,
+      "total_log_prob": -7.03515625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.513671875,
+      "perplexity": 12.350195278830133,
+      "probability": 4.298378957396587e-05,
+      "normalized_probability": 0.08097037961125458,
+      "total_log_prob": -10.0546875,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 2.52734375,
+      "perplexity": 12.520205133467638,
+      "probability": 0.0005095251980991962,
+      "normalized_probability": 0.07987089583116412,
+      "total_log_prob": -7.58203125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.2265625,
+      "perplexity": 25.192907336481866,
+      "probability": 6.25410447978757e-05,
+      "normalized_probability": 0.03969371167224909,
+      "total_log_prob": -9.6796875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.5,
+      "perplexity": 33.11545195869231,
+      "probability": 0.0009118819655545162,
+      "normalized_probability": 0.0301973834223185,
+      "total_log_prob": -7.0,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.65234375,
+      "perplexity": 104.83039411284926,
+      "probability": 9.099668324216146e-05,
+      "normalized_probability": 0.009539218167237892,
+      "total_log_prob": -9.3046875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.40234375,
+      "perplexity": 11.049042250008942,
+      "probability": 0.0007413547887659687,
+      "normalized_probability": 0.09050558205614526,
+      "total_log_prob": -7.20703125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.828125,
+      "perplexity": 16.91371785382974,
+      "probability": 0.0034956008536636734,
+      "normalized_probability": 0.059123606568473756,
+      "total_log_prob": -5.65625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 1.8115234375,
+      "perplexity": 6.119763411344857,
+      "probability": 0.0007129539328114074,
+      "normalized_probability": 0.1634050097665857,
+      "total_log_prob": -7.24609375,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 0.9287109375,
+      "perplexity": 2.531244141750851,
+      "probability": 0.02435924695002104,
+      "normalized_probability": 0.3950626427162036,
+      "total_log_prob": -3.71484375,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 3.171875,
+      "perplexity": 23.852165264858517,
+      "probability": 7.369135982777617e-05,
+      "normalized_probability": 0.04192491494570112,
+      "total_log_prob": -9.515625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.216796875,
+      "perplexity": 3.3763555056637293,
+      "probability": 0.002283533511383005,
+      "normalized_probability": 0.29629305907679354,
+      "total_log_prob": -6.08203125,
+      "num_target_tokens": 5
+    },
+    {
+      "loss": 4.90234375,
+      "perplexity": 134.60489048229144,
+      "probability": 5.519227831852973e-05,
+      "normalized_probability": 0.007429150578533843,
+      "total_log_prob": -9.8046875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.81640625,
+      "perplexity": 45.44061233480379,
+      "probability": 0.0004842968562034343,
+      "normalized_probability": 0.022006745697704472,
+      "total_log_prob": -7.6328125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.53515625,
+      "perplexity": 34.300373728940066,
+      "probability": 0.0008499674528310694,
+      "normalized_probability": 0.02915420128954092,
+      "total_log_prob": -7.0703125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.4296875,
+      "perplexity": 30.866995306309306,
+      "probability": 0.0010495697087443705,
+      "normalized_probability": 0.03239706327345691,
+      "total_log_prob": -6.859375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.115234375,
+      "perplexity": 8.29152886548122,
+      "probability": 0.00021157362739219717,
+      "normalized_probability": 0.12060501943895269,
+      "total_log_prob": -8.4609375,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 1.7919921875,
+      "perplexity": 6.001396472117657,
+      "probability": 0.004630918733533246,
+      "normalized_probability": 0.16668213447794653,
+      "total_log_prob": -5.375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.583984375,
+      "perplexity": 36.016759615546256,
+      "probability": 0.0007708870062038323,
+      "normalized_probability": 0.02776485199319154,
+      "total_log_prob": -7.16796875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 10.1484375,
+      "perplexity": 25551.147332366145,
+      "probability": 3.913718577847501e-05,
+      "normalized_probability": 3.913718577847501e-05,
+      "total_log_prob": -10.1484375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.2890625,
+      "perplexity": 26.817710263716034,
+      "probability": 0.0013904539533680367,
+      "normalized_probability": 0.03728879125646253,
+      "total_log_prob": -6.578125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.505859375,
+      "perplexity": 12.254085296672228,
+      "probability": 0.0005423867500556189,
+      "normalized_probability": 0.08155232691960804,
+      "total_log_prob": -7.51953125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.4990234375,
+      "perplexity": 4.477314557195713,
+      "probability": 0.0024884537383830186,
+      "normalized_probability": 0.22334816712684408,
+      "total_log_prob": -5.99609375,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 3.4453125,
+      "perplexity": 31.35307975333966,
+      "probability": 3.2445866613991646e-05,
+      "normalized_probability": 0.0318947933621571,
+      "total_log_prob": -10.3359375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.564453125,
+      "perplexity": 12.993550578338562,
+      "probability": 0.0004567354357107468,
+      "normalized_probability": 0.07701137942299377,
+      "total_log_prob": -7.69140625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.3203125,
+      "perplexity": 75.21212841006654,
+      "probability": 0.00017677638246969176,
+      "normalized_probability": 0.013295727978177492,
+      "total_log_prob": -8.640625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.025390625,
+      "perplexity": 20.602050815688813,
+      "probability": 0.00011413541084880993,
+      "normalized_probability": 0.048507266541346176,
+      "total_log_prob": -9.078125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.53515625,
+      "perplexity": 4.642050793727773,
+      "probability": 9.99403050221641e-05,
+      "normalized_probability": 0.21542202884793415,
+      "total_log_prob": -9.2109375,
+      "num_target_tokens": 6
+    },
+    {
+      "loss": 2.39453125,
+      "perplexity": 10.963057921054194,
+      "probability": 0.0007559767017882707,
+      "normalized_probability": 0.0910967333385507,
+      "total_log_prob": -7.1875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.634765625,
+      "perplexity": 13.940044882238906,
+      "probability": 0.0003698756277686204,
+      "normalized_probability": 0.07178249870021773,
+      "total_log_prob": -7.90234375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.251953125,
+      "perplexity": 25.840760898054555,
+      "probability": 5.784101105861684e-05,
+      "normalized_probability": 0.03867336469531795,
+      "total_log_prob": -9.7578125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.7451171875,
+      "perplexity": 5.726572518818638,
+      "probability": 0.0009298672257686418,
+      "normalized_probability": 0.17462452395631145,
+      "total_log_prob": -6.98046875,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 2.81640625,
+      "perplexity": 16.716667072215767,
+      "probability": 0.00021323301991815497,
+      "normalized_probability": 0.05974269629795193,
+      "total_log_prob": -8.453125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.435546875,
+      "perplexity": 11.422063446614425,
+      "probability": 0.0006697582376672773,
+      "normalized_probability": 0.08749287507339046,
+      "total_log_prob": -7.30859375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.34765625,
+      "perplexity": 77.29708541258049,
+      "probability": 0.00016736851500600766,
+      "normalized_probability": 0.012937098399796133,
+      "total_log_prob": -8.6953125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 1.7001953125,
+      "perplexity": 5.475016626491205,
+      "probability": 0.00020346836901064417,
+      "normalized_probability": 0.18268352405273466,
+      "total_log_prob": -8.5,
+      "num_target_tokens": 5
+    },
+    {
+      "loss": 6.94921875,
+      "perplexity": 1042.3350857163095,
+      "probability": 0.0009593843800362759,
+      "normalized_probability": 0.0009593843800362759,
+      "total_log_prob": -6.94921875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 2.673828125,
+      "perplexity": 14.495353140571094,
+      "probability": 0.0003276916444969635,
+      "normalized_probability": 0.06894272671549434,
+      "total_log_prob": -8.0234375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.69921875,
+      "perplexity": 5.46967254040864,
+      "probability": 0.001117261139206414,
+      "normalized_probability": 0.18282630132100924,
+      "total_log_prob": -6.796875,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 2.34375,
+      "perplexity": 10.42023928423861,
+      "probability": 0.00088382630693505,
+      "normalized_probability": 0.09596708604499847,
+      "total_log_prob": -7.03125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.33203125,
+      "perplexity": 10.298839819419056,
+      "probability": 0.0009154509706573315,
+      "normalized_probability": 0.09709831568740805,
+      "total_log_prob": -6.99609375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.974609375,
+      "perplexity": 53.22932014095188,
+      "probability": 0.0003529377895963558,
+      "normalized_probability": 0.01878663859226434,
+      "total_log_prob": -7.94921875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 1.8974609375,
+      "perplexity": 6.668940071633784,
+      "probability": 0.0005055600415496265,
+      "normalized_probability": 0.1499488658255428,
+      "total_log_prob": -7.58984375,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 2.689453125,
+      "perplexity": 14.723621737689907,
+      "probability": 0.0003126855515614081,
+      "normalized_probability": 0.06787386880884176,
+      "total_log_prob": -8.0703125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.4375,
+      "perplexity": 31.10908815096766,
+      "probability": 0.001033297638647637,
+      "normalized_probability": 0.03214494732687607,
+      "total_log_prob": -6.875,
+      "num_target_tokens": 2
+    }
+  ]
+}

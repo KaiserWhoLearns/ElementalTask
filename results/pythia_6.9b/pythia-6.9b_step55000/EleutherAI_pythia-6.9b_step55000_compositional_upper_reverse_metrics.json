@@ -1,0 +1,309 @@
+{
+  "task_name": "compositional:upper_reverse",
+  "model_id": "EleutherAI/pythia-6.9b",
+  "backend": "transformers",
+  "checkpoint": "step55000",
+  "split": "test",
+  "eval_mode": "all",
+  "num_examples": 26,
+  "metrics": {
+    "exact_match": {
+      "accuracy": 1.0,
+      "correct": 26,
+      "total": 26,
+      "accuracy_upper_reverse": 1.0,
+      "correct_upper_reverse": 26,
+      "total_upper_reverse": 26
+    },
+    "continuous": {
+      "mean_loss": 7.53515625,
+      "mean_perplexity": 2176.3274423518696,
+      "mean_probability": 0.0006237676048073056,
+      "mean_normalized_probability": 0.0006237676048073056,
+      "num_valid_examples": 26,
+      "num_total_examples": 26
+    }
+  },
+  "config": {
+    "model_config": {
+      "model_id": "EleutherAI/pythia-6.9b",
+      "backend": "transformers",
+      "checkpoint": "step55000",
+      "local_path": null,
+      "api_key": null,
+      "temperature": 0.0,
+      "max_tokens": 50,
+      "top_p": 1.0,
+      "tensor_parallel_size": null,
+      "trust_remote_code": true,
+      "quantization": null,
+      "generation_kwargs": {}
+    },
+    "eval_config": {
+      "output_dir": "results/pythia_6.9b/pythia-6.9b_step55000",
+      "save_predictions": true,
+      "save_detailed_results": true,
+      "batch_size": 1,
+      "retry_attempts": 3,
+      "retry_delay": 1.0,
+      "eval_mode": "all",
+      "compute_loss": true,
+      "compute_perplexity": true
+    },
+    "task_config": {
+      "name": "compositional:upper_reverse",
+      "description": "Compositional task with chained string operations",
+      "data_path": "dataset/compositional.csv",
+      "data_format": "csv",
+      "input_column": "input",
+      "output_column": "output",
+      "demonstrations_path": null,
+      "num_demonstrations": 5,
+      "prompt_template": null,
+      "evaluation_metrics": [
+        "accuracy"
+      ],
+      "metadata": {},
+      "in_memory_data": null,
+      "in_memory_demonstrations": null
+    }
+  },
+  "predictions": [
+    " B\nc -> C\nl -> L\nd -> D\nk -> K\na -> A\nb -> B\nc -> C\nl -> L\nd -> D\nk -> K\na -> A\nb -> B\n",
+    " A\n\nI want to get the following output:\na -> A\nb -> B\nc -> C\nd -> D\ne -> E\nf -> F\ng -> G\nh -> H\ni -> I\nj ->",
+    " D\ne -> E\nf -> F\ng -> G\nh -> H\ni -> I\nj -> J\nw -> W\nl -> L\nk -> K\nd -> D\ne -> E\nf -> F\n",
+    " E\nr -> R\nd -> D\nf -> F\ng -> G\nh -> H\nj -> J\nk -> K\nl -> L\nm -> M\nn -> N\np -> P\nq -> Q\n",
+    " F\ng -> G\nh -> H\nj -> J\nk -> K\nl -> L\nm -> M\nn -> N\no -> O\np -> P\nq -> Q\nr -> R\ns -> S\n",
+    " G\nd -> D\nf -> F\ns -> S\nr -> R\nt -> T\nz -> Z\nx -> X\nc -> C\nv -> V\nz -> Z\nx -> X\nc -> C\n",
+    " H\n\nA:\n\nYou can use a dictionary to map the characters to their corresponding numbers.\nfrom collections import defaultdict\n\nd = defaultdict(int)\nfor c in 'abcdefghijklmnopqrst",
+    " I\nu -> U\nn -> N\nz -> Z\no -> O\ne -> E\ni -> I\nu -> U\nn -> N\nz -> Z\no -> O\ne -> E\ni -> I\n",
+    " J\n\nA:\n\nYou can use a dictionary to map the characters to their corresponding numbers.\nfrom collections import defaultdict\n\nd = defaultdict(int)\nfor c in 'abcdefghijklmnopqrst",
+    " C\nd -> D\ne -> E\nf -> F\ng -> G\nh -> H\ni -> I\nj -> J\nk -> K\nl -> L\nm -> M\nn -> N\no -> O\n",
+    " K\nl -> L\nr -> R\ns -> S\nf -> F\nh -> H\nb -> B\ne -> E\nk -> K\nl -> L\nr -> R\ns -> S\nf -> F\n",
+    " L\nr -> R\ns -> S\nt -> T\nz -> Z\n\nA:\n\nYou can use a dictionary to map the characters to their corresponding numbers.\nfrom collections import defaultdict\n\nd = defaultdict(",
+    " M\nf -> F\ng -> G\nh -> H\nj -> J\nk -> K\nl -> L\nz -> Z\nx -> X\nc -> C\ns -> S\nr -> R\nn -> N\n",
+    " N\nr -> R\ns -> S\nt -> T\nu -> U\nv -> V\nw -> W\nx -> X\nc -> C\nd -> D\nm -> M\ny -> Y\np -> P\n",
+    " O\nr -> R\ns -> S\nt -> T\nu -> U\nv -> V\nw -> W\nx -> X\ny -> Y\nz -> Z\n\nA:\n\nYou can use a dictionary to map",
+    " P\nq -> Q\nr -> R\np -> P\nq -> Q\nr -> R\np -> P\nq -> Q\nr -> R\np -> P\nq -> Q\nr -> R\np -> P\n",
+    " Q\nr -> R\ns -> S\nt -> T\nd -> D\nf -> F\nh -> H\nj -> J\nk -> K\nl -> L\nm -> M\nn -> N\no -> O\n",
+    " R\n\nA:\n\nYou can use a dictionary to map the characters to their corresponding functions.\nfrom collections import defaultdict\n\ndef map_char(char):\n    return defaultdict(lambda: lambda x: x.upper",
+    " S\nt -> T\nu -> U\nv -> V\nw -> W\nx -> X\ny -> Y\nz -> Z\n\nA:\n\nYou can use a dictionary to map the characters to their corresponding numbers.\n",
+    " T\nn -> N\nr -> R\ns -> S\nf -> F\ng -> G\nh -> H\nj -> J\nk -> K\nl -> L\n; -> ;\n. -> .\n. -> .\n",
+    " U\nl -> L\nv -> V\nw -> W\nx -> X\ny -> Y\nz -> Z\n\nA:\n\nYou can use a dictionary to map the characters to their corresponding numbers.\n>>> from collections import",
+    " V\n\nI want to write a function that takes a list of strings and returns a list of strings.\nI have written the following function:\nimport Data.Char\n\ngetList :: [String] -> [String]\ngetList",
+    " W\nq -> Q\nr -> R\ns -> S\nt -> T\nu -> U\nv -> V\nx -> X\ny -> Y\nz -> Z\n\nA:\n\nYou can use a dictionary to map",
+    " X\ny -> Y\nz -> Z\n\nA:\n\nYou can use a dictionary to map the characters to their corresponding numbers.\nfrom collections import defaultdict\n\nd = defaultdict(int)\nfor c in 'abc",
+    " Y\n\nA:\n\nYou can use a dictionary to map the characters to their corresponding numbers.\nfrom collections import defaultdict\n\nd = defaultdict(int)\nfor c in 'abcdefghijklmnopqrst",
+    " Z\n\nA:\n\nYou can use a dictionary to map the characters to their corresponding numbers.\nfrom collections import defaultdict\n\nd = defaultdict(int)\nfor c in 'abcdefghijklmnopqrst"
+  ],
+  "target_metrics": [
+    {
+      "loss": 6.71875,
+      "perplexity": 827.7821368360857,
+      "probability": 0.0012080473297263435,
+      "normalized_probability": 0.0012080473297263435,
+      "total_log_prob": -6.71875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.50390625,
+      "perplexity": 1815.118892385283,
+      "probability": 0.0005509280985367745,
+      "normalized_probability": 0.0005509280985367745,
+      "total_log_prob": -7.50390625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.90234375,
+      "perplexity": 2703.611497823697,
+      "probability": 0.0003698756277686204,
+      "normalized_probability": 0.0003698756277686204,
+      "total_log_prob": -7.90234375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.25,
+      "perplexity": 3827.6258214399063,
+      "probability": 0.00026125855730166754,
+      "normalized_probability": 0.00026125855730166754,
+      "total_log_prob": -8.25,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.66015625,
+      "perplexity": 2122.088979078394,
+      "probability": 0.00047123377476579323,
+      "normalized_probability": 0.00047123377476579323,
+      "total_log_prob": -7.66015625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.40625,
+      "perplexity": 1646.2413521768196,
+      "probability": 0.0006074443450698789,
+      "normalized_probability": 0.0006074443450698789,
+      "total_log_prob": -7.40625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.20703125,
+      "perplexity": 1348.881824402271,
+      "probability": 0.0007413547887659687,
+      "normalized_probability": 0.0007413547887659687,
+      "total_log_prob": -7.20703125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.07421875,
+      "perplexity": 1181.120389956714,
+      "probability": 0.0008466537437700558,
+      "normalized_probability": 0.0008466537437700558,
+      "total_log_prob": -7.07421875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.6953125,
+      "perplexity": 2198.020584446467,
+      "probability": 0.00045495479299700566,
+      "normalized_probability": 0.00045495479299700566,
+      "total_log_prob": -7.6953125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.16796875,
+      "perplexity": 1297.2069732040436,
+      "probability": 0.0007708870062038323,
+      "normalized_probability": 0.0007708870062038323,
+      "total_log_prob": -7.16796875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.69140625,
+      "perplexity": 805.4541259733185,
+      "probability": 0.0012415356353058474,
+      "normalized_probability": 0.0012415356353058474,
+      "total_log_prob": -6.69140625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.484375,
+      "perplexity": 4838.5724119797005,
+      "probability": 0.00020667252959243203,
+      "normalized_probability": 0.00020667252959243203,
+      "total_log_prob": -8.484375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.484375,
+      "perplexity": 1780.0113149866502,
+      "probability": 0.0005617941816327723,
+      "normalized_probability": 0.0005617941816327723,
+      "total_log_prob": -7.484375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.28125,
+      "perplexity": 3949.1277076439605,
+      "probability": 0.0002532204765281185,
+      "normalized_probability": 0.0002532204765281185,
+      "total_log_prob": -8.28125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.9765625,
+      "perplexity": 1071.2296786745287,
+      "probability": 0.0009335066231896564,
+      "normalized_probability": 0.0009335066231896564,
+      "total_log_prob": -6.9765625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.23046875,
+      "perplexity": 1380.8696350453124,
+      "probability": 0.000724181323581053,
+      "normalized_probability": 0.000724181323581053,
+      "total_log_prob": -7.23046875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.51953125,
+      "perplexity": 1843.7028557527542,
+      "probability": 0.0005423867500556189,
+      "normalized_probability": 0.0005423867500556189,
+      "total_log_prob": -7.51953125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.375,
+      "perplexity": 1595.5918304990491,
+      "probability": 0.0006267266984484576,
+      "normalized_probability": 0.0006267266984484576,
+      "total_log_prob": -7.375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.7578125,
+      "perplexity": 2339.7807327306596,
+      "probability": 0.000427390475530988,
+      "normalized_probability": 0.000427390475530988,
+      "total_log_prob": -7.7578125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.2578125,
+      "perplexity": 522.0756496064025,
+      "probability": 0.0019154312229538169,
+      "normalized_probability": 0.0019154312229538169,
+      "total_log_prob": -6.2578125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.515625,
+      "perplexity": 1836.514939511285,
+      "probability": 0.0005445095917739226,
+      "normalized_probability": 0.0005445095917739226,
+      "total_log_prob": -7.515625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.578125,
+      "perplexity": 5314.132180380701,
+      "probability": 0.0001881774796065311,
+      "normalized_probability": 0.0001881774796065311,
+      "total_log_prob": -8.578125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.25,
+      "perplexity": 3827.6258214399063,
+      "probability": 0.00026125855730166754,
+      "normalized_probability": 0.00026125855730166754,
+      "total_log_prob": -8.25,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.22265625,
+      "perplexity": 1370.1236222908349,
+      "probability": 0.0007298611480969934,
+      "normalized_probability": 0.0007298611480969934,
+      "total_log_prob": -7.22265625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.8203125,
+      "perplexity": 2490.683625074556,
+      "probability": 0.00040149619563587327,
+      "normalized_probability": 0.00040149619563587327,
+      "total_log_prob": -7.8203125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.8828125,
+      "perplexity": 2651.318917809312,
+      "probability": 0.0003771707708502542,
+      "normalized_probability": 0.0003771707708502542,
+      "total_log_prob": -7.8828125,
+      "num_target_tokens": 1
+    }
+  ]
+}

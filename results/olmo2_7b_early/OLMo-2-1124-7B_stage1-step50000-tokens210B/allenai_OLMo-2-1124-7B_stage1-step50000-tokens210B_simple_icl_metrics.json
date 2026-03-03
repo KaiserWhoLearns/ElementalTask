@@ -1,0 +1,1730 @@
+{
+  "task_name": "simple_icl",
+  "model_id": "allenai/OLMo-2-1124-7B",
+  "backend": "transformers",
+  "checkpoint": "stage1-step50000-tokens210B",
+  "split": "test",
+  "eval_mode": "all",
+  "num_examples": 184,
+  "metrics": {
+    "exact_match": {
+      "accuracy": 0.8532608695652174,
+      "correct": 157,
+      "total": 184,
+      "accuracy_country_to_capital": 0.8532608695652174,
+      "correct_country_to_capital": 157,
+      "total_country_to_capital": 184
+    },
+    "continuous": {
+      "mean_loss": 3.533205778702446,
+      "mean_perplexity": 259.6369783818666,
+      "mean_probability": 0.0005494954663067828,
+      "mean_normalized_probability": 0.053076820925944415,
+      "num_valid_examples": 184,
+      "num_total_examples": 184
+    }
+  },
+  "config": {
+    "model_config": {
+      "model_id": "allenai/OLMo-2-1124-7B",
+      "backend": "transformers",
+      "checkpoint": "stage1-step50000-tokens210B",
+      "local_path": null,
+      "api_key": null,
+      "temperature": 0.0,
+      "max_tokens": 50,
+      "top_p": 1.0,
+      "tensor_parallel_size": null,
+      "trust_remote_code": true,
+      "generation_kwargs": {}
+    },
+    "eval_config": {
+      "output_dir": "results/olmo2_continuous_7b_early_revised/OLMo-2-1124-7B_stage1-step50000-tokens210B",
+      "save_predictions": true,
+      "save_detailed_results": true,
+      "batch_size": 1,
+      "retry_attempts": 3,
+      "retry_delay": 1.0,
+      "eval_mode": "all",
+      "compute_loss": true,
+      "compute_perplexity": true
+    },
+    "task_config": {
+      "name": "simple_icl",
+      "description": "Simple ICL task with category-based demonstrations",
+      "data_path": "dataset/simple.csv",
+      "data_format": "csv",
+      "input_column": "question",
+      "output_column": "answer",
+      "demonstrations_path": null,
+      "num_demonstrations": 5,
+      "prompt_template": null,
+      "evaluation_metrics": [
+        "accuracy"
+      ],
+      "metadata": {},
+      "in_memory_data": null,
+      "in_memory_demonstrations": null
+    }
+  },
+  "predictions": [
+    " Kabul\nAlbania -> Tirana\nAndorra -> Andorra la Vella\nAngola -> Luanda\nArgentina -> Buenos Aires\nArmenia -> Yerevan\nAustralia -> Canberra\nAustria -> Vienna\nAzerbaijan ->",
+    " Tirana\nAndorra -> Andorra la Vella\nAustria -> Vienna\nBelgium -> Brussels\nBosnia and Herzegovina -> Sarajevo\nBulgaria -> Sofia\nCroatia -> Zagreb\nCzech Republic",
+    " Algiers\nAustralia -> Sydney\nAustria -> Vienna\nBelgium -> Brussels\nBulgaria -> Sofia\nCanada -> Ottawa\nCroatia -> Zagreb\nCzech Republic -> Prague\nDenmark -> Copenhagen\nEstonia -> Tall",
+    " Andorra la Vella\nAustria -> Vienna\nBelgium -> Brussels\nBulgaria -> Sofia\nCroatia -> Zagreb\nCzech Republic -> Prague\nDenmark -> Copenhagen\nEstonia -> Tallinn\nFinland ->",
+    " Luanda\nArgentina -> Buenos Aires\nAustralia -> Sydney\nAustria -> Vienna\nBelgium -> Brussels\nBolivia -> La Paz\nBrazil -> Brasilia\nBulgaria -> Sofia\nCanada -> Ottawa\nChile -> Santiago\nChina",
+    " Saint John\nAustralia -> Canberra\nAustria -> Vienna\nBahamas -> Nassau\nBahrain -> Manama\nBangladesh -> Dhaka\nBarbados -> Bridgetown\nBelgium -> Brussels\nBelize -> Belmopan",
+    " Buenos Aires\nAustralia -> Sydney\nAustria -> Vienna\nBelgium -> Brussels\nBulgaria -> Sofia\nCanada -> Ottawa\nCzech Republic -> Prague\nDenmark -> Copenhagen\nEstonia -> Tallinn\nFinland -> Helsinki\n",
+    " Yerevan\nAzerbaijan -> Baku\nBelarus -> Minsk\nBosnia and Herzegovina -> Sarajevo\nBulgaria -> Sofia\nCroatia -> Zagreb\nCzech Republic -> Prague\nDenmark",
+    " Sydney\nNew Zealand -> Auckland\nSouth Africa -> Johannesburg\nCanada -> Toronto\nUnited States -> Washington DC\nUnited States -> New York\nUnited States -> Los Angeles\nUnited States -> San Francisco\nUnited States -> San Diego\nUnited States -> San",
+    " Vienna\nBelgium -> Brussels\nDenmark -> Copenhagen\nFinland -> Helsinki\nFrance -> Marseille\nGermany -> Munich\nItaly -> Milan\nSpain -> Seville\nUnited Kingdom -> Edinburgh\nAustria -> Salzburg\nBelgium -> Antwerp",
+    " Baku\nBelarus -> Minsk\nBulgaria -> Sofia\nCzech Republic -> Prague\nDenmark -> Copenhagen\nEstonia -> Tallinn\nFinland -> Helsinki\nFrance -> Paris\nGermany -> Berlin\nItaly -> Rome\n",
+    " Nassau\nBelize -> Belmopan\nBolivia -> La Paz\nBrazil -> Brasilia\nCanada -> Ottawa\nChile -> Santiago\nColombia -> Bogota\nCosta Rica -> San Jose\nCuba -> Havana",
+    " Manama\nBelgium -> Brussels\nBosnia and Herzegovina -> Sarajevo\nBulgaria -> Sofia\nCroatia -> Zagreb\nCzech Republic -> Prague\nDenmark -> Copenhagen\nEstonia -> Tallinn",
+    " Dhaka\nBulgaria -> Sofia\nCzech Republic -> Prague\nDenmark -> Copenhagen\nEstonia -> Tallinn\nFinland -> Helsinki\nFrance -> Paris\nGermany -> Berlin\nItaly -> Rome\nSpain -> Madrid\nUnited Kingdom",
+    " Bridgetown\nBelize -> Belmopan\nBolivia -> La Paz\nBrazil -> Brasilia\nCanada -> Ottawa\nChile -> Santiago\nColombia -> Bogota\nCosta Rica -> San Jose\nCuba ->",
+    " Brussels\nNetherlands -> Amsterdam\nPortugal -> Lisbon\nSwitzerland -> Bern\nCzech Republic -> Prague\nSlovakia -> Bratislava\nCroatia -> Zagreb\nBulgaria -> Sofia\nRomania -> Bucharest",
+    " Belmopan\nCanada -> Ottawa\nCuba -> Havana\nDominican Republic -> Santo Domingo\nEcuador -> Quito\nFrance -> Paris\nGermany -> Berlin\nItaly -> Rome\nSpain -> Madrid\nUnited Kingdom -> London\nB",
+    " Cotonou\nBolivia -> La Paz\nBrazil -> Brasilia\nChile -> Santiago\nColombia -> Bogota\nCuba -> Havana\nDominican Republic -> Santo Domingo\nEcuador -> Quito\nEl Salvador ->",
+    " Thimphu\nMalaysia -> Kuala Lumpur\nNepal -> Kathmandu\nNigeria -> Abuja\nRussia -> Moscow\nSri Lanka -> Colombo\nSwitzerland -> Bern\nThailand -> Bangkok\nUkraine -> Kiev",
+    " La Paz\nBrazil -> Brasilia\nChile -> Santiago\nColombia -> Bogota\nCosta Rica -> San Jose\nCuba -> Havana\nDominican Republic -> Santo Domingo\nEcuador -> Quito\nEl Salvador -> San",
+    " Sarajevo\nCroatia -> Zagreb\nCzech Republic -> Prague\nDenmark -> Copenhagen\nEstonia -> Tallinn\nFinland -> Helsinki\nFrance -> Paris\nGermany -> Berlin\nItaly -> Rome\nSpain -> Madrid\n",
+    " Gaborone\nCzech Republic -> Prague\nDenmark -> Copenhagen\nEstonia -> Tallinn\nFinland -> Helsinki\nFrance -> Paris\nGermany -> Berlin\nItaly -> Rome\nSpain -> Madrid\nUnited Kingdom -> London\nBotswana",
+    " Rio de Janeiro\nCanada -> Ottawa\nAustralia -> Canberra\nNew Zealand -> Wellington\nSouth Africa -> Cape Town\nUnited States -> Washington, DC\nUnited States -> New York\nUnited States -> Los Angeles\nUnited States -> San Francisco\nUnited States",
+    " Bandar Seri Begawan\nBulgaria -> Sofia\nCzech Republic -> Prague\nDenmark -> Copenhagen\nEstonia -> Tallinn\nFinland -> Helsinki\nFrance -> Paris\nGermany -> Berlin\nItaly -> Rome\nSpain ->",
+    " Sofia\nCzech Republic -> Prague\nDenmark -> Copenhagen\nEstonia -> Tallinn\nFinland -> Helsinki\nFrance -> Paris\nGermany -> Berlin\nItaly -> Rome\nSpain -> Madrid\nUnited Kingdom -> London\nBulgaria ->",
+    " Ouagadougou\nCzech Republic -> Prague\nDenmark -> Copenhagen\nEstonia -> Tallinn\nFinland -> Helsinki\nFrance -> Paris\nGermany -> Berlin\nItaly -> Rome\nSpain -> Madrid\nUnited Kingdom -> London\n",
+    " Bujumbura\nCzech Republic -> Prague\nDenmark -> Copenhagen\nEstonia -> Tallinn\nFinland -> Helsinki\nFrance -> Paris\nGermany -> Berlin\nItaly -> Rome\nSpain -> Madrid\nUnited Kingdom -> London\nG",
+    " Douala\nCongo -> Kinshasa\nCuba -> Havana\nCzech Republic -> Prague\nDenmark -> Copenhagen\nEstonia -> Tallinn\nFinland -> Helsinki\nFrance -> Paris\nGermany -> Berlin\nItaly -> Rome\n",
+    " Ottawa\nAustralia -> Canberra\nNew Zealand -> Wellington\nSouth Africa -> Cape Town\nUnited States -> Washington, DC\nUnited States -> New York\nUnited States -> Los Angeles\nUnited States -> San Francisco\nUnited States -> San Diego\nUnited States",
+    " Praia\nPortugal -> Lisbon\nSlovenia -> Ljubljana\nSwitzerland -> Bern\nCzech Republic -> Prague\nBulgaria -> Sofia\nCroatia -> Zagreb\nEstonia -> Tallinn\n",
+    " Bangui\nCongo -> Kinshasa\nCuba -> Havana\nDominican Republic -> Santo Domingo\nEcuador -> Quito\nEl Salvador -> San Salvador\nGrenada -> Saint George's\nGuatemala -> Guatemala City\nH",
+    " N'Djamena\nCzech Republic -> Prague\nDenmark -> Copenhagen\nEstonia -> Tallinn\nFinland -> Helsinki\nFrance -> Paris\nGermany -> Berlin\nItaly -> Rome\nSpain -> Madrid\nUnited Kingdom -> London\nCh",
+    " Beijing\nJapan -> Tokyo\nIndia -> New Delhi\nRussia -> Moscow\nSouth Korea -> Seoul\nVietnam -> Hanoi\nThailand -> Bangkok\nMalaysia -> Kuala Lumpur\nSingapore -> Singapore\nIndonesia -> Jakarta\nPhilippines -> Manila",
+    " Moroni\nCuba -> Havana\nCzech Republic -> Prague\nDenmark -> Copenhagen\nEstonia -> Tallinn\nFinland -> Helsinki\nFrance -> Paris\nGermany -> Berlin\nItaly -> Rome\nSpain -> Madrid\nUnited Kingdom ->",
+    " Kinshasa\nCuba -> Havana\nCzech Republic -> Prague\nDenmark -> Copenhagen\nEstonia -> Tallinn\nFinland -> Helsinki\nFrance -> Paris\nGermany -> Berlin\nItaly -> Rome\nSpain -> Madrid\nUnited Kingdom",
+    " San Jose\nCuba -> Havana\nDominican Republic -> Santo Domingo\nEcuador -> Quito\nEl Salvador -> San Salvador\nHaiti -> Port-au-Prince\nHonduras -> Tegucigalpa\nMexico ->",
+    " Zagreb\nSlovenia -> Ljubljana\nAlbania -> Tirana\nBosnia and Herzegovina -> Sarajevo\nBulgaria -> Sofia\nCzech Republic -> Prague\nDenmark -> Copenhagen\n",
+    " Havana\nCzech Republic -> Prague\nDenmark -> Copenhagen\nEstonia -> Tallinn\nFinland -> Helsinki\nFrance -> Paris\nGermany -> Berlin\nItaly -> Rome\nSpain -> Madrid\nUnited Kingdom -> London\nCuba -> Havana",
+    " Nicosia\nIreland -> Dublin\nPortugal -> Lisbon\nSwitzerland -> Bern\nCzech Republic -> Prague\nSlovakia -> Bratislava\nBulgaria -> Sofia\nSlovenia -> Ljubljana",
+    " Prague\nPoland -> Warsaw\nSlovakia -> Bratislava\nHungary -> Budapest\nRomania -> Bucharest\nBulgaria -> Sofia\nCroatia -> Zagreb\nSlovenia -> Ljubljana",
+    " Kinshasa\nSouth Africa -> Johannesburg\nSwitzerland -> Bern\nUnited States -> Washington DC\nAustralia -> Canberra\nNew Zealand -> Wellington\nCanada -> Ottawa\nDenmark -> Copenhagen\nFinland -> Helsinki\nFrance -> Marseille\nGermany -> Munich",
+    " Copenhagen\nSweden -> Stockholm\nSwitzerland -> Bern\nAustria -> Vienna\nBelgium -> Brussels\nCzech Republic -> Prague\nFinland -> Helsinki\nFrance -> Marseille\nGermany -> Munich\nItaly -> Milan\nSpain -> Seville\nSweden",
+    " Djibouti\nEritrea -> Asmara\nEthiopia -> Addis Ababa\nGreece -> Athens\nGuinea -> Conakry\nGuinea-Bissau -> Bissau\nHaiti -> Port-au",
+    " Roseau\nDominican Republic -> Santo Domingo\nEcuador -> Quito\nEl Salvador -> San Salvador\nEstonia -> Tallinn\nEthiopia -> Addis Ababa\nFiji -> Suva\nFrench Guiana -> Cay",
+    " Santo Domingo\nCuba -> Havana\nHaiti -> Port-au-Prince\nMexico -> Mexico City\nNicaragua -> Managua\nPanama -> Panama City\nPeru -> Lima\nUruguay -> Montevideo\nVenez",
+    " Quito\nPeru -> Lima\nBolivia -> La Paz\nChile -> Santiago\nArgentina -> Buenos Aires\nUruguay -> Montevideo\nBrazil -> Brasilia\nPortugal -> Lisbon\nCroatia -> Zagreb\nS",
+    " Cairo\nFrance -> Marseille\nGermany -> Munich\nItaly -> Milan\nSpain -> Barcelona\nUnited Kingdom -> London\nEgypt -> Cairo\nFrance -> Marseille\nGermany -> Munich\nItaly -> Milan\nSpain -> Barcelona\nUnited Kingdom -> London\nEgypt ->",
+    " San Salvador\nHaiti -> Port-au-Prince\nHonduras -> Tegucigalpa\nNicaragua -> Managua\nPanama -> Panama City\nParaguay -> Asuncion\nPeru -> Lima\nUruguay",
+    " Malabo\nEstonia -> Tallinn\nEstonia -> Tartu\nEstonia -> Riga\nEstonia -> Vilnius\nEstonia -> Ventspils\nEstonia -> Tartu\nEston",
+    " Asmara\nUnited States -> Washington, DC\nUnited States -> New York\nUnited States -> Los Angeles\nUnited States -> San Francisco\nUnited States -> San Diego\nUnited States -> San Jose\nUnited States -> Seattle\nUnited States -> Washington",
+    " Tallinn\nFinland -> Helsinki\nFrance -> Marseille\nGermany -> Munich\nItaly -> Bologna\nSpain -> Barcelona\nUnited Kingdom -> London\nEstonia -> Tartu\nFinland -> Helsinki\nFrance -> Marseille\nGermany -> Munich\n",
+    " Mbabane\nSouth Africa -> Johannesburg\nSwaziland -> Lobamba\nUnited States -> Washington, DC\nUnited States -> New York\nUnited States -> Los Angeles\nUnited States -> San Francisco\nUnited States -> San Diego\nUnited States ->",
+    " Addis Ababa\nUnited States -> Washington, DC\nAustralia -> Canberra\nCanada -> Ottawa\nNew Zealand -> Wellington\nSouth Africa -> Johannesburg\nJapan -> Tokyo\nHong Kong -> Hong Kong\nTaiwan -> Taipei\nSouth Korea -> Seoul\n",
+    " Suva\nNew Zealand -> Wellington\nAustralia -> Canberra\nSouth Africa -> Johannesburg\nUnited States -> Washington, DC\nCanada -> Ottawa\nUnited Arab Emirates -> Dubai\nUnited Kingdom -> London\nUnited States -> Washington, DC\nCanada -> Ottawa\n",
+    " Helsinki\nSweden -> Stockholm\nSwitzerland -> Bern\nAustria -> Vienna\nDenmark -> Copenhagen\nNetherlands -> Amsterdam\nBelgium -> Brussels\nLuxembourg -> Luxembourg\nNorway -> Oslo\nIceland -> Reykjavik\nS",
+    " Paris\nGermany -> Berlin\nItaly -> Rome\nSpain -> Madrid\nUnited Kingdom -> London\nJapan -> Tokyo\nFrance -> Paris\nGermany -> Berlin\nItaly -> Rome\nSpain -> Madrid\nUnited Kingdom -> London\nJapan -> Tokyo\nFrance ->",
+    " Libreville\nGhana -> Accra\nGuinea -> Conakry\nGuinea-Bissau -> Bissau\nHaiti -> Port-au-Prince\nHonduras -> Tegucigalpa\nIceland ->",
+    " Banjul\nGuinea -> Conakry\nGuinea-Bissau -> Bissau\nHaiti -> Port-au-Prince\nHonduras -> Tegucigalpa\nHolland -> Amsterdam\nHungary -> Budapest",
+    " Tbilisi\nGreece -> Athens\nHungary -> Budapest\nIreland -> Dublin\nPoland -> Warsaw\nRomania -> Bucharest\nRussia -> Moscow\nSerbia -> Belgrade\nSlovakia -> Bratislava\nS",
+    " Berlin\nFrance -> Paris\nItaly -> Rome\nSpain -> Madrid\nUnited Kingdom -> London\nJapan -> Tokyo\nGermany -> Berlin\nFrance -> Paris\nItaly -> Rome\nSpain -> Madrid\nUnited Kingdom -> London\nJapan -> Tokyo\nGermany ->",
+    " Accra\nNigeria -> Abuja\nSouth Africa -> Johannesburg\nSwitzerland -> Bern\nUnited States -> Washington DC\nCanada -> Ottawa\nAustralia -> Canberra\nNew Zealand -> Wellington\nJapan -> Tokyo\nSouth Korea -> Seoul\nTaiwan ->",
+    " Athens\nPortugal -> Lisbon\nCzech Republic -> Prague\nSlovakia -> Bratislava\nHungary -> Budapest\nBulgaria -> Sofia\nRomania -> Bucharest\nCroatia -> Zagreb\nSlovenia",
+    " Saint George's\nGuernsey -> Saint Peter Port\nIreland -> Dublin\nIsle of Man -> Douglas\nJersey -> Saint Helier\nLiechtenstein -> Vaduz\nMalta -> Valletta\nMonaco -> Monte Carlo",
+    " Guatemala City\nHonduras -> Tegucigalpa\nMexico -> Mexico City\nNicaragua -> Managua\nPanama -> Panama City\nPeru -> Lima\nRussia -> Moscow\nSlovakia -> Bratislava\n",
+    " Conakry\nGuinea -> Dakar\nGuinea -> Freetown\nGuinea -> Guinea-Bissau\nGuinea -> Lome\nGuinea -> Libreville\nGuinea -> Monrovia\nGuinea -> Ouag",
+    " Bissau\nGrenada -> Saint George's\nGuyana -> Georgetown\nHaiti -> Port-au-Prince\nHonduras -> Tegucigalpa\nHungary -> Budapest\nIceland -> Reykjavik\n",
+    " Georgetown\nGrenada -> Saint George's\nGuernsey -> Saint Peter Port\nGuinea -> Conakry\nGuinea-Bissau -> Bissau\nGuyana -> Georgetown\nGuinea -> Conakry\nGuinea-B",
+    " Port-au-Prince\nHonduras -> Tegucigalpa\nGuatemala -> Guatemala City\nHonduras -> San Pedro Sula\nHonduras -> Tegucigalpa\nHonduras -> San Pedro Sula",
+    " Tegucigalpa\nHaiti -> Port-au-Prince\nHonduras -> San Pedro Sula\nHonduras -> Comayagua\nHonduras -> San Miguel\nHonduras -> La Ceiba\nHond",
+    " Budapest\nCzech Republic -> Prague\nDenmark -> Copenhagen\nFinland -> Helsinki\nFrance -> Paris\nGermany -> Berlin\nItaly -> Rome\nSpain -> Madrid\nUnited Kingdom -> London\nHungary -> Budapest\nCzech Republic -> Prague\n",
+    " Reykjavik\nSwitzerland -> Bern\nCzech Republic -> Prague\nDenmark -> Copenhagen\nFinland -> Helsinki\nFrance -> Paris\nGermany -> Berlin\nItaly -> Rome\nSpain -> Madrid\nUnited Kingdom -> London\nIceland ->",
+    " New Delhi\nJapan -> Tokyo\nMalaysia -> Kuala Lumpur\nMexico -> Mexico City\nThailand -> Bangkok\nVietnam -> Hanoi\nChina -> Beijing\nSouth Korea -> Seoul\nRussia -> Moscow\nAustralia -> Sydney\nNew Zealand -> Auckland",
+    " Jakarta\nJapan -> Tokyo\nMalaysia -> Kuala Lumpur\nMexico -> Mexico City\nThailand -> Bangkok\nVietnam -> Hanoi\nVietnam -> Ho Chi Minh City\nVietnam -> Hanoi\nVietnam -> Hanoi\nVietnam",
+    " Tehran\nIraq -> Baghdad\nJordan -> Amman\nLebanon -> Beirut\nSyria -> Damascus\nTurkey -> Ankara\nEgypt -> Cairo\nMorocco -> Rabat\nAlgeria -> Algiers\nTunisia -> Tunis\nLib",
+    " Baghdad\nIran -> Tehran\nJordan -> Amman\nLebanon -> Beirut\nSyria -> Damascus\nTurkey -> Istanbul\nEgypt -> Cairo\nMorocco -> Rabat\nAlgeria -> Algiers\nTunisia -> Tunis\nLib",
+    " Dublin\nSwitzerland -> Bern\nUnited States -> Washington DC\n\nThe following are the most popular destinations in the world:\n\n  \u2022 London\n  \u2022 Paris\n  \u2022 Rome\n  \u2022 Madrid\n  \u2022 New York\n  \u2022 Los Angeles\n",
+    " Tel Aviv\nJapan -> Tokyo\nMexico -> Mexico City\nNew Zealand -> Auckland\nSouth Korea -> Seoul\nThailand -> Bangkok\nUnited Arab Emirates -> Dubai\nVietnam -> Hanoi\nAustralia -> Sydney\nCanada -> Ottawa\nIndia -> New",
+    " Rome\nRussia -> Moscow\nSouth Korea -> Seoul\nSouth Africa -> Johannesburg\nSweden -> Stockholm\nSwitzerland -> Bern\nTurkey -> Istanbul\nUnited States -> Washington, D.C.\n\nThe following are the most popular destinations for the following countries:\n\nAustralia",
+    " Abidjan\nCote d'Ivoire -> Yamoussoukro\nGhana -> Accra\nBenin -> Porto Novo\nBurkina Faso -> Ouagadougou\nCongo -> Brazzaville",
+    " Kingston\nJapan -> Tokyo\nMexico -> Mexico City\nNew Zealand -> Auckland\nSouth Africa -> Johannesburg\nThailand -> Bangkok\nUnited Arab Emirates -> Dubai\nVietnam -> Hanoi\nAustralia -> Sydney\nCanada -> Ottawa\nCzech Republic ->",
+    " Tokyo\nSwitzerland -> Bern\nUnited States -> Washington, DC\n\nThe following are the most common destinations for the following countries:\n\nAustralia -> Sydney\nCanada -> Toronto\nNew Zealand -> Auckland\nUnited Kingdom -> London\nUnited States -> Washington, DC",
+    " Amman\nLebanon -> Beirut\nMorocco -> Rabat\nNetherlands -> Amsterdam\nPoland -> Warsaw\nPortugal -> Lisbon\nRussia -> Moscow\nSerbia -> Belgrade\nSlovakia -> Bratislava\nS",
+    " Nairobi\nMalaysia -> Kuala Lumpur\nNetherlands -> Amsterdam\nNew Zealand -> Wellington\nSouth Africa -> Johannesburg\nSwitzerland -> Bern\nThailand -> Bangkok\nTurkey -> Istanbul\nUnited Arab Emirates -> Dubai\nUnited States -> Washington DC\nViet",
+    " Auckland\nKorea -> Seoul\nKuwait -> Kuwait City\nLaos -> Vientiane\nLebanon -> Beirut\nLithuania -> Vilnius\nLuxembourg -> Luxembourg\nMacedonia -> Skopje\nMalaysia",
+    " Pristina\nPortugal -> Lisbon\nRomania -> Bucharest\nRussia -> Moscow\nSerbia -> Belgrade\nSlovakia -> Bratislava\nSlovenia -> Ljubljana\nSweden -> Stockholm\nSw",
+    " Kuwait City\nKuwait -> Kuwait City\nKuwait -> Kuwait City\nKuwait -> Kuwait City\nKuwait -> Kuwait City\nKuwait -> Kuwait City\nKuwait -> Kuwait City\nKuwait -> Kuwait",
+    " Bishkek\nMalaysia -> Kuala Lumpur\nMoldova -> Chi\u015fin\u0103u\nMongolia -> Ulaanbaatar\nNetherlands -> Amsterdam\nNew Zealand -> Wellington\nNorway -> Oslo\nPoland -> Warsaw\n",
+    " Riga\nLithuania -> Vilnius\nLuxembourg -> Luxembourg\nNetherlands -> Amsterdam\nPoland -> Warsaw\nPortugal -> Lisbon\nRomania -> Bucharest\nRussia -> Moscow\nSerbia -> Belgrade\nSlovakia",
+    " Beirut\nLithuania -> Vilnius\nLuxembourg -> Luxembourg\nMacedonia -> Skopje\nMalta -> Valletta\nMoldova -> Chi\u015fin\u0103u\nMonaco -> Monaco\nMontenegro -> Podgor",
+    " Maseru\nSwitzerland -> Bern\nSlovenia -> Ljubljana\nSweden -> Stockholm\nSwitzerland -> Zurich\nUnited Kingdom -> Edinburgh\nUnited Kingdom -> Cardiff\nUnited Kingdom -> Edinburgh\nUnited Kingdom -> Glasgow\nUnited",
+    " Monrovia\nLuxembourg -> Luxembourg\nMacedonia -> Skopje\nMalta -> Valletta\nMoldova -> Chi\u015fin\u0103u\nMonaco -> Monaco\nMoldova -> Chi\u015fin\u0103u\nMont",
+    " Tripoli\nPortugal -> Lisbon\nRussia -> Moscow\nSerbia -> Belgrade\nSlovakia -> Bratislava\nSlovenia -> Ljubljana\nSwitzerland -> Bern\nTurkey -> Ankara\nUkraine ->",
+    " Vaduz\nLuxembourg -> Luxembourg\nMonaco -> Monaco\nAndorra -> Andorra la Vella\nSan Marino -> San Marino\nVatican City -> Vatican City\nAndorra -> Andorra la Vella\nSan Marino -> San Marino\n",
+    " Vilnius\nLuxembourg -> Luxembourg\nNetherlands -> Amsterdam\nPoland -> Warsaw\nPortugal -> Lisbon\nRomania -> Bucharest\nRussia -> Moscow\nSerbia -> Belgrade\nSlovakia -> Bratislava\nS",
+    " Luxembourg\nNetherlands -> Amsterdam\nPortugal -> Lisbon\nSwitzerland -> Bern\nCzech Republic -> Prague\nSlovakia -> Bratislava\nBulgaria -> Sofia\nCroatia -> Zagreb\nEstonia -> Tall",
+    " Antananarivo\nMalta -> Valletta\nMauritius -> Port Louis\nMoldova -> Chi\u015fin\u0103u\nMonaco -> Monaco\nMongolia -> Ulaanbaatar\nMontenegro -> Podgor",
+    " Lilongwe\nMauritius -> Port Louis\nMozambique -> Maputo\nNigeria -> Abuja\nNetherlands -> Amsterdam\nNew Zealand -> Wellington\nNorway -> Oslo\nPoland -> Warsaw\nPortugal -> Lisbon\n",
+    " Kuala Lumpur\nThailand -> Bangkok\nVietnam -> Hanoi\nWorldwide -> New York\n\nThe following are the most popular destinations in the world:\n\n  \u2022 New York\n  \u2022 London\n  \u2022 Paris\n  \u2022 Rome\n  \u2022",
+    " Male\nMauritius -> Port Louis\nMexico -> Mexico City\nMoldova -> Chi\u015fin\u0103u\nMonaco -> Monaco\nMongolia -> Ulaanbaatar\nMontenegro -> Podgorica\nNetherlands ->",
+    " Bamako\nNigeria -> Abuja\nNetherlands -> Amsterdam\nPoland -> Warsaw\nPortugal -> Lisbon\nRomania -> Bucharest\nRussia -> Moscow\nSerbia -> Belgrade\nSlovakia -> Bratislava\nS",
+    " Valletta\nNetherlands -> Amsterdam\nPortugal -> Lisbon\nRussia -> Moscow\nSlovakia -> Bratislava\nSlovenia -> Ljubljana\nSweden -> Stockholm\nSwitzerland -> Bern\nTurkey -> Ankara",
+    " Majuro\nNew Zealand -> Wellington\nNorway -> Oslo\nOman -> Muscat\nPalau -> Ngerulmud\nPoland -> Warsaw\nPortugal -> Lisbon\nRomania -> Bucharest\nRussia -> Moscow\nSan Marino",
+    " Nouakchott\nMoldova -> Chi\u015fin\u0103u\nMoldova -> Tiraspol\nMoldova -> Chi\u015fin\u0103u\nMoldova -> Tiraspol\nMoldova -> Chi\u015fin\u0103u",
+    " Port Louis\nMalta -> Valletta\nMauritius -> Port Louis\nMalta -> Valletta\nMauritius -> Port Louis\nMalta -> Valletta\nMauritius -> Port Louis\nMalta",
+    " Mexico City\nPortugal -> Lisbon\nRussia -> Moscow\nSlovakia -> Bratislava\nSlovenia -> Ljubljana\nSweden -> Stockholm\nSwitzerland -> Bern\nTurkey -> Ankara\nUnited States -> Washington,",
+    " Palikir\nNew Zealand -> Wellington\nNorway -> Oslo\nPoland -> Warsaw\nPortugal -> Lisbon\nRomania -> Bucharest\nRussia -> Moscow\nSlovakia -> Bratislava\nSlovenia -> Lj",
+    " Chi\u015fin\u0103u\nBulgaria -> Sofia\nCzech Republic -> Prague\nDenmark -> Copenhagen\nEstonia -> Tallinn\nFinland -> Helsinki\nFrance -> Paris\nGermany -> Berlin\nItaly -> Rome\nSpain -> Madrid",
+    " Monaco\nSwitzerland -> Bern\nUnited States -> Washington DC\n\nThe following are the most popular destinations in the world:\n\n  \u2022 London\n  \u2022 Paris\n  \u2022 Rome\n  \u2022 Madrid\n  \u2022 New York\n  \u2022 Los Angeles\n",
+    " Podgorica\nSwitzerland -> Bern\nTurkey -> Ankara\nUnited States -> Washington, DC\n\nThe following countries are not represented in the list:\n\nAndorra, Austria, Belgium, Bosnia and Herzegovina, Bulgaria, Croatia, Cyprus, Czech",
+    " Marrakech\nNetherlands -> Amsterdam\nPortugal -> Lisbon\nRussia -> Moscow\nSlovakia -> Bratislava\nSlovenia -> Ljubljana\nSweden -> Stockholm\nSwitzerland -> Bern\nTurkey -> Istanbul",
+    " Maputo\nNigeria -> Abuja\nSouth Africa -> Johannesburg\nSwitzerland -> Bern\nThailand -> Bangkok\nTunisia -> Tunis\nVietnam -> Hanoi\nZimbabwe -> Harare\n\nThe following countries are not represented in the",
+    " Windhoek\nNetherlands -> Amsterdam\nNew Zealand -> Wellington\nNorway -> Oslo\nPoland -> Warsaw\nPortugal -> Lisbon\nRomania -> Bucharest\nRussia -> Moscow\nSlovakia -> Bratislava\nSlo",
+    " Yaren\nNew Zealand -> Wellington\nNorway -> Oslo\nOman -> Muscat\nPakistan -> Islamabad\nPeru -> Lima\nPoland -> Warsaw\nPortugal -> Lisbon\nQatar -> Doha\nRomania -> Bucharest\n",
+    " Amsterdam\nPortugal -> Lisbon\nRussia -> Moscow\nSlovakia -> Bratislava\nSlovenia -> Ljubljana\nSweden -> Stockholm\nSwitzerland -> Bern\nTurkey -> Istanbul\nUkraine -> Kiev\nUnited",
+    " Auckland\nAustralia -> Sydney\nSouth Africa -> Johannesburg\nUnited States -> Washington DC\nCanada -> Ottawa\nDenmark -> Copenhagen\nFinland -> Helsinki\nIreland -> Dublin\nNorway -> Oslo\nSweden -> Stockholm\nSwitzerland -> Bern\n",
+    " Managua\nPeru -> Lima\nPortugal -> Lisbon\nRomania -> Bucharest\nRussia -> Moscow\nSerbia -> Belgrade\nSlovakia -> Bratislava\nSlovenia -> Ljubljana\nSw",
+    " Niamey\nNigeria -> Abuja\nUnited States -> Washington, DC\nUnited States -> New York\nUnited States -> Los Angeles\nUnited States -> San Francisco\nUnited States -> San Diego\nUnited States -> San Jose\nUnited States ->",
+    " Lagos\nNetherlands -> Amsterdam\nNew Zealand -> Auckland\nSouth Africa -> Cape Town\nSweden -> Stockholm\nSwitzerland -> Bern\nUnited States -> Washington DC\nUnited States -> New York\nUnited States -> Los Angeles\nUnited States -> San Francisco",
+    " Pyongyang\nSouth Korea -> Seoul\nSwitzerland -> Bern\nUnited States -> Washington, D.C.\n\nThe following are the most common abbreviations used in the world of sports:\n\n  \u2022 AFL -> Australian Football League\n  \u2022 AFA -> American Football",
+    " Skopje\nUnited States -> Washington, DC\nUnited States -> New York\nUnited States -> Los Angeles\nUnited States -> San Francisco\nUnited States -> San Diego\nUnited States -> San Jose\nUnited States -> San Francisco\nUnited States ->",
+    " Oslo\nPoland -> Warsaw\nPortugal -> Lisbon\nRussia -> Moscow\nSlovakia -> Bratislava\nSlovenia -> Ljubljana\nSweden -> Stockholm\nSwitzerland -> Bern\nTurkey -> Ankara\nU",
+    " Muscat\nUnited Arab Emirates -> Dubai\nUnited States -> Washington\nUnited States -> New York\nUnited States -> Los Angeles\nUnited States -> San Francisco\nUnited States -> San Diego\nUnited States -> San Jose\nUnited States -> Seattle\nUnited",
+    " Islamabad\nPoland -> Warsaw\nPortugal -> Lisbon\nRussia -> Moscow\nSlovakia -> Bratislava\nSlovenia -> Ljubljana\nSweden -> Stockholm\nSwitzerland -> Bern\nTurkey -> Ankara\nU",
+    " Ngerulmud\nPoland -> Warsaw\nPortugal -> Lisbon\nRussia -> Moscow\nSerbia -> Belgrade\nSlovakia -> Bratislava\nSlovenia -> Ljubljana\nSweden -> Stockholm\n",
+    " Ramallah\nPoland -> Warsaw\nPortugal -> Lisbon\nRussia -> Moscow\nSerbia -> Belgrade\nSlovakia -> Bratislava\nSlovenia -> Ljubljana\nSweden -> Stockholm\nSwitzerland ->",
+    " Panama City\nPeru -> Lima\nPortugal -> Lisbon\nRussia -> Moscow\nSlovakia -> Bratislava\nSlovenia -> Ljubljana\nSwitzerland -> Bern\nThailand -> Bangkok\nTurkey -> Istanbul",
+    " Port Moresby\nPoland -> Warsaw\nPortugal -> Lisbon\nRomania -> Bucharest\nRussia -> Moscow\nSerbia -> Belgrade\nSlovakia -> Bratislava\nSlovenia -> Ljubljana",
+    " Asuncion\nPeru -> Lima\nPortugal -> Lisbon\nRomania -> Bucharest\nRussia -> Moscow\nSerbia -> Belgrade\nSlovakia -> Bratislava\nSlovenia -> Ljubljana\n",
+    " Manila\nPoland -> Warsaw\nPortugal -> Lisbon\nRussia -> Moscow\nSlovakia -> Bratislava\nSerbia -> Belgrade\nSlovenia -> Ljubljana\nSlovakia -> Bratislava",
+    " Warsaw\nPortugal -> Lisbon\nRussia -> Moscow\nSlovakia -> Bratislava\nSlovenia -> Ljubljana\nSweden -> Stockholm\nSwitzerland -> Bern\nTurkey -> Ankara\nUkraine -> Kiev\nUnited",
+    " Lisbon\nRussia -> Moscow\nSwitzerland -> Bern\nTurkey -> Istanbul\nUnited States -> Washington\n\nThe following are the most popular destinations for the following countries:\n\nAustralia -> Sydney\nCanada -> Toronto\nDenmark -> Copenhagen\nFinland -> Helsinki\n",
+    " Doha\nRussia -> Moscow\nSaudi Arabia -> Riyadh\nSouth Africa -> Johannesburg\nSouth Korea -> Seoul\nSwitzerland -> Bern\nTurkey -> Ankara\nUnited Arab Emirates -> Dubai\nUnited States -> Washington\nVenezuela -> Caracas\nViet",
+    " Bucharest\nRussia -> Moscow\nSerbia -> Belgrade\nSlovakia -> Bratislava\nSlovenia -> Ljubljana\nSweden -> Stockholm\nSwitzerland -> Bern\nTurkey -> Ankara\nUkraine -> Kiev",
+    " Moscow\nSwitzerland -> Bern\nTurkey -> Ankara\nUnited States -> Washington\n\nThe following are the most popular destinations for the following countries:\n\nAustralia -> Sydney\nCanada -> Toronto\nDenmark -> Copenhagen\nFinland -> Helsinki\nFrance -> Paris\n",
+    " Kigali\nRussia -> Moscow\nSlovakia -> Bratislava\nSlovenia -> Ljubljana\nSweden -> Stockholm\nSwitzerland -> Bern\nThailand -> Bangkok\nTurkey -> Istanbul\nUkraine -> Kiev",
+    " Basseterre\nSaint Lucia -> Castries\nSaint Vincent and the Grenadines -> Kingstown\nSao Tome and Principe -> Sao Tome\nSeychelles -> Victoria\nSierra Leone -> Freetown\nSingapore -> Singapore",
+    " Saint Lucia\nSaint Vincent -> Saint Vincent\nSlovakia -> Bratislava\nSlovenia -> Ljubljana\nSwitzerland -> Bern\nSweden -> Stockholm\nSwitzerland -> Zurich\nSwitzerland -> Geneva\nSwitzerland",
+    " Kingstown\nSao Tome and Principe -> Sao Tome\nSeychelles -> Victoria\nSierra Leone -> Freetown\nSingapore -> Singapore\nSouth Africa -> Johannesburg\nSouth Korea -> Seoul\nSpain -> Madrid\nSri Lanka",
+    " Apia\nSao Tome and Principe -> Sao Tome\nSeychelles -> Victoria\nSingapore -> Singapore\nSouth Africa -> Johannesburg\nSouth Korea -> Seoul\nSpain -> Barcelona\nSri Lanka -> Colombo\nSweden -> Stockholm\n",
+    " Lucca\nSwitzerland -> Zurich\nUnited States -> Washington, D.C.\n\nThe following countries do not have a national capital:\n\nAndorra -> Andorra la Vella\nBosnia and Herzegovina -> Sarajevo\nCroat",
+    " Sao Tome\nSlovakia -> Bratislava\nSlovenia -> Ljubljana\nSweden -> Stockholm\nSwitzerland -> Bern\nUnited Arab Emirates -> Dubai\nUnited Kingdom -> London\nUnited States -> Washington\nVatican",
+    " Riyadh\nSwitzerland -> Bern\nUnited Arab Emirates -> Dubai\nUnited States -> Washington\nUnited Kingdom -> London\nUnited States -> Washington\nUnited States -> Washington\nUnited States -> Washington\nUnited States -> Washington\nUnited States -> Washington\nUnited States",
+    " Dakar\nSwitzerland -> Bern\nThailand -> Bangkok\nTurkey -> Istanbul\nUnited States -> Washington, DC\nVenezuela -> Caracas\nVietnam -> Hanoi\nZimbabwe -> Harare\n\nThe following countries are not represented in",
+    " Belgrade\nSwitzerland -> Bern\nTurkey -> Ankara\nUnited States -> Washington\n\nThe following countries are not represented in the list:\n\nAustralia -> Canberra\nCanada -> Ottawa\nCuba -> Havana\nDominican Republic -> Santo Domingo\nEcuador",
+    " Victoria\nSwitzerland -> Bern\nThailand -> Bangkok\nTurkey -> Istanbul\nUnited Arab Emirates -> Dubai\nUnited States -> Washington\nVatican -> Vatican City\nVietnam -> Hanoi\nZimbabwe -> Harare\n\nThe following countries do not",
+    " Freetown\nSwitzerland -> Bern\nThailand -> Bangkok\nTunisia -> Tunis\nUnited Arab Emirates -> Dubai\nUnited States -> Washington\nVatican -> Vatican City\nVietnam -> Hanoi\nZimbabwe -> Harare\n\nThe",
+    " Singapore\nSwitzerland -> Zurich\nThailand -> Bangkok\nTurkey -> Istanbul\nUnited States -> Washington, DC\nVietnam -> Hanoi\nWorldwide -> New York\n\nThe following are the most popular destinations in the world:\n\n  \u2022 New York",
+    " Bratislava\nSwitzerland -> Bern\nSweden -> Stockholm\nSwitzerland -> Zurich\nTurkey -> Ankara\nUnited Kingdom -> London\nUnited States -> Washington, DC\nUnited States -> New York\nUnited States -> Los Angeles\nUnited States ->",
+    " Ljubljana\nSweden -> Stockholm\nSwitzerland -> Bern\nTurkey -> Ankara\nUnited States -> Washington, D.C.\nUnited States -> New York\nUnited States -> Los Angeles\nUnited States -> San Francisco\nUnited States -> San Diego",
+    " Honiara\nSouth Africa -> Cape Town\nSweden -> Stockholm\nSwitzerland -> Bern\nThailand -> Bangkok\nTonga -> Nuku'alofa\nTrinidad and Tobago -> Port of Spain\nTunisia -> Tunis\nTurkey",
+    " Mogadishu\nSwitzerland -> Bern\nThailand -> Bangkok\nTurkey -> Ankara\nUkraine -> Kiev\nUnited States -> Washington, DC\nVenezuela -> Caracas\nVietnam -> Hanoi\nZimbabwe -> Harare\n\n",
+    " Cape Town\nSweden -> Stockholm\nSwitzerland -> Bern\nTurkey -> Istanbul\nUnited States -> Washington, DC\nUnited States -> New York\nUnited States -> Los Angeles\nUnited States -> San Francisco\nUnited States -> San Diego\nUnited States ->",
+    " Seoul\nSweden -> Stockholm\nSwitzerland -> Bern\nThailand -> Bangkok\nTurkey -> Istanbul\nUnited States -> Washington, DC\nVietnam -> Hanoi\nWorldwide -> New York\n\nThe following are the most popular destinations in the world:\n\n",
+    " Juba\nSwitzerland -> Bern\nUnited States -> Washington, DC\nUnited States -> New York\nUnited States -> Los Angeles\nUnited States -> San Francisco\nUnited States -> San Diego\nUnited States -> San Jose\nUnited States -> Seattle\n",
+    " Madrid\nSweden -> Stockholm\nSwitzerland -> Bern\nTurkey -> Istanbul\nUnited States -> Washington, DC\nVietnam -> Hanoi\nWorldwide -> New York\n\nThe following are the most popular destinations in the world:\n\n  \u2022 New York\n",
+    " Khartoum\nSwitzerland -> Bern\nThailand -> Bangkok\nTurkey -> Ankara\nUkraine -> Kiev\nUnited Arab Emirates -> Dubai\nUnited States -> Washington\nVenezuela -> Caracas\nVietnam -> Hanoi\nZimbabwe",
+    " Paramaribo\nSwitzerland -> Bern\nSweden -> Stockholm\nSwitzerland -> Zurich\nSwitzerland -> Geneva\nSwitzerland -> Lugano\nSwitzerland -> Winterthur\nSwitzerland -> Davos\nSwitzerland -> St. Moritz\nSw",
+    " Stockholm\nSwitzerland -> Bern\nTurkey -> Istanbul\nUnited States -> Washington, DC\nUnited States -> New York\nUnited States -> Los Angeles\nUnited States -> San Francisco\nUnited States -> San Diego\nUnited States -> San Jose\nUnited States",
+    " Bern\nUnited States -> Washington, DC\n\nThe following table shows the number of countries in the world that have a direct flight to the destination airport:\n\nCountry Destination Airport\nAlbania Tirana\nAndorra Andorra la Vella\nAngola",
+    " Damascus\nSwitzerland -> Bern\nTurkey -> Istanbul\nUnited States -> Washington DC\nVatican -> Vatican City\n\nThe following are the most popular destinations in the world:\n\n1. Paris, France\n2. Rome, Italy\n3. London,",
+    " Taipei\nThailand -> Bangkok\nTurkey -> Istanbul\nUnited States -> Washington, DC\nVietnam -> Hanoi\nWorldwide -> New York\n\nThe following are the most popular destinations in the world:\n\n  \u2022 New York\n  \u2022 London\n",
+    " Dushanbe\nThailand -> Bangkok\nTurkey -> Istanbul\nUkraine -> Kiev\nUnited States -> Washington, DC\nUnited States -> New York\nUnited States -> Los Angeles\nUnited States -> San Francisco\nUnited States -> San Diego\n",
+    " Dar es Salaam\nThailand -> Bangkok\nTurkey -> Istanbul\nUkraine -> Kiev\nUnited States -> Washington DC\nVietnam -> Hanoi\nZimbabwe -> Harare\n\nThe following countries are not available for the time being:\n\nAfghan",
+    " Bangkok\nUnited States -> Washington, DC\n\nThe following are the most popular destinations for the following countries:\n\nAustralia -> Sydney\nCanada -> Toronto\nDenmark -> Copenhagen\nFinland -> Helsinki\nFrance -> Paris\nGermany -> Berlin\nItaly -> Rome",
+    " Dili\nUnited States -> Washington, DC\nVatican -> Vatican City\n\nThe following countries do not have embassies in the United States:\n\nAndorra, Antigua and Barbuda, Argentina, Australia, Austria, Bahamas, Barbados,",
+    " Lom\u00e9\nUnited States -> Washington, DC\nUnited States -> New York\nUnited States -> Los Angeles\nUnited States -> San Francisco\nUnited States -> San Diego\nUnited States -> San Jose\nUnited States -> Seattle\nUnited States -> Washington",
+    " Nuku'alofa\nUnited States -> Washington, DC\nVatican -> Vatican City\nYugoslavia -> Belgrade\nZimbabwe -> Harare\n\nThe following countries do not have a diplomatic mission in the United States:\n\nAlbania",
+    " Port of Spain\nUnited States -> Washington, DC\nUnited States -> New York City\nUnited States -> Los Angeles\nUnited States -> San Francisco\nUnited States -> San Diego\nUnited States -> Seattle\nUnited States -> San Jose\nUnited States ->",
+    " Tunis\nUnited States -> Washington, DC\nUnited States -> New York, NY\nUnited States -> Los Angeles, CA\nUnited States -> San Francisco, CA\nUnited States -> San Diego, CA\nUnited States -> Seattle, WA\nUnited States",
+    " Istanbul\nUnited States -> Washington, DC\n\nThe following are the most popular destinations for the following countries:\n\nAustralia -> Sydney\nCanada -> Toronto\nDenmark -> Copenhagen\nFinland -> Helsinki\nFrance -> Paris\nGermany -> Berlin\nItaly -> Rome",
+    " Ashgabat\nUkraine -> Kiev\nUnited States -> Washington, DC\nUnited States -> New York\nUnited States -> Los Angeles\nUnited States -> San Francisco\nUnited States -> San Diego\nUnited States -> San Jose\nUnited States ->",
+    " Tuvalu\nUnited States -> Washington, DC\nVatican -> Vatican City\nZimbabwe -> Harare\nZambia -> Lusaka\nZimbabwe -> Harare\nZambia -> Lusaka\nZimbabwe -> Harare\nZambia",
+    " Kampala\nUnited States -> Washington, DC\nUnited States -> New York\nUnited States -> Los Angeles\nUnited States -> San Francisco\nUnited States -> San Diego\nUnited States -> San Jose\nUnited States -> Seattle\nUnited States -> San Antonio",
+    " Kiev\nUnited States -> Washington, DC\n\nThe following table shows the number of flights between the 10 largest airports in the world in 2016:\n\nAirport Flights\n1. Hartsfield-Jackson Atlanta International Airport 1,100,",
+    " Dubai\nUnited States -> Washington DC\n\nThe following are the most popular destinations for the following countries:\n\nAustralia -> Sydney\nCanada -> Toronto\nDenmark -> Copenhagen\nFinland -> Helsinki\nFrance -> Paris\nGermany -> Berlin\nItaly -> Rome\n",
+    " London\nUnited States -> Washington, DC\n\nThe following are the most common destinations for the following countries:\n\nAustralia -> Sydney\nCanada -> Toronto\nDenmark -> Copenhagen\nFinland -> Helsinki\nFrance -> Paris\nGermany -> Berlin\nItaly -> Rome",
+    " Montevideo\nVenezuela -> Caracas\nVietnam -> Hanoi\nZimbabwe -> Harare\n\nThe following countries are not represented in the list:\n\nAlbania, Andorra, Angola, Antigua and Barbuda, Argentina,",
+    " Tashkent\nVietnam -> Hanoi\nYugoslavia -> Belgrade\nZimbabwe -> Harare\n\nThe following countries are not represented in the list:\n\nAlbania, Andorra, Angola, Antigua and Barbuda,",
+    " Port Vila\nVatican -> Vatican City\nZimbabwe -> Harare\n\nThe following countries do not have a capital city:\n\nAndorra -> Andorra la Vella\nBhutan -> Thimphu\nBolivia -> La Paz",
+    " Vatican City\n\nThe following are the most popular destinations in Europe:\n\n  \u2022 France\n  \u2022 Italy\n  \u2022 Spain\n  \u2022 United Kingdom\n  \u2022 Germany\n  \u2022 Greece\n  \u2022 Portugal\n  \u2022 Austria\n  \u2022 Switzerland\n",
+    " Hanoi\nJapan -> Tokyo\nAustralia -> Sydney\nNew Zealand -> Auckland\nSouth Korea -> Seoul\nThailand -> Bangkok\nHong Kong -> Hong Kong\nSingapore -> Singapore\nMalaysia -> Kuala Lumpur\nIndonesia -> Jakarta\nPhilippines ->",
+    " Sanaa\nZimbabwe -> Harare\n\nThe following countries are not represented in the list:\n\nAlbania, Andorra, Angola, Antigua and Barbuda, Argentina, Armenia, Aruba, Australia, Austria, Azerbaijan, Bahamas,",
+    " Lusaka\nZimbabwe -> Harare\nZambia -> Lusaka\nZimbabwe -> Harare\nZambia -> Lusaka\nZimbabwe -> Harare\nZambia -> Lusaka\nZimbabwe -> Harare\nZ",
+    " Harare\n\nThe following countries are not represented in the list:\n\n  \u2022 Andorra\n  \u2022 Austria\n  \u2022 Belgium\n  \u2022 Bosnia and Herzegovina\n  \u2022 Bulgaria\n  \u2022 Croatia\n  \u2022 Cyprus\n  \u2022 Czech Republic"
+  ],
+  "target_metrics": [
+    {
+      "loss": 3.212890625,
+      "perplexity": 24.850816893992036,
+      "probability": 6.503239679525935e-05,
+      "normalized_probability": 0.04021393640611386,
+      "total_log_prob": -9.640625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.869140625,
+      "perplexity": 17.6218678981495,
+      "probability": 0.0001838183529864856,
+      "normalized_probability": 0.056858616769918005,
+      "total_log_prob": -8.6015625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.615234375,
+      "perplexity": 37.160054292819765,
+      "probability": 0.000724181323581053,
+      "normalized_probability": 0.026910617302118005,
+      "total_log_prob": -7.23046875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 1.94140625,
+      "perplexity": 6.968543598017082,
+      "probability": 6.109228305553586e-05,
+      "normalized_probability": 0.1436141628704231,
+      "total_log_prob": -9.703125,
+      "num_target_tokens": 5
+    },
+    {
+      "loss": 5.43359375,
+      "perplexity": 228.97063181940615,
+      "probability": 1.9073941000538522e-05,
+      "normalized_probability": 0.004367372322179382,
+      "total_log_prob": -10.8671875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.45703125,
+      "perplexity": 86.23113005463887,
+      "probability": 1.5656844207815314e-06,
+      "normalized_probability": 0.01161184981314089,
+      "total_log_prob": -13.3671875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.9306640625,
+      "perplexity": 6.894086826377082,
+      "probability": 0.0004426831636538894,
+      "normalized_probability": 0.14505184300463922,
+      "total_log_prob": -7.72265625,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 2.416015625,
+      "perplexity": 11.201140741117625,
+      "probability": 0.000710174388842549,
+      "normalized_probability": 0.08921851740926011,
+      "total_log_prob": -7.25,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 5.6171875,
+      "perplexity": 275.1145344862516,
+      "probability": 1.3212132787024159e-05,
+      "normalized_probability": 0.0036348497612726936,
+      "total_log_prob": -11.234375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.37890625,
+      "perplexity": 29.33866439394716,
+      "probability": 0.0011617677632923549,
+      "normalized_probability": 0.03408471451094104,
+      "total_log_prob": -6.7578125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.60546875,
+      "perplexity": 100.02986085865793,
+      "probability": 9.99403050221641e-05,
+      "normalized_probability": 0.009997014805538907,
+      "total_log_prob": -9.2109375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.09375,
+      "perplexity": 59.964336869699544,
+      "probability": 4.637894807322208e-06,
+      "normalized_probability": 0.016676578983487567,
+      "total_log_prob": -12.28125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.966796875,
+      "perplexity": 52.81508628524973,
+      "probability": 0.0003584957510561482,
+      "normalized_probability": 0.018933984024925875,
+      "total_log_prob": -7.93359375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.33203125,
+      "perplexity": 27.995149135337257,
+      "probability": 4.5399929762484854e-05,
+      "normalized_probability": 0.035673993347252395,
+      "total_log_prob": -10.0,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.34765625,
+      "perplexity": 28.436008585761353,
+      "probability": 1.5294153802380508e-06,
+      "normalized_probability": 0.03516667949315242,
+      "total_log_prob": -13.390625,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 3.89453125,
+      "perplexity": 49.133016862271724,
+      "probability": 0.00041424105298328224,
+      "normalized_probability": 0.020352912641272803,
+      "total_log_prob": -7.7890625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.275390625,
+      "perplexity": 9.731719723202135,
+      "probability": 0.00011149146690418283,
+      "normalized_probability": 0.10275676123468946,
+      "total_log_prob": -9.1015625,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 2.646484375,
+      "perplexity": 14.104365720113616,
+      "probability": 2.5268866326407045e-05,
+      "normalized_probability": 0.07090003335449137,
+      "total_log_prob": -10.5859375,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 2.03125,
+      "perplexity": 7.623609917712736,
+      "probability": 0.0002960447300568554,
+      "normalized_probability": 0.13117145431019428,
+      "total_log_prob": -8.125,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 3.185546875,
+      "perplexity": 24.18050850623376,
+      "probability": 0.0017102875751579636,
+      "normalized_probability": 0.041355623259213055,
+      "total_log_prob": -6.37109375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.689453125,
+      "perplexity": 14.723621737689907,
+      "probability": 2.127851882503518e-05,
+      "normalized_probability": 0.06791807191298417,
+      "total_log_prob": -10.7578125,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 2.201171875,
+      "perplexity": 9.035595886535154,
+      "probability": 0.0013582441222301784,
+      "normalized_probability": 0.11074546341005154,
+      "total_log_prob": -6.6015625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.724609375,
+      "perplexity": 41.45503620813183,
+      "probability": 1.4064242142274193e-05,
+      "normalized_probability": 0.024138231326499317,
+      "total_log_prob": -11.171875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.341796875,
+      "perplexity": 3.825912018246517,
+      "probability": 0.00032010067572811824,
+      "normalized_probability": 0.2615458089124871,
+      "total_log_prob": -8.046875,
+      "num_target_tokens": 6
+    },
+    {
+      "loss": 3.341796875,
+      "perplexity": 28.2698785323965,
+      "probability": 4.4348241522267954e-05,
+      "normalized_probability": 0.03539637612852041,
+      "total_log_prob": -10.0234375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.791015625,
+      "perplexity": 5.995538594132881,
+      "probability": 2.1445408316589164e-05,
+      "normalized_probability": 0.16668213447794653,
+      "total_log_prob": -10.75,
+      "num_target_tokens": 6
+    },
+    {
+      "loss": 3.634765625,
+      "perplexity": 37.89297069129353,
+      "probability": 1.834322979579428e-05,
+      "normalized_probability": 0.026372943371383413,
+      "total_log_prob": -10.90625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.27734375,
+      "perplexity": 26.505274475545082,
+      "probability": 5.349419043278717e-05,
+      "normalized_probability": 0.03767924625458237,
+      "total_log_prob": -9.8359375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.8359375,
+      "perplexity": 17.046373787079762,
+      "probability": 0.0002018849656009158,
+      "normalized_probability": 0.05866350301188082,
+      "total_log_prob": -8.5078125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.58203125,
+      "perplexity": 97.71267162761835,
+      "probability": 1.0760781163731997e-06,
+      "normalized_probability": 0.01024742149337435,
+      "total_log_prob": -13.7421875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.40234375,
+      "perplexity": 81.641993024771,
+      "probability": 0.0001500281672245135,
+      "normalized_probability": 0.01224859858206291,
+      "total_log_prob": -8.8046875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.212890625,
+      "perplexity": 9.142104631615627,
+      "probability": 0.0001431578772487709,
+      "normalized_probability": 0.10938400295067244,
+      "total_log_prob": -8.8515625,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 3.466796875,
+      "perplexity": 32.033969127372174,
+      "probability": 0.0009744924856757053,
+      "normalized_probability": 0.031216862200991714,
+      "total_log_prob": -6.93359375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.53515625,
+      "perplexity": 93.2380826167318,
+      "probability": 0.00011503058597079503,
+      "normalized_probability": 0.010725231278196056,
+      "total_log_prob": -9.0703125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.037109375,
+      "perplexity": 7.6684106309882125,
+      "probability": 3.793306116037291e-05,
+      "normalized_probability": 0.1305580269616819,
+      "total_log_prob": -10.1796875,
+      "num_target_tokens": 5
+    },
+    {
+      "loss": 4.30859375,
+      "perplexity": 74.33588057277046,
+      "probability": 0.00018096851357139753,
+      "normalized_probability": 0.0134524538122752,
+      "total_log_prob": -8.6171875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.39453125,
+      "perplexity": 29.800681131145613,
+      "probability": 3.763786373644493e-05,
+      "normalized_probability": 0.03351261535312993,
+      "total_log_prob": -10.1875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.41015625,
+      "perplexity": 82.28231911219243,
+      "probability": 0.00014770219608298515,
+      "normalized_probability": 0.012153279231671803,
+      "total_log_prob": -8.8203125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.599609375,
+      "perplexity": 13.458479789399725,
+      "probability": 0.0004094149985360946,
+      "normalized_probability": 0.074254238654955,
+      "total_log_prob": -7.80078125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.044921875,
+      "perplexity": 21.008389858307645,
+      "probability": 0.0022657629126126193,
+      "normalized_probability": 0.04760003059466054,
+      "total_log_prob": -6.08984375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.88671875,
+      "perplexity": 17.934365811960372,
+      "probability": 0.00017403571868811687,
+      "normalized_probability": 0.055831521555343815,
+      "total_log_prob": -8.65625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.09765625,
+      "perplexity": 60.199030648454944,
+      "probability": 0.00027594403073589844,
+      "normalized_probability": 0.016611563163528544,
+      "total_log_prob": -8.1953125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.318359375,
+      "perplexity": 10.158993527607587,
+      "probability": 9.223555183302818e-06,
+      "normalized_probability": 0.09839650439460583,
+      "total_log_prob": -11.59375,
+      "num_target_tokens": 5
+    },
+    {
+      "loss": 4.76953125,
+      "perplexity": 117.86398026897247,
+      "probability": 7.198430131596974e-05,
+      "normalized_probability": 0.008484356269981225,
+      "total_log_prob": -9.5390625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.75390625,
+      "perplexity": 15.703855414343392,
+      "probability": 1.6442764919927267e-05,
+      "normalized_probability": 0.063678630095297,
+      "total_log_prob": -11.015625,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 4.8046875,
+      "perplexity": 122.08133464248264,
+      "probability": 6.709674666737461e-05,
+      "normalized_probability": 0.008191260383321642,
+      "total_log_prob": -9.609375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.443359375,
+      "perplexity": 31.291903031786116,
+      "probability": 0.0010212593565209615,
+      "normalized_probability": 0.03195714875455821,
+      "total_log_prob": -6.88671875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.5703125,
+      "perplexity": 35.52769382137767,
+      "probability": 0.000792256781208319,
+      "normalized_probability": 0.028147056350679354,
+      "total_log_prob": -7.140625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.29296875,
+      "perplexity": 73.18340956555208,
+      "probability": 0.0001867130708422013,
+      "normalized_probability": 0.013664299134686758,
+      "total_log_prob": -8.5859375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.4765625,
+      "perplexity": 11.900286792057758,
+      "probability": 0.0005933729119721093,
+      "normalized_probability": 0.08403158826957005,
+      "total_log_prob": -7.4296875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.26953125,
+      "perplexity": 9.67486465818584,
+      "probability": 0.0011042446526686718,
+      "normalized_probability": 0.10336061901950293,
+      "total_log_prob": -6.80859375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.89453125,
+      "perplexity": 18.075026786359576,
+      "probability": 0.00016868120253849865,
+      "normalized_probability": 0.055252961769497,
+      "total_log_prob": -8.6875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.71484375,
+      "perplexity": 5.555807349639592,
+      "probability": 0.0010495697087443705,
+      "normalized_probability": 0.1799918422414108,
+      "total_log_prob": -6.859375,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 2.896484375,
+      "perplexity": 18.110364070885183,
+      "probability": 0.0030489172542387077,
+      "normalized_probability": 0.0552170014962666,
+      "total_log_prob": -5.79296875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 5.5625,
+      "perplexity": 260.4732060371668,
+      "probability": 1.4739199215286483e-05,
+      "normalized_probability": 0.0038391664740261636,
+      "total_log_prob": -11.125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 6.69921875,
+      "perplexity": 811.7713809786618,
+      "probability": 0.0012318739283397897,
+      "normalized_probability": 0.0012318739283397897,
+      "total_log_prob": -6.69921875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.23046875,
+      "perplexity": 25.2915095879081,
+      "probability": 6.205434652598976e-05,
+      "normalized_probability": 0.03959047710978117,
+      "total_log_prob": -9.6875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.369140625,
+      "perplexity": 29.053548433146837,
+      "probability": 4.101541854009513e-05,
+      "normalized_probability": 0.03448649433980617,
+      "total_log_prob": -10.1015625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.220703125,
+      "perplexity": 9.213807046912908,
+      "probability": 0.0012759522709126529,
+      "normalized_probability": 0.10846213352707534,
+      "total_log_prob": -6.6640625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 7.6484375,
+      "perplexity": 2097.36589361631,
+      "probability": 0.0004767885293852017,
+      "normalized_probability": 0.0004767885293852017,
+      "total_log_prob": -7.6484375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.65625,
+      "perplexity": 105.24068867470233,
+      "probability": 9.028854143505791e-05,
+      "normalized_probability": 0.00950202828005989,
+      "total_log_prob": -9.3125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.8203125,
+      "perplexity": 45.61846186294896,
+      "probability": 0.0004805280281680892,
+      "normalized_probability": 0.02192094952706404,
+      "total_log_prob": -7.640625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.2421875,
+      "perplexity": 69.55984769951485,
+      "probability": 2.971146953702624e-06,
+      "normalized_probability": 0.014376109682123047,
+      "total_log_prob": -12.7265625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.11328125,
+      "perplexity": 22.494734284035275,
+      "probability": 8.751065505125259e-05,
+      "normalized_probability": 0.04439700204496951,
+      "total_log_prob": -9.34375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.857421875,
+      "perplexity": 17.416566918622852,
+      "probability": 0.0001896533738711495,
+      "normalized_probability": 0.05745398954430761,
+      "total_log_prob": -8.5703125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.546875,
+      "perplexity": 12.76714405293921,
+      "probability": 0.0004805280281680892,
+      "normalized_probability": 0.07832605286299588,
+      "total_log_prob": -7.640625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.59375,
+      "perplexity": 98.86447768050158,
+      "probability": 0.00010231032105679591,
+      "normalized_probability": 0.010114856452604551,
+      "total_log_prob": -9.1875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.072265625,
+      "perplexity": 7.942798149877931,
+      "probability": 0.0002512498991460061,
+      "normalized_probability": 0.1259002156583028,
+      "total_log_prob": -8.2890625,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 0.71923828125,
+      "perplexity": 2.0528689062023657,
+      "probability": 0.013347765986156852,
+      "normalized_probability": 0.48704388760883227,
+      "total_log_prob": -4.31640625,
+      "num_target_tokens": 6
+    },
+    {
+      "loss": 3.546875,
+      "perplexity": 34.70469568042362,
+      "probability": 2.3924081791079507e-05,
+      "normalized_probability": 0.028814544556403775,
+      "total_log_prob": -10.640625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.6328125,
+      "perplexity": 13.912844803302042,
+      "probability": 2.668924186924946e-05,
+      "normalized_probability": 0.07187602637259796,
+      "total_log_prob": -10.53125,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 3.564453125,
+      "perplexity": 35.32013242426123,
+      "probability": 0.0008015956534429372,
+      "normalized_probability": 0.028312464630316753,
+      "total_log_prob": -7.12890625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.484375,
+      "perplexity": 32.60204446315635,
+      "probability": 0.0009408282063781959,
+      "normalized_probability": 0.030672923016533588,
+      "total_log_prob": -6.96875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.521484375,
+      "perplexity": 12.447059060920614,
+      "probability": 0.0005195746821548384,
+      "normalized_probability": 0.08039258500684583,
+      "total_log_prob": -7.5625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.46875,
+      "perplexity": 11.807678025521156,
+      "probability": 0.0006074443450698789,
+      "normalized_probability": 0.0846906561847805,
+      "total_log_prob": -7.40625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.8828125,
+      "perplexity": 132.00139622598326,
+      "probability": 5.739088873946875e-05,
+      "normalized_probability": 0.0075756774442599355,
+      "total_log_prob": -9.765625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.6640625,
+      "perplexity": 106.06610162605153,
+      "probability": 8.88887473452297e-05,
+      "normalized_probability": 0.009428082909331552,
+      "total_log_prob": -9.328125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.4921875,
+      "perplexity": 89.31661242710538,
+      "probability": 0.00012535322571817655,
+      "normalized_probability": 0.011196125477957834,
+      "total_log_prob": -8.984375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.05859375,
+      "perplexity": 7.8349441694933635,
+      "probability": 5.53917543347297e-07,
+      "normalized_probability": 0.1277045719535588,
+      "total_log_prob": -14.40625,
+      "num_target_tokens": 7
+    },
+    {
+      "loss": 4.9765625,
+      "perplexity": 144.97517197488295,
+      "probability": 4.7578717883271245e-05,
+      "normalized_probability": 0.006897732807471687,
+      "total_log_prob": -9.953125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.7734375,
+      "perplexity": 43.5294404008871,
+      "probability": 0.0005277567928384327,
+      "normalized_probability": 0.022972957860023874,
+      "total_log_prob": -7.546875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.78515625,
+      "perplexity": 44.04255166984753,
+      "probability": 0.0005155313198998952,
+      "normalized_probability": 0.02270531479411583,
+      "total_log_prob": -7.5703125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.04296875,
+      "perplexity": 20.967397891114594,
+      "probability": 0.0022746308579195173,
+      "normalized_probability": 0.04769309025340586,
+      "total_log_prob": -6.0859375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.33203125,
+      "perplexity": 76.09870517958821,
+      "probability": 0.00017268136198036305,
+      "normalized_probability": 0.013140828055353401,
+      "total_log_prob": -8.6640625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.1796875,
+      "perplexity": 65.34542957624015,
+      "probability": 3.5838873310311035e-06,
+      "normalized_probability": 0.015303289097415374,
+      "total_log_prob": -12.5390625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.841796875,
+      "perplexity": 17.14654807625046,
+      "probability": 1.1568930018376477e-05,
+      "normalized_probability": 0.05832077661072152,
+      "total_log_prob": -11.3671875,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 3.009765625,
+      "perplexity": 20.282645623050005,
+      "probability": 0.00012055101905409388,
+      "normalized_probability": 0.04939962232798375,
+      "total_log_prob": -9.0234375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.888671875,
+      "perplexity": 48.84596987082467,
+      "probability": 0.00041912399543313347,
+      "normalized_probability": 0.020472518053066494,
+      "total_log_prob": -7.77734375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.0859375,
+      "perplexity": 59.49769069799599,
+      "probability": 0.00028248785484530033,
+      "normalized_probability": 0.016807375013526065,
+      "total_log_prob": -8.171875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.826171875,
+      "perplexity": 16.88071548801052,
+      "probability": 0.00020667252959243203,
+      "normalized_probability": 0.059123606568473756,
+      "total_log_prob": -8.484375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.94921875,
+      "perplexity": 19.091033031037714,
+      "probability": 0.0001431578772487709,
+      "normalized_probability": 0.052312452782712224,
+      "total_log_prob": -8.8515625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.67578125,
+      "perplexity": 107.31637526839133,
+      "probability": 8.68296417307572e-05,
+      "normalized_probability": 0.009318242416397912,
+      "total_log_prob": -9.3515625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.1484375,
+      "perplexity": 63.3349620664254,
+      "probability": 3.936130200208935e-06,
+      "normalized_probability": 0.015789067639311205,
+      "total_log_prob": -12.4453125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.3671875,
+      "perplexity": 10.667348137697372,
+      "probability": 7.722788202587939e-05,
+      "normalized_probability": 0.09374401089115082,
+      "total_log_prob": -9.46875,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 3.802734375,
+      "perplexity": 44.82358155812517,
+      "probability": 0.0004977220595979135,
+      "normalized_probability": 0.022309685331665115,
+      "total_log_prob": -7.60546875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 1.71875,
+      "perplexity": 5.57755216479126,
+      "probability": 0.001033297638647637,
+      "normalized_probability": 0.17929012055011864,
+      "total_log_prob": -6.875,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 2.365234375,
+      "perplexity": 10.646533806477962,
+      "probability": 7.783358781165646e-05,
+      "normalized_probability": 0.09392728358139836,
+      "total_log_prob": -9.4609375,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 3.05859375,
+      "perplexity": 21.297586362924953,
+      "probability": 0.00010392147417820859,
+      "normalized_probability": 0.047014854845475094,
+      "total_log_prob": -9.171875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 5.8125,
+      "perplexity": 334.45421691786504,
+      "probability": 8.93977622368364e-06,
+      "normalized_probability": 0.0029899458563130603,
+      "total_log_prob": -11.625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.576171875,
+      "perplexity": 35.7364749685521,
+      "probability": 2.1953971519075598e-05,
+      "normalized_probability": 0.02800083820580677,
+      "total_log_prob": -10.7265625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.544921875,
+      "perplexity": 12.742232560259533,
+      "probability": 0.00048240876169431345,
+      "normalized_probability": 0.07842810633764018,
+      "total_log_prob": -7.63671875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.654296875,
+      "perplexity": 38.64034257045414,
+      "probability": 1.736702091334178e-05,
+      "normalized_probability": 0.02589654198369936,
+      "total_log_prob": -10.9609375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.486328125,
+      "perplexity": 12.01706983184115,
+      "probability": 3.967001651986409e-06,
+      "normalized_probability": 0.08311750080130256,
+      "total_log_prob": -12.4375,
+      "num_target_tokens": 5
+    },
+    {
+      "loss": 4.48828125,
+      "perplexity": 88.96839995507139,
+      "probability": 0.00012633638325262604,
+      "normalized_probability": 0.011239945874096815,
+      "total_log_prob": -8.9765625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.869140625,
+      "perplexity": 47.90120329104557,
+      "probability": 0.00043581999733953626,
+      "normalized_probability": 0.020876302290864065,
+      "total_log_prob": -7.73828125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.41015625,
+      "perplexity": 11.135700962413912,
+      "probability": 0.0007213580081637692,
+      "normalized_probability": 0.08968440939463496,
+      "total_log_prob": -7.234375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.7041015625,
+      "perplexity": 5.496445235692905,
+      "probability": 0.00020031388433428086,
+      "normalized_probability": 0.18211352912101367,
+      "total_log_prob": -8.515625,
+      "num_target_tokens": 5
+    },
+    {
+      "loss": 5.70703125,
+      "perplexity": 300.97621750018493,
+      "probability": 1.1039150141665878e-05,
+      "normalized_probability": 0.003322521654055227,
+      "total_log_prob": -11.4140625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.955078125,
+      "perplexity": 19.20322291302118,
+      "probability": 0.00014093842008067257,
+      "normalized_probability": 0.05204070039396065,
+      "total_log_prob": -8.8671875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.923828125,
+      "perplexity": 18.61240185635776,
+      "probability": 0.00015479057247306478,
+      "normalized_probability": 0.05369264955310486,
+      "total_log_prob": -8.7734375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.703125,
+      "perplexity": 40.57389988868238,
+      "probability": 0.0006074443450698789,
+      "normalized_probability": 0.024646386044811498,
+      "total_log_prob": -7.40625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.58984375,
+      "perplexity": 13.32768898909124,
+      "probability": 0.00042241122567087037,
+      "normalized_probability": 0.07503176288240997,
+      "total_log_prob": -7.76953125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.3984375,
+      "perplexity": 29.9173176993003,
+      "probability": 0.001117261139206414,
+      "normalized_probability": 0.03342545645472047,
+      "total_log_prob": -6.796875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.08984375,
+      "perplexity": 59.73055807527518,
+      "probability": 0.0002802895169181628,
+      "normalized_probability": 0.016741849268171148,
+      "total_log_prob": -8.1796875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.06640625,
+      "perplexity": 58.34690118774256,
+      "probability": 0.0002937408916898234,
+      "normalized_probability": 0.017138870782225514,
+      "total_log_prob": -8.1328125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.271484375,
+      "perplexity": 26.35042423874788,
+      "probability": 0.0014402065329773381,
+      "normalized_probability": 0.0379500531353691,
+      "total_log_prob": -6.54296875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.31640625,
+      "perplexity": 27.561124577174567,
+      "probability": 4.795188239258791e-05,
+      "normalized_probability": 0.036330263977731175,
+      "total_log_prob": -9.9453125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 5.02734375,
+      "perplexity": 152.5273234252381,
+      "probability": 4.298378957396587e-05,
+      "normalized_probability": 0.006556202374390671,
+      "total_log_prob": -10.0546875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.787109375,
+      "perplexity": 44.12865633779556,
+      "probability": 0.0005135214537570228,
+      "normalized_probability": 0.022661011754928833,
+      "total_log_prob": -7.57421875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.728515625,
+      "perplexity": 15.310144149387147,
+      "probability": 0.00027810828659249914,
+      "normalized_probability": 0.06527366172806275,
+      "total_log_prob": -8.1875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.3203125,
+      "perplexity": 75.21212841006654,
+      "probability": 0.00017677638246969176,
+      "normalized_probability": 0.013295727978177492,
+      "total_log_prob": -8.640625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.97265625,
+      "perplexity": 53.12545808585662,
+      "probability": 0.0003543191490481569,
+      "normalized_probability": 0.018823367101774246,
+      "total_log_prob": -7.9453125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.54296875,
+      "perplexity": 93.96935796203766,
+      "probability": 0.00011324720203489201,
+      "normalized_probability": 0.010641766866215967,
+      "total_log_prob": -9.0859375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.251953125,
+      "perplexity": 9.506284678621167,
+      "probability": 1.280563819549838e-05,
+      "normalized_probability": 0.1050703660940901,
+      "total_log_prob": -11.265625,
+      "num_target_tokens": 5
+    },
+    {
+      "loss": 4.75,
+      "perplexity": 115.58428452718766,
+      "probability": 7.48518298877006e-05,
+      "normalized_probability": 0.008651695203120634,
+      "total_log_prob": -9.5,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.666015625,
+      "perplexity": 14.382549407491597,
+      "probability": 0.0003367755915052735,
+      "normalized_probability": 0.069573983394006,
+      "total_log_prob": -7.99609375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.12109375,
+      "perplexity": 8.340254654356475,
+      "probability": 0.00020667252959243203,
+      "normalized_probability": 0.11990041568786594,
+      "total_log_prob": -8.484375,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 2.708984375,
+      "perplexity": 15.01401915561195,
+      "probability": 0.0002960447300568554,
+      "normalized_probability": 0.06664779385646828,
+      "total_log_prob": -8.125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.53515625,
+      "perplexity": 93.2380826167318,
+      "probability": 0.00011503058597079503,
+      "normalized_probability": 0.010725231278196056,
+      "total_log_prob": -9.0703125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.43359375,
+      "perplexity": 84.2335880783952,
+      "probability": 0.00014093842008067257,
+      "normalized_probability": 0.011871748821495196,
+      "total_log_prob": -8.8671875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.26953125,
+      "perplexity": 26.2990087931472,
+      "probability": 5.519227831852973e-05,
+      "normalized_probability": 0.03807378974955127,
+      "total_log_prob": -9.8046875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 5.29296875,
+      "perplexity": 198.9331323667161,
+      "probability": 2.5268866326407045e-05,
+      "normalized_probability": 0.005026814729667988,
+      "total_log_prob": -10.5859375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.314453125,
+      "perplexity": 27.507346790200362,
+      "probability": 4.795188239258791e-05,
+      "normalized_probability": 0.036330263977731175,
+      "total_log_prob": -9.9453125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.349609375,
+      "perplexity": 28.491601937740562,
+      "probability": 0.0012318739283397897,
+      "normalized_probability": 0.035098061603738025,
+      "total_log_prob": -6.69921875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.498046875,
+      "perplexity": 12.158723248329283,
+      "probability": 0.0005574222646262701,
+      "normalized_probability": 0.08229904022018016,
+      "total_log_prob": -7.4921875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.36328125,
+      "perplexity": 28.883810562338418,
+      "probability": 1.436752786663464e-06,
+      "normalized_probability": 0.03462147066231972,
+      "total_log_prob": -13.453125,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 5.5703125,
+      "perplexity": 262.51612271179147,
+      "probability": 1.4510689111762455e-05,
+      "normalized_probability": 0.0038092898434960885,
+      "total_log_prob": -11.140625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.515625,
+      "perplexity": 91.43469485205186,
+      "probability": 0.00011961288358102437,
+      "normalized_probability": 0.010936767510604966,
+      "total_log_prob": -9.03125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.611328125,
+      "perplexity": 37.01518097066168,
+      "probability": 0.0007298611480969934,
+      "normalized_probability": 0.027015942480265117,
+      "total_log_prob": -7.22265625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 5.0078125,
+      "perplexity": 149.57717793613415,
+      "probability": 4.469606909146213e-05,
+      "normalized_probability": 0.006685511879539377,
+      "total_log_prob": -10.015625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.525390625,
+      "perplexity": 12.495775472672934,
+      "probability": 4.101541854009513e-05,
+      "normalized_probability": 0.08002704611545754,
+      "total_log_prob": -10.1015625,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 2.91796875,
+      "perplexity": 18.503663694167408,
+      "probability": 0.00015846132511575126,
+      "normalized_probability": 0.05411376622282161,
+      "total_log_prob": -8.75,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.2109375,
+      "perplexity": 67.41971617548266,
+      "probability": 3.2887598813664843e-06,
+      "normalized_probability": 0.014871132916733311,
+      "total_log_prob": -12.625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.810546875,
+      "perplexity": 45.17513726542669,
+      "probability": 0.0004900055942931395,
+      "normalized_probability": 0.022136069983019556,
+      "total_log_prob": -7.62109375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 7.19921875,
+      "perplexity": 1338.384742765137,
+      "probability": 0.0007471693064387259,
+      "normalized_probability": 0.0007471693064387259,
+      "total_log_prob": -7.19921875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.08984375,
+      "perplexity": 21.973644325590612,
+      "probability": 9.462157900914659e-05,
+      "normalized_probability": 0.045568359830315645,
+      "total_log_prob": -9.265625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 7.78515625,
+      "perplexity": 2404.641843912843,
+      "probability": 0.0004158623466240594,
+      "normalized_probability": 0.0004158623466240594,
+      "total_log_prob": -7.78515625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 1.529296875,
+      "perplexity": 4.6149308080322236,
+      "probability": 0.002204647823661035,
+      "normalized_probability": 0.21668797249560356,
+      "total_log_prob": -6.1171875,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 1.7294921875,
+      "perplexity": 5.637790241030036,
+      "probability": 0.00017540069774718182,
+      "normalized_probability": 0.1773398200053605,
+      "total_log_prob": -8.6484375,
+      "num_target_tokens": 5
+    },
+    {
+      "loss": 4.96875,
+      "perplexity": 143.8469662358426,
+      "probability": 3.3596797299283724e-07,
+      "normalized_probability": 0.006951832396384793,
+      "total_log_prob": -14.90625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.1015625,
+      "perplexity": 8.178939526719109,
+      "probability": 2.7536449349747158e-05,
+      "normalized_probability": 0.1224564282529819,
+      "total_log_prob": -10.5,
+      "num_target_tokens": 5
+    },
+    {
+      "loss": 4.12109375,
+      "perplexity": 61.626609520407456,
+      "probability": 4.255971510111862e-06,
+      "normalized_probability": 0.016205641877453023,
+      "total_log_prob": -12.3671875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.904296875,
+      "perplexity": 49.61518196998445,
+      "probability": 0.0004062289057403044,
+      "normalized_probability": 0.020155121079772863,
+      "total_log_prob": -7.80859375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.421875,
+      "perplexity": 30.62678644311483,
+      "probability": 0.0010660980266590896,
+      "normalized_probability": 0.03265115658991408,
+      "total_log_prob": -6.84375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.25390625,
+      "perplexity": 70.37979717263202,
+      "probability": 0.0002018849656009158,
+      "normalized_probability": 0.014208622931196246,
+      "total_log_prob": -8.5078125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.357421875,
+      "perplexity": 10.563681823081545,
+      "probability": 8.030429110667905e-05,
+      "normalized_probability": 0.09466396439686488,
+      "total_log_prob": -9.4296875,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 3.69140625,
+      "perplexity": 40.1011996370117,
+      "probability": 1.556769693323107e-05,
+      "normalized_probability": 0.0249694009275405,
+      "total_log_prob": -11.0703125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.265625,
+      "perplexity": 71.20941195067294,
+      "probability": 0.00019720830540981299,
+      "normalized_probability": 0.014043087460021496,
+      "total_log_prob": -8.53125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 10.328125,
+      "perplexity": 30580.71926586695,
+      "probability": 3.2700342699792625e-05,
+      "normalized_probability": 3.2700342699792625e-05,
+      "total_log_prob": -10.328125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.974609375,
+      "perplexity": 53.22932014095188,
+      "probability": 0.0003529377895963558,
+      "normalized_probability": 0.01878663859226434,
+      "total_log_prob": -7.94921875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.25390625,
+      "perplexity": 70.37979717263202,
+      "probability": 0.0002018849656009158,
+      "normalized_probability": 0.014208622931196246,
+      "total_log_prob": -8.5078125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.134765625,
+      "perplexity": 8.455064618848082,
+      "probability": 0.00019567361820152106,
+      "normalized_probability": 0.11827230720044336,
+      "total_log_prob": -8.5390625,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 5.25,
+      "perplexity": 190.56626845863,
+      "probability": 2.7536449349747158e-05,
+      "normalized_probability": 0.005247518399181385,
+      "total_log_prob": -10.5,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.2890625,
+      "perplexity": 72.89809449073893,
+      "probability": 0.0001881774796065311,
+      "normalized_probability": 0.013717779689386,
+      "total_log_prob": -8.578125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.08984375,
+      "perplexity": 59.73055807527518,
+      "probability": 0.0002802895169181628,
+      "normalized_probability": 0.016741849268171148,
+      "total_log_prob": -8.1796875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.662109375,
+      "perplexity": 14.326477161274006,
+      "probability": 0.0003394169552062084,
+      "normalized_probability": 0.06975540176173406,
+      "total_log_prob": -7.98828125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.52734375,
+      "perplexity": 4.605926067851898,
+      "probability": 0.00048240876169431345,
+      "normalized_probability": 0.21711160476059874,
+      "total_log_prob": -7.63671875,
+      "num_target_tokens": 5
+    },
+    {
+      "loss": 3.02734375,
+      "perplexity": 20.64232851707703,
+      "probability": 0.00011324720203489201,
+      "normalized_probability": 0.04838110987252015,
+      "total_log_prob": -9.0859375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.703125,
+      "perplexity": 14.926303617194517,
+      "probability": 0.0003007067561944148,
+      "normalized_probability": 0.06699582332279769,
+      "total_log_prob": -8.109375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.296875,
+      "perplexity": 73.46984133199462,
+      "probability": 2.5215796691343987e-06,
+      "normalized_probability": 0.013611027080910821,
+      "total_log_prob": -12.890625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.9375,
+      "perplexity": 6.941375821197036,
+      "probability": 0.00043074254057568753,
+      "normalized_probability": 0.14406365910145327,
+      "total_log_prob": -7.75,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 3.373046875,
+      "perplexity": 29.167260806600495,
+      "probability": 4.037953341500923e-05,
+      "normalized_probability": 0.034307344123787095,
+      "total_log_prob": -10.1171875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.03125,
+      "perplexity": 20.723120306578686,
+      "probability": 0.0001123659053168018,
+      "normalized_probability": 0.04825528130927965,
+      "total_log_prob": -9.09375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.49609375,
+      "perplexity": 89.66618776422116,
+      "probability": 0.00012437771917636007,
+      "normalized_probability": 0.011152475921353074,
+      "total_log_prob": -8.9921875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.544921875,
+      "perplexity": 34.63697922255266,
+      "probability": 2.4111720690141957e-05,
+      "normalized_probability": 0.028889680223290137,
+      "total_log_prob": -10.6328125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 7.46875,
+      "perplexity": 1752.4147974336688,
+      "probability": 0.0005706411526908208,
+      "normalized_probability": 0.0005706411526908208,
+      "total_log_prob": -7.46875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 2.615234375,
+      "perplexity": 13.67042000714299,
+      "probability": 0.00039066652075090693,
+      "normalized_probability": 0.07310303338835246,
+      "total_log_prob": -7.84765625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.548828125,
+      "perplexity": 4.7059521623170095,
+      "probability": 0.002038965923272597,
+      "normalized_probability": 0.21249684771713506,
+      "total_log_prob": -6.1953125,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 3.15625,
+      "perplexity": 23.482371718117374,
+      "probability": 7.722788202587939e-05,
+      "normalized_probability": 0.04258513628878761,
+      "total_log_prob": -9.46875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.556640625,
+      "perplexity": 12.892433965519283,
+      "probability": 0.0004675666044367073,
+      "normalized_probability": 0.07761538715781095,
+      "total_log_prob": -7.66796875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.94921875,
+      "perplexity": 51.894808174781225,
+      "probability": 0.0003713232800446586,
+      "normalized_probability": 0.019269750388748126,
+      "total_log_prob": -7.8984375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.33203125,
+      "perplexity": 27.995149135337257,
+      "probability": 4.5399929762484854e-05,
+      "normalized_probability": 0.035673993347252395,
+      "total_log_prob": -10.0,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.7783203125,
+      "perplexity": 5.919904473306918,
+      "probability": 0.00481539356400332,
+      "normalized_probability": 0.16886666611773832,
+      "total_log_prob": -5.3359375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 1.92578125,
+      "perplexity": 6.8605063433646665,
+      "probability": 0.021246512812908964,
+      "normalized_probability": 0.14576183592734063,
+      "total_log_prob": -3.8515625,
+      "num_target_tokens": 2
+    }
+  ]
+}

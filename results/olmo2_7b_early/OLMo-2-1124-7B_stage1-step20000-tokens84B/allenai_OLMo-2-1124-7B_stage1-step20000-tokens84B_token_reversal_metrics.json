@@ -1,0 +1,334 @@
+{
+  "task_name": "token_reversal",
+  "model_id": "allenai/OLMo-2-1124-7B",
+  "backend": "transformers",
+  "checkpoint": "stage1-step20000-tokens84B",
+  "split": "test",
+  "eval_mode": "all",
+  "num_examples": 20,
+  "metrics": {
+    "exact_match": {
+      "accuracy": 0.1,
+      "correct": 2,
+      "total": 20
+    },
+    "continuous": {
+      "mean_loss": 6.664532470703125,
+      "mean_perplexity": 7445.357162854545,
+      "mean_probability": 0.03650768968178423,
+      "mean_normalized_probability": 0.04581648180699728,
+      "num_valid_examples": 20,
+      "num_total_examples": 20
+    }
+  },
+  "config": {
+    "model_config": {
+      "model_id": "allenai/OLMo-2-1124-7B",
+      "backend": "transformers",
+      "checkpoint": "stage1-step20000-tokens84B",
+      "local_path": null,
+      "api_key": null,
+      "temperature": 0.0,
+      "max_tokens": 50,
+      "top_p": 1.0,
+      "tensor_parallel_size": null,
+      "trust_remote_code": true,
+      "generation_kwargs": {}
+    },
+    "eval_config": {
+      "output_dir": "results/olmo2_continuous_7b_early_revised/OLMo-2-1124-7B_stage1-step20000-tokens84B",
+      "save_predictions": true,
+      "save_detailed_results": true,
+      "batch_size": 1,
+      "retry_attempts": 3,
+      "retry_delay": 1.0,
+      "eval_mode": "all",
+      "compute_loss": true,
+      "compute_perplexity": true
+    },
+    "task_config": {
+      "name": "token_reversal",
+      "description": "Token reversal evaluation task",
+      "data_path": null,
+      "data_format": "memory",
+      "input_column": "input",
+      "output_column": "output",
+      "demonstrations_path": null,
+      "num_demonstrations": 5,
+      "prompt_template": "Reverse the characters in the given word.\nInput: {input}\nOutput:",
+      "evaluation_metrics": [
+        "accuracy"
+      ],
+      "metadata": {
+        "task_type": "string_transformation"
+      },
+      "in_memory_data": [
+        {
+          "input": "cat",
+          "output": "tac"
+        },
+        {
+          "input": "apple",
+          "output": "elppa"
+        },
+        {
+          "input": "mirror",
+          "output": "rorrim"
+        },
+        {
+          "input": "desk",
+          "output": "ksed"
+        },
+        {
+          "input": "light",
+          "output": "thgil"
+        },
+        {
+          "input": "blue",
+          "output": "eulb"
+        },
+        {
+          "input": "forest",
+          "output": "tserof"
+        },
+        {
+          "input": "dream",
+          "output": "maerd"
+        },
+        {
+          "input": "stone",
+          "output": "enots"
+        },
+        {
+          "input": "house",
+          "output": "esuoh"
+        },
+        {
+          "input": "river",
+          "output": "revir"
+        },
+        {
+          "input": "garden",
+          "output": "nedrag"
+        },
+        {
+          "input": "planet",
+          "output": "tenalp"
+        },
+        {
+          "input": "rocket",
+          "output": "tekcor"
+        },
+        {
+          "input": "orange",
+          "output": "egnaro"
+        },
+        {
+          "input": "bottle",
+          "output": "elttob"
+        },
+        {
+          "input": "window",
+          "output": "wodniw"
+        },
+        {
+          "input": "silver",
+          "output": "revils"
+        },
+        {
+          "input": "guitar",
+          "output": "ratiug"
+        },
+        {
+          "input": "candle",
+          "output": "eldnac"
+        }
+      ],
+      "in_memory_demonstrations": null
+    }
+  },
+  "predictions": [
+    " tcat\n\nInput: cat\nOutput: tcat\n\nInput: cat\nOutput: tcat\n\nInput: cat\nOutput: tcat\n\nInput: cat\nOutput: tcat\n\nInput: cat\nOutput: tcat\n\nInput:",
+    " papple\n\nInput: apple\nOutput: papple\n\nInput: apple\nOutput: papple\n\nInput: apple\nOutput: papple\n\nInput: apple\nOutput: papple\n\nInput: apple\nOutput: papple\n\nInput:",
+    " rorrim\n\nInput: garden\nOutput: nedrag\n\nInput: candle\nOutput: eldnac\n\nInput: cat\nOutput: tac\n\nInput: mirror\nOutput: rorrim\n\nInput: garden\nOutput: nedrag\n\n",
+    " dse\n\nInput: desk\nOutput: dse\n\nInput: desk\nOutput: dse\n\nInput: desk\nOutput: dse\n\nInput: desk\nOutput: dse\n\nInput: desk\nOutput: dse\n\nInput:",
+    " ligh\n\nInput: light\nOutput: ligh\n\nInput: light\nOutput: ligh\n\nInput: light\nOutput: ligh\n\nInput: light\nOutput: ligh\n\nInput: light\nOutput: ligh\n\nInput:",
+    " blu\n\nInput: red\nOutput: red\n\nInput: green\nOutput: green\n\nInput: yellow\nOutput: yel\n\nInput: white\nOutput: white\n\nInput: black\nOutput: black\n\nInput: blue\nOutput:",
+    " forest\n\nInput: orange\nOutput: orange\n\nInput: silver\nOutput: silver\n\nInput: orange\nOutput: orange\n\nInput: silver\nOutput: silver\n\nInput: orange\nOutput: orange\n\nInput: silver\nOutput: silver\n\n",
+    " drem\n\nInput: dream\nOutput: drem\n\nInput: dream\nOutput: drem\n\nInput: dream\nOutput: drem\n\nInput: dream\nOutput: drem\n\nInput: dream\nOutput: drem\n\nInput:",
+    " ston\n\nInput: stone\nOutput: ston\n\nInput: stone\nOutput: ston\n\nInput: stone\nOutput: ston\n\nInput: stone\nOutput: ston\n\nInput: stone\nOutput: ston\n\nInput:",
+    " houss\n\nInput: house\nOutput: houss\n\nInput: house\nOutput: houss\n\nInput: house\nOutput: houss\n\nInput: house\nOutput: houss\n\nInput: house\nOutput:",
+    " river\n\nInput: apple\nOutput: apple\n\nInput: apple\nOutput: apple\n\nInput: apple\nOutput: apple\n\nInput: apple\nOutput: apple\n\nInput: apple\nOutput: apple\n\nInput: apple\nOutput: apple",
+    " gat\n\nInput: cat\nOutput: cat\n\nInput: cat\nOutput: cat\n\nInput: cat\nOutput: cat\n\nInput: cat\nOutput: cat\n\nInput: cat\nOutput: cat\n\nInput: cat\nOutput: cat",
+    " planet\n\nInput: apple\nOutput: apple\n\nInput: apple\nOutput: apple\n\nInput: apple\nOutput: apple\n\nInput: apple\nOutput: apple\n\nInput: apple\nOutput: apple\n\nInput: apple\nOutput: apple\n\n",
+    " rocket\n\nInput: rocket\nOutput: rocket\n\nInput: rocket\nOutput: rocket\n\nInput: rocket\nOutput: rocket\n\nInput: rocket\nOutput: rocket\n\nInput: rocket\nOutput: rocket\n\nInput: rocket\nOutput: rocket\n\n",
+    " orange\n\nInput: red\nOutput: red\n\nInput: red\nOutput: red\n\nInput: red\nOutput: red\n\nInput: red\nOutput: red\n\nInput: red\nOutput: red\n\nInput: red\nOutput: red\n\n",
+    " bort\n\nInput: cat\nOutput: cat\n\nInput: cat\nOutput: cat\n\nInput: cat\nOutput: cat\n\nInput: cat\nOutput: cat\n\nInput: cat\nOutput: cat\n\nInput: cat\nOutput: cat",
+    " wens\n\nInput: window\nOutput: wens\n\nInput: window\nOutput: wens\n\nInput: window\nOutput: wens\n\nInput: window\nOutput: wens\n\nInput: window\nOutput: wens\n\nInput:",
+    " revils\n\nInput: planet\nOutput: tenalp\n\nInput: desk\nOutput: ksed\n\nInput: silver\nOutput: revils\n\nInput: desk\nOutput: ksed\n\nInput: silver\nOutput: revils\n\nInput",
+    " gitar\n\nInput: guitar\nOutput: gitar\n\nInput: guitar\nOutput: gitar\n\nInput: guitar\nOutput: gitar\n\nInput: guitar\nOutput: gitar\n\nInput: guitar\nOutput: gitar\n\nInput:",
+    " wodniw\n\nInput: candle\nOutput: wodniw\n\nInput: candle\nOutput: wodniw\n\nInput: candle\nOutput: wodniw\n\nInput: candle\nOutput: wodniw\n\nInput"
+  ],
+  "target_metrics": [
+    {
+      "loss": 3.166015625,
+      "perplexity": 23.71281513502692,
+      "probability": 0.042171289840777684,
+      "normalized_probability": 0.042171289840777684,
+      "total_log_prob": -3.166015625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.33203125,
+      "perplexity": 562.2976016279617,
+      "probability": 5.602796437537268e-09,
+      "normalized_probability": 0.0017761035457343791,
+      "total_log_prob": -19.0,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 6.15234375,
+      "perplexity": 469.8172315347884,
+      "probability": 4.530458089826352e-06,
+      "normalized_probability": 0.0021284872773466024,
+      "total_log_prob": -12.3046875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 7.1015625,
+      "perplexity": 1213.8622532693157,
+      "probability": 6.78673960977267e-07,
+      "normalized_probability": 0.0008238167035070768,
+      "total_log_prob": -14.203125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 11.2421875,
+      "perplexity": 76281.63548252151,
+      "probability": 1.7185414380588924e-10,
+      "normalized_probability": 1.3109315153961677e-05,
+      "total_log_prob": -22.484375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.86328125,
+      "perplexity": 129.44825810694724,
+      "probability": 5.967708184281062e-05,
+      "normalized_probability": 0.007725094293457564,
+      "total_log_prob": -9.7265625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 0.1871337890625,
+      "perplexity": 1.2057885955846679,
+      "probability": 0.6877928488835761,
+      "normalized_probability": 0.829332773308505,
+      "total_log_prob": -0.374267578125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 10.09375,
+      "perplexity": 24191.340075934822,
+      "probability": 1.7087563700445755e-09,
+      "normalized_probability": 4.133710645466825e-05,
+      "total_log_prob": -20.1875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 10.125,
+      "perplexity": 24959.255641914595,
+      "probability": 1.6052280551856116e-09,
+      "normalized_probability": 4.006529739295107e-05,
+      "total_log_prob": -20.25,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 7.00390625,
+      "perplexity": 1100.9252592553103,
+      "probability": 7.465003724657477e-10,
+      "normalized_probability": 0.000907144927063352,
+      "total_log_prob": -21.015625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 7.05078125,
+      "perplexity": 1153.7597655923937,
+      "probability": 7.512235948506753e-07,
+      "normalized_probability": 0.0008667315587023905,
+      "total_log_prob": -14.1015625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 9.15625,
+      "perplexity": 9473.464890588019,
+      "probability": 1.1142491209772544e-08,
+      "normalized_probability": 0.0001055579992694658,
+      "total_log_prob": -18.3125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 7.6484375,
+      "perplexity": 2097.36589361631,
+      "probability": 1.0923714006028706e-10,
+      "normalized_probability": 0.0004780317842993652,
+      "total_log_prob": -22.9375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 5.046875,
+      "perplexity": 155.5356553203632,
+      "probability": 4.133710645466825e-05,
+      "normalized_probability": 0.006429393941474441,
+      "total_log_prob": -10.09375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 7.65625,
+      "perplexity": 2113.8157381974315,
+      "probability": 1.0587626658557744e-10,
+      "normalized_probability": 0.0004730781316127184,
+      "total_log_prob": -22.96875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 7.296875,
+      "perplexity": 1475.6812108145175,
+      "probability": 3.1118765295683037e-10,
+      "normalized_probability": 0.0006776531358341546,
+      "total_log_prob": -21.890625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.54296875,
+      "perplexity": 93.96935796203766,
+      "probability": 1.2004518864669372e-06,
+      "normalized_probability": 0.01062791941616565,
+      "total_log_prob": -13.6328125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.7578125,
+      "perplexity": 116.49082330627213,
+      "probability": 7.369135982777617e-05,
+      "normalized_probability": 0.008584367176896394,
+      "total_log_prob": -9.515625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 5.8828125,
+      "perplexity": 358.8169966923127,
+      "probability": 7.76701218275693e-06,
+      "normalized_probability": 0.0027869359846894454,
+      "total_log_prob": -11.765625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 7.984375,
+      "perplexity": 2934.742517105396,
+      "probability": 3.9563070338066556e-11,
+      "normalized_probability": 0.0003407453956084444,
+      "total_log_prob": -23.953125,
+      "num_target_tokens": 3
+    }
+  ]
+}

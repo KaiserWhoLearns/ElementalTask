@@ -1,0 +1,434 @@
+{
+  "task_name": "coreference",
+  "model_id": "allenai/OLMo-2-0425-1B",
+  "backend": "transformers",
+  "checkpoint": "stage1-step1200000-tokens2517B",
+  "split": "test",
+  "eval_mode": "all",
+  "num_examples": 40,
+  "metrics": {
+    "exact_match": {
+      "accuracy": 0.8,
+      "correct": 32,
+      "total": 40,
+      "accuracy_pronoun_simple": 0.9,
+      "accuracy_pronoun_hard": 0.7
+    },
+    "continuous": {
+      "mean_loss": 4.778829574584961,
+      "mean_perplexity": 1381.386525270639,
+      "mean_probability": 0.1203428860640533,
+      "mean_normalized_probability": 0.13082916396717575,
+      "num_valid_examples": 40,
+      "num_total_examples": 40
+    }
+  },
+  "config": {
+    "model_config": {
+      "model_id": "allenai/OLMo-2-0425-1B",
+      "backend": "transformers",
+      "checkpoint": "stage1-step1200000-tokens2517B",
+      "local_path": null,
+      "api_key": null,
+      "temperature": 0.0,
+      "max_tokens": 50,
+      "top_p": 1.0,
+      "tensor_parallel_size": null,
+      "trust_remote_code": true,
+      "quantization": null,
+      "generation_kwargs": {}
+    },
+    "eval_config": {
+      "output_dir": "results/olmo2_continuous_1b_early_revised/OLMo-2-0425-1B_stage1-step1200000-tokens2517B",
+      "save_predictions": true,
+      "save_detailed_results": true,
+      "batch_size": 1,
+      "retry_attempts": 3,
+      "retry_delay": 1.0,
+      "eval_mode": "all",
+      "compute_loss": true,
+      "compute_perplexity": true
+    },
+    "task_config": {
+      "name": "coreference",
+      "description": null,
+      "data_path": null,
+      "data_format": "csv",
+      "input_column": "input",
+      "output_column": "output",
+      "demonstrations_path": null,
+      "num_demonstrations": 5,
+      "prompt_template": null,
+      "evaluation_metrics": [
+        "accuracy"
+      ],
+      "metadata": {},
+      "in_memory_data": null,
+      "in_memory_demonstrations": null
+    }
+  },
+  "predictions": [
+    " Alice\n\nSentence: \"The teacher gave the students a test.\"\nWhat does \"the students\" refer to?\nAnswer: the students\n\nSentence: \"The students were given a test.\"\nWhat does \"the students\" refer to?\nAnswer: the students",
+    " David\n\nSentence: \"The teacher gave the students a test.\"\nWhat does \"the students\" refer to?\nAnswer: the students\n\nSentence: \"The students were given a test.\"\nWhat does \"the students\" refer to?\nAnswer: the students",
+    " Maria\n\nSentence: \"The teacher gave the students a test.\"\nWhat does \"the\" refer to?\nAnswer: the test\n\nSentence: \"The students were given a test.\"\nWhat does \"the\" refer to?\nAnswer: the test\n\nSentence",
+    " James\n\nSentence: \"The students were asked to write a paper on the topic.\"\nWhat does \"they\" refer to?\nAnswer: the students\n\nSentence: \"The students were asked to write a paper on the topic.\"\nWhat does \"they\"",
+    " Emma\n\nSentence: \"The students were given a test.\"\nWho does \"they\" refer to?\nAnswer: the students\n\nSentence: \"The students were given a test.\"\nWho does \"they\" refer to?\nAnswer: the students\n\nSentence:",
+    " Tom\n\nSentence: \"The teacher gave the students a test.\"\nWhat does \"the\" refer to?\nAnswer: the test\n\nSentence: \"The students were given a test.\"\nWhat does \"the\" refer to?\nAnswer: the test\n\nSentence",
+    " Lisa\n\nSentence: \"The teacher gave the students a test.\"\nWhat does \"the\" refer to?\nAnswer: the test\n\nSentence: \"The students were given a test.\"\nWhat does \"the\" refer to?\nAnswer: the test\n\nSentence",
+    " the patient\n\nSentence: \"The teacher gave the students a test.\"\nWho does \"the students\" refer to?\nAnswer: the teacher\n\nSentence: \"The students were given a test.\"\nWho does \"the students\" refer to?\nAnswer: the",
+    " Kevin\n\nSentence: \"The teacher gave the students a test.\"\nWhat does \"the\" refer to?\nAnswer: the test\n\nSentence: \"The students were given a test.\"\nWhat does \"the\" refer to?\nAnswer: the test\n\nSentence",
+    " Rachel\n\nSentence: \"The teacher gave the students a test.\"\nWhat does \"the\" refer to?\nAnswer: the test\n\nSentence: \"The students were given a test.\"\nWhat does \"the\" refer to?\nAnswer: the test\n\nSentence",
+    " Mr. Johnson\n\nSentence: \"The students were asked to write a paper on the topic.\"\nWho does \"they\" refer to?\nAnswer: the students\n\nSentence: \"The students were asked to write a paper on the topic.\"\nWho does \"",
+    " the cake\n\nSentence: \"The students were given a test.\"\nWhat does \"a\" refer to?\nAnswer: the test\n\nSentence: \"The students were given a test.\"\nWhat does \"a\" refer to?\nAnswer: the test\n\nSentence",
+    " Mark\n\nSentence: \"The students were given a test.\"\nWhat does \"they\" refer to?\nAnswer: the students\n\nSentence: \"The students were given a test.\"\nWhat does \"they\" refer to?\nAnswer: the students\n\nSentence:",
+    " Diana's novel\n\nSentence: \"The students were given a test.\"\nWhat does \"a\" refer to?\nAnswer: the test\n\nSentence: \"The students were given a test.\"\nWhat does \"the\" refer to?\nAnswer: the test\n\n",
+    " the manager\n\nSentence: \"The students were asked to write a paper on the topic.\"\nWhat does \"they\" refer to?\nAnswer: the students\n\nSentence: \"The students were asked to write a paper on the topic.\"\nWhat does \"they",
+    " Paul\n\nSentence: \"The teacher gave the students a test.\"\nWhat does \"the\" refer to?\nAnswer: the test\n\nSentence: \"The students were given a test.\"\nWhat does \"the\" refer to?\nAnswer: the test\n\nSentence",
+    " Olivia\n\nSentence: \"The students were given a test.\"\nWho does \"they\" refer to?\nAnswer: the students\n\nSentence: \"The students were given a test.\"\nWho does \"they\" refer to?\nAnswer: the students\n\nSentence:",
+    " the dish\n\nSentence: \"The students were given a test.\"\nWhat does \"they\" refer to?\nAnswer: the students\n\nSentence: \"The students were given a test.\"\nWhat does \"they\" refer to?\nAnswer: the students\n\nSentence",
+    " Laura\n\nSentence: \"The teacher gave the students a test.\"\nWho does \"the students\" refer to?\nAnswer: the teacher\n\nSentence: \"The students were given a test.\"\nWho does \"the students\" refer to?\nAnswer: the teacher",
+    " the car\n\nSentence: \"The teacher gave the students a test.\"\nWhat does \"the students\" refer to?\nAnswer: the students\n\nSentence: \"The students were given a test.\"\nWhat does \"the students\" refer to?\nAnswer: the",
+    " the trophy\n\nSentence: \"The dog ate the cake because it was too sweet.\"\nWhat was too sweet?\nAnswer: the cake\n\nSentence: \"The book fell off the shelf because it was too heavy.\"\nWhat was too heavy?\nAnswer: the",
+    " the trophy\n\nSentence: \"The dog ate the cake because it was too sweet.\"\nWhat was too sweet?\nAnswer: the cake\n\nSentence: \"The book fell off the shelf because it was too heavy.\"\nWhat was too heavy?\nAnswer: the",
+    " the city council\n\nSentence: \"The man was arrested because he was drunk.\"\nWho was drunk?\nAnswer: the man\n\nSentence: \"The man was arrested because he was drunk.\"\nWhat was drunk?\nAnswer: the man\n\nSentence: \"The",
+    " the city council\n\nSentence: \"The man was arrested because he was drunk.\"\nWho was drunk?\nAnswer: the man\n\nSentence: \"The man was arrested because he was drunk.\"\nWho was arrested?\nAnswer: the man\n\nSentence: \"The",
+    " Sam and Chris\n\nSentence: \"The dog ate the cat's food because it was too spicy.\"\nWhat was too spicy?\nAnswer: the cat's food\n\nSentence: \"The dog ate the cat's food because it was too spicy.\"\nWhat was",
+    " the painting\n\nSentence: \"The man was arrested because he was drunk.\"\nWho was drunk?\nAnswer: the man\n\nSentence: \"The man was arrested because he was drunk.\"\nWhat was drunk?\nAnswer: the man\n\nSentence: \"The man",
+    " the pot\n\nSentence: \"The dog didn't bark because it was afraid of the cat.\"\nWho was afraid of the cat?\nAnswer: the dog\n\nSentence: \"The cat didn't eat the mouse because it was too big.\"\nWhat was too",
+    " the mouse\n\nSentence: \"The dog chased the cat because it was too fast.\"\nWhat was too fast?\nAnswer: the cat\n\nSentence: \"The dog chased the cat because it was too big.\"\nWhat was too big?\nAnswer: the cat",
+    " the cat\n\nSentence: \"The dog chased the cat because it was very fast.\"\nWhat was very fast?\nAnswer: the cat\n\nSentence: \"The man was very angry because he was late.\"\nWhat was late?\nAnswer: the man\n\nSentence",
+    " Joan\n\nSentence: \"The man was arrested because he was drunk.\"\nWho was drunk?\nAnswer: the man\n\nSentence: \"The man was arrested because he was drunk.\"\nWho was arrested?\nAnswer: the man\n\nSentence: \"The man was",
+    " the table\n\nSentence: \"The car broke down because it was too old.\"\nWhat was too old?\nAnswer: the car\n\nSentence: \"The dog ate the cake because it was too sweet.\"\nWhat was too sweet?\nAnswer: the cake\n\n",
+    " the table\n\nSentence: \"The car broke down because it was out of gas.\"\nWhat was out of gas?\nAnswer: the car\n\nSentence: \"The dog ate the cat because it was hungry.\"\nWhat did the dog eat?\nAnswer: the",
+    " Bob\n\nSentence: \"The dog ate the cat's food because it was too spicy.\"\nWhat was too spicy?\nAnswer: the cat's food\n\nSentence: \"The dog ate the cat's food because it was too spicy.\"\nWhat was too spicy",
+    " the nurse\n\nSentence: \"The man was angry because he had to wait in line.\"\nWho was angry?\nAnswer: the man\n\nSentence: \"The man was angry because he had to wait in line.\"\nWhat was he angry about?\nAnswer:",
+    " the truck\n\nSentence: \"The man was angry because he was late for work.\"\nWho was angry?\nAnswer: the man\n\nSentence: \"The man was angry because he was late for work.\"\nWhat was late?\nAnswer: the man\n\nSentence",
+    " the actress\n\nSentence: \"The man was a good friend, but he died because he was sick.\"\nWho was sick?\nAnswer: the man\n\nSentence: \"The man was a good friend, but he died because he was sick.\"\nWhat was",
+    " the window\n\nSentence: \"The car broke down because it was out of gas.\"\nWhat was out of gas?\nAnswer: the car\n\nSentence: \"The dog bit the cat because it was hungry.\"\nWhat was hungry?\nAnswer: the dog\n\n",
+    " the ball\n\nSentence: \"The car broke down because it was out of gas.\"\nWhat was out of gas?\nAnswer: the car\n\nSentence: \"The dog bit the cat because it was hungry.\"\nWhat was hungry?\nAnswer: the dog\n\n",
+    " the meal\n\nSentence: \"The dog ate the bone because it was tasty.\"\nWhat was tasty?\nAnswer: the bone\n\nSentence: \"The dog ate the bone because it was tasty.\"\nWhat was tasty?\nAnswer: the bone\n\nSentence: \"",
+    " the lock\n\nSentence: \"The car wouldn't start because the battery was dead.\"\nWhat was dead?\nAnswer: the car\n\nSentence: \"The dog ate the cat because it was hungry.\"\nWhat was hungry?\nAnswer: the dog\n\nSentence:"
+  ],
+  "target_metrics": [
+    {
+      "loss": 0.0044403076171875,
+      "perplexity": 1.0044501803903632,
+      "probability": 0.9955695359737666,
+      "normalized_probability": 0.9955695359737666,
+      "total_log_prob": -0.0044403076171875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.7734375,
+      "perplexity": 6460.341763862983,
+      "probability": 0.00015479057247306478,
+      "normalized_probability": 0.00015479057247306478,
+      "total_log_prob": -8.7734375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 0.018646240234375,
+      "perplexity": 1.0188211669219833,
+      "probability": 0.9815265254265919,
+      "normalized_probability": 0.9815265254265919,
+      "total_log_prob": -0.018646240234375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.078125,
+      "perplexity": 8761.522761105713,
+      "probability": 0.00011413541084880993,
+      "normalized_probability": 0.00011413541084880993,
+      "total_log_prob": -9.078125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.1640625,
+      "perplexity": 3512.4268928432866,
+      "probability": 0.00028470343455049295,
+      "normalized_probability": 0.00028470343455049295,
+      "total_log_prob": -8.1640625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.84375,
+      "perplexity": 6930.934974231482,
+      "probability": 0.00014428067839590176,
+      "normalized_probability": 0.00014428067839590176,
+      "total_log_prob": -8.84375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 0.007175445556640625,
+      "perplexity": 1.007201250750439,
+      "probability": 0.9928502364894071,
+      "normalized_probability": 0.9928502364894071,
+      "total_log_prob": -0.007175445556640625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.33984375,
+      "perplexity": 76.69555472159655,
+      "probability": 0.0001700041856069086,
+      "normalized_probability": 0.013038565320115117,
+      "total_log_prob": -8.6796875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 8.921875,
+      "perplexity": 7494.127553809398,
+      "probability": 0.00013343781418447866,
+      "normalized_probability": 0.00013343781418447866,
+      "total_log_prob": -8.921875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.0390625,
+      "perplexity": 3099.705853489035,
+      "probability": 0.00032261125644370356,
+      "normalized_probability": 0.00032261125644370356,
+      "total_log_prob": -8.0390625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.03125,
+      "perplexity": 20.723120306578686,
+      "probability": 0.0001123659053168018,
+      "normalized_probability": 0.04825528130927965,
+      "total_log_prob": -9.09375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.779296875,
+      "perplexity": 43.78524440968234,
+      "probability": 0.0005216082399637996,
+      "normalized_probability": 0.022838744272919202,
+      "total_log_prob": -7.55859375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 8.5390625,
+      "perplexity": 5110.550973561067,
+      "probability": 0.00019567361820152106,
+      "normalized_probability": 0.00019567361820152106,
+      "total_log_prob": -8.5390625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.515625,
+      "perplexity": 91.43469485205186,
+      "probability": 0.00011961288358102437,
+      "normalized_probability": 0.010936767510604966,
+      "total_log_prob": -9.03125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.5703125,
+      "perplexity": 96.57428452170761,
+      "probability": 0.00010722029588095494,
+      "normalized_probability": 0.010354723360909018,
+      "total_log_prob": -9.140625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 8.65625,
+      "perplexity": 5745.946909852821,
+      "probability": 0.00017403571868811687,
+      "normalized_probability": 0.00017403571868811687,
+      "total_log_prob": -8.65625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.65234375,
+      "perplexity": 104.83039411284926,
+      "probability": 9.099668324216146e-05,
+      "normalized_probability": 0.009539218167237892,
+      "total_log_prob": -9.3046875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.25,
+      "perplexity": 70.10541234668786,
+      "probability": 0.00020346836901064417,
+      "normalized_probability": 0.014264233908999256,
+      "total_log_prob": -8.5,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 0.007442474365234375,
+      "perplexity": 1.0074702384125702,
+      "probability": 0.9925851522677823,
+      "normalized_probability": 0.9925851522677823,
+      "total_log_prob": -0.007442474365234375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.8671875,
+      "perplexity": 47.807737558209425,
+      "probability": 0.00043752574858056214,
+      "normalized_probability": 0.020917116163098635,
+      "total_log_prob": -7.734375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.26953125,
+      "perplexity": 71.48811770889668,
+      "probability": 0.00019567361820152106,
+      "normalized_probability": 0.013988338650516045,
+      "total_log_prob": -8.5390625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 5.3046875,
+      "perplexity": 201.27809318052155,
+      "probability": 2.4683513668415607e-05,
+      "normalized_probability": 0.004968250564174034,
+      "total_log_prob": -10.609375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.8984375,
+      "perplexity": 18.145770440989054,
+      "probability": 0.00016736851500600766,
+      "normalized_probability": 0.05510926103975853,
+      "total_log_prob": -8.6953125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.61328125,
+      "perplexity": 100.81440478091984,
+      "probability": 9.839087420755427e-05,
+      "normalized_probability": 0.009919217419108943,
+      "total_log_prob": -9.2265625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 8.0625,
+      "perplexity": 3173.213259472856,
+      "probability": 0.000315137974737356,
+      "normalized_probability": 0.000315137974737356,
+      "total_log_prob": -8.0625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.1328125,
+      "perplexity": 62.3530444922685,
+      "probability": 0.00025720811880066503,
+      "normalized_probability": 0.01603770927535055,
+      "total_log_prob": -8.265625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.54296875,
+      "perplexity": 93.96935796203766,
+      "probability": 0.00011324720203489201,
+      "normalized_probability": 0.010641766866215967,
+      "total_log_prob": -9.0859375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.4765625,
+      "perplexity": 87.93188669987823,
+      "probability": 0.00012933236424347565,
+      "normalized_probability": 0.011372438799284682,
+      "total_log_prob": -8.953125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.4921875,
+      "perplexity": 89.31661242710538,
+      "probability": 0.00012535322571817655,
+      "normalized_probability": 0.011196125477957834,
+      "total_log_prob": -8.984375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 0.170166015625,
+      "perplexity": 1.1855016467811816,
+      "probability": 0.8435247666801248,
+      "normalized_probability": 0.8435247666801248,
+      "total_log_prob": -0.170166015625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.31640625,
+      "perplexity": 74.91890411002962,
+      "probability": 0.00017816285682120578,
+      "normalized_probability": 0.013347765986156852,
+      "total_log_prob": -8.6328125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 5.09375,
+      "perplexity": 162.99996726850102,
+      "probability": 3.763786373644493e-05,
+      "normalized_probability": 0.006134970557096825,
+      "total_log_prob": -10.1875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 8.0078125,
+      "perplexity": 3004.337930302434,
+      "probability": 0.0003328520370207935,
+      "normalized_probability": 0.0003328520370207935,
+      "total_log_prob": -8.0078125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.2265625,
+      "perplexity": 68.48142221881122,
+      "probability": 0.00021323301991815497,
+      "normalized_probability": 0.014602500468007353,
+      "total_log_prob": -8.453125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.37109375,
+      "perplexity": 79.13013296849392,
+      "probability": 0.00015970415269209664,
+      "normalized_probability": 0.012637410838146264,
+      "total_log_prob": -8.7421875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.48828125,
+      "perplexity": 32.72964525738904,
+      "probability": 0.0009335066231896564,
+      "normalized_probability": 0.030553340622420593,
+      "total_log_prob": -6.9765625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.25,
+      "perplexity": 70.10541234668786,
+      "probability": 0.00020346836901064417,
+      "normalized_probability": 0.014264233908999256,
+      "total_log_prob": -8.5,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.802734375,
+      "perplexity": 44.82358155812517,
+      "probability": 0.0004977220595979135,
+      "normalized_probability": 0.022309685331665115,
+      "total_log_prob": -7.60546875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.16015625,
+      "perplexity": 64.08153455750669,
+      "probability": 0.00024351975241113875,
+      "normalized_probability": 0.01560511942956986,
+      "total_log_prob": -8.3203125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.4140625,
+      "perplexity": 82.60436300370014,
+      "probability": 0.00014655276847396972,
+      "normalized_probability": 0.012105898086221019,
+      "total_log_prob": -8.828125,
+      "num_target_tokens": 2
+    }
+  ]
+}

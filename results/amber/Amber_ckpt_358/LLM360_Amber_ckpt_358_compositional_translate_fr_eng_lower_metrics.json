@@ -1,0 +1,1569 @@
+{
+  "task_name": "compositional:translate_fr_eng_lower",
+  "model_id": "LLM360/Amber",
+  "backend": "transformers",
+  "checkpoint": "ckpt_358",
+  "split": "test",
+  "eval_mode": "all",
+  "num_examples": 166,
+  "metrics": {
+    "exact_match": {
+      "accuracy": 0.8734939759036144,
+      "correct": 145,
+      "total": 166,
+      "accuracy_translate_fr_eng_lower": 0.8734939759036144,
+      "correct_translate_fr_eng_lower": 145,
+      "total_translate_fr_eng_lower": 166
+    },
+    "continuous": {
+      "mean_loss": 5.74828219126506,
+      "mean_perplexity": 53014.86753474967,
+      "mean_probability": 0.0013498518900507065,
+      "mean_normalized_probability": 0.016639945962002467,
+      "num_valid_examples": 166,
+      "num_total_examples": 166
+    }
+  },
+  "config": {
+    "model_config": {
+      "model_id": "LLM360/Amber",
+      "backend": "transformers",
+      "checkpoint": "ckpt_358",
+      "local_path": null,
+      "api_key": null,
+      "temperature": 0.0,
+      "max_tokens": 50,
+      "top_p": 1.0,
+      "tensor_parallel_size": null,
+      "trust_remote_code": true,
+      "quantization": null,
+      "generation_kwargs": {}
+    },
+    "eval_config": {
+      "output_dir": "results/amber/Amber_ckpt_358",
+      "save_predictions": true,
+      "save_detailed_results": true,
+      "batch_size": 1,
+      "retry_attempts": 3,
+      "retry_delay": 1.0,
+      "eval_mode": "all",
+      "compute_loss": true,
+      "compute_perplexity": true
+    },
+    "task_config": {
+      "name": "compositional:translate_fr_eng_lower",
+      "description": "Compositional task with chained string operations",
+      "data_path": "dataset/compositional.csv",
+      "data_format": "csv",
+      "input_column": "input",
+      "output_column": "output",
+      "demonstrations_path": null,
+      "num_demonstrations": 5,
+      "prompt_template": null,
+      "evaluation_metrics": [
+        "accuracy"
+      ],
+      "metadata": {},
+      "in_memory_data": null,
+      "in_memory_demonstrations": null
+    }
+  },
+  "predictions": [
+    "hello\n\n\nA: You can use the following code to get the words in the list:\nimport re\n\ndef get_words(text):\n    return re.findall(r'\\w+', text)\n\n\n",
+    "goodbye\n\n\nA: You can use the following regex:\n\\b([a-zA-Z]+)\\b\n\n\n\n*\n\n*\\b - word boundary\n\n*([a-zA-Z]+) -",
+    "thank you\nbonne journ\u00e9e -> good day\nbonne nuit -> good night\nbonsoir -> good night\nbonsoir -> good night\nbonsoir -> good night\nbonsoir -> good night\nbonsoir ->",
+    "please\nje suis d\u00e9sol\u00e9 -> I'm sorry\nje suis d\u00e9sol\u00e9e -> I'm sorry\nje suis d\u00e9sol\u00e9e -> I'm sorry\nje suis d\u00e9sol\u00e9e -> I'm sorry\nje suis d\u00e9sol",
+    "yes\nnon -> no\n\n\nA: You can use the following code to get the desired output:\nimport re\n\ntext = \"Je suis un poisson, un rose, une princesse, oui, non, un m",
+    "no\n\n\nA: You can use the following code to get the desired output:\nimport re\n\ntext = \"Je suis un ami de mon ami.\"\n\ndef get_word(text, word):\n    return re.",
+    "water\n\n\nA: You can use the following regex:\n\\b[a-zA-Z]+[a-zA-Z]*\\b\n\n\n\n*\n\n*\\b - word boundary\n\n*[a-",
+    "house\nchambre -> room\nchambrette -> roomette\nchambrette -> roomette\nchambrette -> roomette\nchambrette -> roomette\nchambrette -> roomette\ncham",
+    "cat\n\n\nA: You can use the following regex:\n^([a-z]+) -> ([a-z]+)$\n\n\nA: You can use the following regex:\n^([a-z]+) -> ([",
+    "dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien ->",
+    "good evening\n\n\nA: You can use the following code to get the translation of the word \"bonsoir\" in French:\nString translation = Translator.translate(\"bonsoir\", \"fr\");\n\n\nA:",
+    "good night\nbonsoir -> good night\nbonsoir -> good night\nbonsoir -> good night\nbonsoir -> good night\nbonsoir -> good night\nbonsoir -> good night\nbonsoir -> good",
+    "how are you\ncomment allez-vous ? -> how are you?\ncomment allez-vous ? -> how are you?\ncomment allez-vous ? -> how are you?\ncomment allez-vous ? -> how are you",
+    "I love you\nje t'aime -> I love you\nje t'aime -> I love you\nje t'aime -> I love you\nje t'aime -> I love you\nje t'aime ->",
+    "friend\n\n\nA: You can use the following regex:\n\\b(de|du|du|de|de|de|de|de|de|de|de|de|de|de|de|de|de",
+    "family\n\n\nA: You can use the following regex:\n\\b(de|du|\u00e0|\u00e0 la|\u00e0 l'|\u00e0 la|\u00e0 l'|\u00e0 la|\u00e0 l'|\u00e0 la|\u00e0 l'",
+    "food\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger ->",
+    "book\n\n\nA: You can use the following regex:\n(?<=\\w)([a-z]+)(?=\\w)\n\n\n\n*\n\n*(?<=\\w) - look behind to assert that there is",
+    "car\n\n\nA: You can use the following regex:\n(?<=\\w)\\w+(?=\\w)\n\n\n\n*\n\n*(?<=\\w) - look behind to assert that there is a word character (",
+    "tree\n\n\nA: You can use the following regex:\n\\b(de|du|des|des|de|de|de|de|de|de|de|de|de|de|de|de|de",
+    "flower\n\n\nA: You can use the following code to get the translation of the word \"apple\" in French:\nString apple = \"pomme\";\nString translation = Translator.translate(apple, \"fr\");\n\n",
+    "sun\nsouvenir -> memory\nsouvenir -> memory\nsouvenir -> memory\nsouvenir -> memory\nsouvenir -> memory\nsouvenir -> memory\nsouvenir -> memory\nsouvenir -> memory\n",
+    "moon\njour -> day\nsamedi -> Saturday\ndimanche -> Sunday\nlundi -> Monday\nmardi -> Tuesday\nmercredi -> Wednesday\njeudi -> Thursday\nvendredi",
+    "star\n\n\nA: You can use the following regex:\n\\b(un|lent|pauvre|dedans|\u00e9toile)\\b\n\n\nA: You can use the following regex:\n\\b(",
+    "bread\n\n\nA: You can use the following regex:\n\\b([a-z]+)([a-z]+)\\b\n\n\n\n*\n\n*\\b - word boundary\n\n*([a-z]+)",
+    "cheese\n\n\nA: You can use the following regex:\n(?<=\\w) -> before a word\n(?=\\w) -> after a word\n\n\nA: You can use the following regex:\n(?<=\\w",
+    "wine\n\n\nA: You can use the following regex:\n\\b(pays|vert|chaud|mois|difficile|vin)\\b\n\n\nA: You can use the following regex:\n\\b(",
+    "coffee\n\n\nA: You can use the following regex:\n\\b(infirmi\u00e8re|nurse|letter|hello|fast|big|coffee)\\b\n\n\nA: You can use the following regex",
+    "tea\n\n\nA: You can use the following regex:\n(?<=\\w)\\s+(?=\\w)\n\n\n\n*\n\n*(?<=\\w) - look behind to assert that there is a word character before",
+    "milk\nmanger -> eat\npain -> bread\npoulet -> chicken\npain -> bread\npoulet -> chicken\npain -> bread\npoulet -> chicken\npain -> bread\npou",
+    "sugar\n\n\nA: You can use the following regex:\n\\b(femme|homme|fille|gar\u00e7on|fille|girl|boy|boy|girl|girl|girl|girl",
+    "salt\n\n\nA: You can use the following regex:\n\\b(lune|lourd|heavy|moon|city|up|star|salt)\\b\n\n\nA: You can use the following regex",
+    "pepper\npapier -> paper\npapier -> paper\npapier -> paper\npapier -> paper\npapier -> paper\npapier -> paper\npapier -> paper\npapier -> paper",
+    "chair\nchien -> dog\nch\u00e2teau -> castle\nchapeau -> hat\nch\u00e2teau -> castle\nch\u00e2teau -> castle\nch\u00e2teau -> castle\nch\u00e2teau -> castle\nch\u00e2teau -> castle\nch\u00e2teau -> castle\nch\u00e2teau",
+    "carry\nsavoir -> know\nsavoir -> know\nsavoir -> know\nsavoir -> know\nsavoir -> know\nsavoir -> know\nsavoir -> know\nsavoir -> know\nsavoir -> know\nsavoir ->",
+    "window\nsauce -> sauce\nsauce -> sauce\nsauce -> sauce\nsauce -> sauce\nsauce -> sauce\nsauce -> sauce\nsauce -> sauce",
+    "street\n\n\nA: You can use the following regex:\n\\b([a-zA-Z]+)\\b\n\n\n\n*\n\n*\\b - word boundary\n\n*([a-zA-Z]+) - Capt",
+    "city\n\n\nA: You can use the following regex:\n(?<=\\w)\\s+(?=\\w)\n\n\n\n*\n\n*(?<=\\w) - look behind to assert that there is a word character before",
+    "country\npour -> for\nsaison -> season\ns\u00e9ance -> session\ns\u00e9jour -> stay\ns\u00e9jour -> stay\ns\u00e9jour -> stay\ns\u00e9jour -> stay\ns\u00e9jour",
+    "world\n\n\nA: You can use the following regex:\n(?<=\\w)([a-z]+)(?=\\w)\n\n\n\n*\n\n*(?<=\\w) - look behind to assert that there is",
+    "time\n\n\nA: You can use the following code to get the words in the sentence:\nsentence = \"Je suis un musicien de 20 ans.\"\nwords = sentence.split()\n\nThen you can use the",
+    "day\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger ->",
+    "night\n\n\nA: You can use the following regular expression:\n\\b(de|du|des|des|de|du|des|de|du|des|de|du|des|de|du|des|",
+    "week\njour -> day\nsaison -> season\n\n\nA: You can use the following regex:\n\\b(huit|sept|dix|neuf|vingt|quatre|cinq|six|",
+    "month\nsauce -> sauce\nsauce -> sauce\nsauce -> sauce\nsauce -> sauce\nsauce -> sauce\nsauce -> sauce\nsauce -> sauce",
+    "and\n\n\nA: You can use the following regex:\n(?<=\\w)\\w+(?=\\w)\n\n\n\n*\n\n*(?<=\\w) - look behind to assert that there is a word character before",
+    "today\njeudi -> Thursday\njeudi -> Thursday\njeudi -> Thursday\njeudi -> Thursday\njeudi -> Thursday\njeudi -> Thursday\njeudi -> Thursday",
+    "tomorrow\n\n\nA: You can use the following regex:\n\\b[a-z]+[a-z]+[a-z]+[a-z]+[a-z]+[a-z]+[a-",
+    "yesterday\n\n\nA: You can use the following regex:\n(?<=\\w) -> match a word character\n(?=\\w) -> match a word character\n\n\nA: You can use the following regex:\n(?<=\\",
+    "child\n\n\nA: You can use the following regex:\n\\b(food|foot|hello|first|nine|child)\\b\n\n\nA: You can use the following regex:\nfood|foot|",
+    "school\nje suis -> I am\nje suis tr\u00e8s -> I am very\nje suis tr\u00e8s tr\u00e8s -> I am very very\nje suis tr\u00e8s tr\u00e8s tr\u00e8s -> I am very very very\nje suis tr\u00e8s tr\u00e8s tr\u00e8s tr\u00e8s -> I am very very very",
+    "student\n\n\nA: You can use the following regex:\n^[a-zA-Z]+$\n\n\nA: You can use the following regex:\n^[a-zA-Z]+$\n\n\nA:",
+    "teacher\n\n\nA: You can use the following regex:\n\\b[a-zA-Z]+[a-zA-Z]*\\b\n\n\n\n*\n\n*\\b - word boundary\n\n*[a-",
+    "apple\n\n\nA: You can use the following regex:\n\\b(nuit|nuit|nuit|nuit|nuit|nuit|nuit|nuit|nuit|nuit|nuit|",
+    "fish\nsoldat -> soldier\ntrois -> three\nvieux -> old\n\n\nA: You can use the following regex:\n(?<=\\w)\\w+(?=\\w)\n\n\n\n*\n\n*",
+    "bird\n\n\nA: You can use the following regex:\n^(?!.*\\b(?:non|oui|soldat|\u00e9cole|large|oiseau)\\b).*$\n\nRegEx Demo\n\n",
+    "horse\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien ->",
+    "letter\npapier -> paper\npapier-m\u00e2ch\u00e9 -> papier-m\u00e2ch\u00e9\npapier-m\u00e2ch\u00e9 -> papier-m\u00e2ch\u00e9\npapier-m\u00e2ch\u00e9 -> papier-m",
+    "motion\nsouffle -> breath\nsouffle -> breath\nsouffle -> breath\nsouffle -> breath\nsouffle -> breath\nsouffle -> breath\nsouffle -> breath",
+    "sentence\n\n\nA: You can use the following code to get the desired output:\nimport re\n\ndef get_word_list(text):\n    return re.findall(r'[a-zA-Z]+',",
+    "music\nchocolat -> chocolate\npain -> bread\nvin -> wine\nmusique -> music\nchocolat -> chocolate\npain -> bread\nvin -> wine\nmusique -> music\nchoc",
+    "song\nchien -> dog\nch\u00e2teau -> castle\nchambre -> room\nchose -> thing\nchose -> thing\nchose -> thing\nchose -> thing\nchose -> thing\nchose -> thing\nchose",
+    "dance\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien ->",
+    "game\n\n\nA: You can use the following regular expression:\n\\b[a-zA-Z]+[a-zA-Z]*\\b\n\n\n\n*\n\n*\\b - word boundary\n\n*[a",
+    "ball\n\n\nA: You can use the following regex:\n\\b[a-zA-Z]+[a-zA-Z]*\\b\n\n\n\n*\n\n*\\b - word boundary\n\n*[a-",
+    "hand\n\n\nA: You can use the following regex:\n(?<=\\w)([a-z]+)(?=\\w)\n\n\n\n*\n\n*(?<=\\w) - look behind to assert that there is",
+    "foot\npied -> foot\npied -> foot\npied -> foot\npied -> foot\npied -> foot\npied -> foot\npied -> foot\npied -> foot\npied -> foot\npied ->",
+    "head\n\n\nA: You can use the following regex:\n\\b[a-zA-Z]+[a-zA-Z]*\\b\n\n\n\n*\n\n*\\b - word boundary\n\n*[a-",
+    "eye\nmauve -> purple\nsouffle -> breath\nsouffle -> breath\nsouffle -> breath\nsouffle -> breath\nsouffle -> breath\nsouffle -> breath",
+    "ear\npapier -> paper\npapier -> paper\npapier -> paper\npapier -> paper\npapier -> paper\npapier -> paper\npapier -> paper\npapier -> paper\n",
+    "nose\n\n\nA: You can use the following regex:\n\\b[a-z]+[a-z]+[a-z]+[a-z]+[a-z]+[a-z]+[a-z",
+    "mouth\n\n\nA: You can use the following regex:\n\\b[a-z]+[a-z]+[a-z]+[a-z]+[a-z]+[a-z]+[a-z",
+    "heart\n\n\nA: You can use the following code to get the words in the list:\nimport re\n\ndef get_words(text):\n    return re.findall(r'[a-zA-Z]+',",
+    "brain\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien ->",
+    "body\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien ->",
+    "red\n\n\nA: You can use the following regex:\n\\b(mois|main|temps|cerveau|musicien|brain|hand|time|red)\\b\n\n\nA: You can use the",
+    "blue\n\n\nA: You can use the following regex:\n\\b(dix|premier|haut|bleu)\\b\n\n\nA: You can use the following regex:\n\\b(dix|pre",
+    "green\n\n\nA: You can use the following code to get the translation of the word \"bonsoir\" in French:\nString translation = Translator.translate(\"bonsoir\", \"fr\");\n\n\nA: You",
+    "yellow\nbleu -> blue\nrose -> pink\nvert -> green\norange -> orange\nrouge -> red\n\n\nA: You can use the following regex:\n\\b(avocat|lawyer|t\u00eate",
+    "black\nblanc -> white\n\n\nA: You can use the following code to get the words in the list:\nimport re\n\ndef get_words(text):\n    return re.findall(r'[a-",
+    "white\n\n\nA: You can use the following regex:\n\\b([a-zA-Z]+)\\b\n\n\n\n*\n\n*\\b - word boundary\n\n*([a-zA-Z]+) - Capt",
+    "purple\n\n\nA: You can use the following code to get the desired output:\nimport re\n\ndef get_words(text):\n    words = re.findall(r'[a-zA-Z]+',",
+    "rose\n\n\nA: You can use the following regex:\n\\b[a-zA-Z]+[a-zA-Z]*\\b\n\n\n\n*\n\n*\\b - word boundary\n\n*[a-",
+    "grey\nhaut -> high\nhaut -> high\nhaut -> high\nhaut -> high\nhaut -> high\nhaut -> high\nhaut -> high\nhaut -> high\nhaut -> high\nhaut ->",
+    "brown\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger ->",
+    "great\ngrand-p\u00e8re -> grandfather\ngrand-m\u00e8re -> grandmother\ngrand-fils -> grandson\ngrand-fille -> granddaughter\ngrand-petit-fils -> great-grandson\n",
+    "small\n\n\nA: You can use the following regex:\n\\b[a-zA-Z]+[a-zA-Z]*\\b\n\n\n\n*\n\n*\\b - word boundary\n\n*[a-",
+    "hot\nfroid -> cold\n\n\nA: You can use the following regex:\n\\b(de|du|des|des|de|de|de|de|de|de|de|de|de|de|",
+    "cold\nfroid -> cold\nfroid -> cold\nfroid -> cold\nfroid -> cold\nfroid -> cold\nfroid -> cold\nfroid -> cold\nfroid -> cold\nfroid -> cold\nfroid ->",
+    "new\n\n\nA: You can use the following regex:\n\\b(un|une|un|de|de|des|des|un|une|un|de|de|des|des|un|une|un",
+    "old\n\n\nA: You can use the following code to get the desired output:\nimport re\n\ntext = \"le mari de la vieille violette est un vieux mari\"\n\npattern = re.compile(r\"",
+    "good\n\n\nA: You can use the following regex:\n\\b(un|sept|bouche|froid|cold)\\b\n\n\nA: You can use the following regex:\n\\b(un",
+    "bad\n\n\nA: You can use the following regex:\n\\b([a-zA-Z]+)([a-zA-Z]+)\\b\n\n\n\n*\n\n*\\b - word boundary\n\n*([a",
+    "happy\n\n\nA: You can use the following regex:\n\\b([a-zA-Z]+)([a-zA-Z]+)\\b\n\n\n\n*\n\n*\\b - word boundary\n\n*([a",
+    "sad\n\n\nA: You can use the following regex:\n\\b([a-zA-Z]+)([a-zA-Z]+)\\b\n\n\n\n*\n\n*\\b - word boundary\n\n*([a",
+    "fast\nsans -> without\nsans -> without\nsans -> without\nsans -> without\nsans -> without\nsans -> without\nsans -> without\nsans -> without\nsans -> without\nsans ->",
+    "slow\n\n\nA: You can use the following regular expression:\n\\b(premier|deuxi\u00e8me|troisi\u00e8me|quatri\u00e8me|cinqui\u00e8me|sixi\u00e8me|septi\u00e8me|huiti\u00e8me|ne",
+    "fort\n\n\nA: You can use the following regex:\n\\b(dehors|marron|gauche|princesse|noir|fort)\\b\n\n\n\n*\n\n*\\b - word",
+    "weak\nfaire -> make\nfaire -> make\nfaire -> make\nfaire -> make\nfaire -> make\nfaire -> make\nfaire -> make\nfaire -> make\nfaire -> make\nfaire ->",
+    "beautiful\n\n\nA: You can use the following regex:\n\\b[a-z]+[a-z]+[a-z]+[a-z]+[a-z]+[a-z]+[a-z",
+    "laid\nsouffler -> breathe\nsouffler -> breathe\nsouffler -> breathe\nsouffler -> breathe\nsouffler -> breathe\nsouff",
+    "young\n\n\nA: You can use the following regex:\n^([a-zA-Z]+) -> ([a-zA-Z]+)$\n\n\nA: You can use the following regex:\n^([a-zA",
+    "rich\n\n\nA: You can use the following regex:\n(?<=\\w)(\\w+)(?=\\w)\n\n\n\n*\n\n*(?<=\\w) - look behind to assert that there is a word",
+    "poor\nbonne -> good\nbonne nuit -> good night\nbonsoir -> good night\nbonsoir -> good night\nbonsoir -> good night\nbonsoir -> good night\nbonsoir -> good night\nbon",
+    "clean\npour -> for\npourquoi -> why\npourquoi -> why\npourquoi -> why\npourquoi -> why\npourquoi -> why\npourquoi -> why\np",
+    "sale\n\n\nA: You can use the following regex:\n^([a-zA-Z]+)([a-zA-Z]+)([a-zA-Z]+)([a-zA-Z]+)([a-",
+    "easy\nje suis -> i am\nje suis -> i am\nje suis -> i am\nje suis -> i am\nje suis -> i am\nje suis -> i am\nje suis -> i am\nje suis -> i am\n",
+    "difficult\ndormir -> sleep\ndormir -> sleep\ndormir -> sleep\ndormir -> sleep\ndormir -> sleep\ndormir -> sleep\ndormir -> sleep\ndormir -> sleep\n",
+    "short\nlong -> long\n\n\nA: You can use the following regex:\n(?<=\\w)([a-z])(?=\\w)\n\n\n\n*\n\n*(?<=\\w) - look behind to assert",
+    "high\nhaut -> high\nhaut -> high\nhaut -> high\nhaut -> high\nhaut -> high\nhaut -> high\nhaut -> high\nhaut -> high\nhaut -> high\nhaut ->",
+    "bottom\n\n\nA: You can use the following code to get the desired output:\nimport re\n\ndef get_word_list(text):\n    return re.findall(r'[a-zA-Z]+',",
+    "big\n\n\nA: You can use the following regex:\n\\b(faible|rapide|professeur|haut|poisson|large)\\b\n\n\nA: You can use the following regex:\n\\",
+    "narrow\n\n\nA: You can use the following regex:\n(?<=\\w)\\s+(?=\\w)\n\n\n\n*\n\n*(?<=\\w) - look behind to assert that there is a word character before",
+    "heavy\n\n\nA: You can use the following regex:\n\\b(salt|maison|\u00e9cole|l\u00e9ger|sale|lourd)\\b\n\n\nA: You can use the following regex:\n\\",
+    "light\n\n\nA: You can use the following regex:\n(?<=\\w)\\w+(?=\\w)\n\n\n\n*\n\n*(?<=\\w) - look behind to assert that there is a word character (",
+    "full\n\n\nA: You can use the following regular expression:\n\\b[A-Z][a-z]+[A-Z][a-z]+[A-Z][a-z]+[A-Z][a",
+    "see\n\n\nA: You can use the following regex:\n\\b([a-zA-Z]+)([a-zA-Z]+)\\b\n\n\n\n*\n\n*\\b - word boundary\n\n*([a",
+    "right\n\n\nA: You can use the following regex:\n\\b(pour|de|du|du|de|de|de|de|de|de|de|de|de|de|de|de|",
+    "left\ndroit -> right\n\n\nA: You can use the following regex:\n(?<=\\w)\\w+(?=\\w)\n\n\n\n*\n\n*(?<=\\w) - look behind for a word character",
+    "inside\ndans -> inside\ndans -> inside\ndans -> inside\ndans -> inside\ndans -> inside\ndans -> inside\ndans -> inside\ndans -> inside\ndans -> inside\ndans ->",
+    "outside\n\n\nA: You can use the following regex:\n^([a-z]+)([a-z]+)([a-z]+)([a-z]+)([a-z]+)([a-z]+",
+    "in front of\n\n\nA: You can use the following regex:\n\\b(de|dans|au|d'|du|du|de|de|de|de|de|de|de|de|de",
+    "behind\nle chien -> dog\nle chat -> cat\nle chaton -> kitten\nle chaton de la grand-m\u00e8re -> kitten of grandmother\nle chaton de la m\u00e8re -> kitten of mother\nle",
+    "near\n\n\nA: You can use the following regular expression:\n\\b(s\\w*|p\\w*|t\\w*|a\\w*|m\\w*|r\\w*|e\\",
+    "back\n\n\nA: You can use the following regex:\n^([a-zA-Z]+) -> ([a-zA-Z]+)$\n\n\nA: You can use the following regex:\n^([a-zA",
+    "first\nquatre -> four\nsacr\u00e9 -> sacred\nsans -> without\nsans -> without\nsans -> without\nsans -> without\nsans -> without\nsans -> without\nsans -> without\nsans",
+    "last\n\n\nA: You can use the following regex:\n^(?<name>[a-zA-Z]+) (?<number>\\d+)$\n\n\n\n*\n\n*^ - start of string\n\n*(?",
+    "open\n\n\nA: You can use the following regex:\n\\b(un|de|le|la|le|la|le|la|le|la|le|la|le|la|le|la|le",
+    "closed\n\n\nA: You can use the following regex:\n\\b(un|une|un|une|un|une|un|une|un|une|un|une|un|une|un|une|un",
+    "one\n\n\nA: You can use the following regex:\n\\b([a-zA-Z]+)\\b\n\n\n\n*\n\n*\\b - word boundary\n\n*([a-zA-Z]+) - Capt",
+    "two\n\n\nA: You can use the following regex:\n(?<=\\w)\\s+(?=\\w)\n\n\n\n*\n\n*(?<=\\w) - look behind to assert that there is a word character before",
+    "three\n\n\nA: You can use the following regex:\n(?<=\\w)\\s*(\\w+)\\s*(?=\\w)\n\nRegEx Demo\n\n\n*\n\n*(?<=\\w) - Match",
+    "four\n\n\nA: You can use the following code to get the desired output:\nimport re\n\ndef get_words(text):\n    words = re.findall(r'[a-zA-Z]+', text",
+    "five\n\n\nA: You can use the following regex:\n\\b(de|du|des|deux|trois|quatre|cinq|six|sept|huit|neuf|dix|",
+    "seven\nmille -> thousand\nb\u00e9b\u00e9 -> baby\nau revoir -> goodbye\nsept -> seven\nmille -> thousand\nb\u00e9b\u00e9 -> baby\nau revoir -> goodbye\nsept -> seven\nmille",
+    "eight\ndix -> ten\ndix-sept -> seventeen\ndix-huit -> eighteen\ndix-neuf -> nineteen\ndix-dix-neuf -> twenty-nine\nd",
+    "nine\n\n\nA: You can use the following regex:\n\\b(princess|princesse|beau|beautiful|p\u00e8re|father|rouge|red|th\u00e9|tea|ne",
+    "ten\ndix-sept -> seventeen\ndix-huit -> eighteen\ndix-neuf -> nineteen\ndix-vingt -> twenty\ndix-trente -> thirty\ndix-qu",
+    "hundred\ndix -> ten\nquatre -> four\ncinq -> five\nsix -> six\nsept -> seven\nhuit -> eight\nneuf -> nine\ndix-sept -> seventeen\ndix-huit",
+    "thousand\n\n\nA: You can use the following regex:\n^(?<number>\\d+)(?<unit>\\w+)$\n\n\n\n*\n\n*^ - start of string\n\n*(?<number>\\d",
+    "brother\nm\u00e8re -> mother\ns\u0153ur -> sister\np\u00e8re -> father\nfils -> son\nfille -> daughter\ngrand-p\u00e8re -> grandfather\ngrand-m\u00e8re -> grandmother\ngrand-fils -> grand",
+    "sister\nm\u00e8re -> mother\np\u00e8re -> father\ngrand-p\u00e8re -> grandfather\ngrand-m\u00e8re -> grandmother\ngrand-fille -> granddaughter\ngrand-fils -> grandson\ngrand-pet",
+    "father\nm\u00e8re -> mother\nnoir -> black\neau -> water\njaune -> yellow\nan -> year\np\u00e8re -> father\nm\u00e8re -> mother\nnoir -> black\neau -> water\njaune -> yellow\nan",
+    "mother\nm\u00e8re -> mother\nm\u00e8re -> mother\nm\u00e8re -> mother\nm\u00e8re -> mother\nm\u00e8re -> mother\nm\u00e8re -> mother\nm\u00e8re -> mother\nm\u00e8re -> mother\nm\u00e8re -> mother\nm\u00e8re ->",
+    "son\n\n\nA: You can use the following regex:\n(?<=\\w)(\\w+)(?=\\w)\n\n\n\n*\n\n*(?<=\\w) - look behind to assert that there is a word",
+    "girl\n\n\nA: You can use the following regex:\n(?<=\\w)\\s*(\\w+)\\s*(?=\\w)\n\n\n\n*\n\n*(?<=\\w) - look behind to assert that",
+    "husband\nm\u00e8re -> mother\np\u00e8re -> father\nenfant -> child\nmari -> husband\nm\u00e8re -> mother\np\u00e8re -> father\nenfant -> child\nmari -> husband\nm\u00e8re -> mother\np\u00e8re ->",
+    "woman\n\n\nA: You can use the following regex:\n\\b(de|du|des|des|de|du|des|de|du|des|de|du|des|de|du|des|de",
+    "grandfather\ngrand-m\u00e8re -> grandmother\ngrand-p\u00e8re -> grandfather\ngrand-m\u00e8re -> grandmother\ngrand-p\u00e8re -> grandfather\ngrand-m\u00e8re -> grandmother\ngrand-p\u00e8re",
+    "grandmother\ngrand-p\u00e8re -> grandfather\ngrand-fils -> grandson\ngrand-fille -> granddaughter\ngrand-enfant -> grandchild\ngrand-petit-fils -> grandson\ngrand",
+    "uncle\n\n\nA: You can use the following regular expression:\n\\b(un|une|un|une|un|une|un|une|un|une|un|une|un|une|un|une|",
+    "aunt\n\n\nA: You can use the following code to get the desired output:\nimport re\n\ntext = \"Je suis un homme, j'ai 20 ans, je suis un homme, j'ai 2",
+    "king\nsaint -> saint\nsaint-jean -> saint-jean\nsaint-jean-de-luz -> saint-jean-de-luz\nsaint-jean-de-luz ->",
+    "queen\n\n\nA: You can use the following regex:\n\\b([a-z]+)([a-z]+)\\b\n\n\n\n*\n\n*\\b - word boundary\n\n*([a-z]+)",
+    "princess\n\n\nA: You can use the following code to get the desired output:\nimport re\n\ntext = \"le chat est un animal\"\n\npattern = re.compile(r\"(?<!\\w)(\\w",
+    "man\n\n\nA: You can use the following regex:\n\\b(de|du|des|des|de|du|des|de|du|des|de|du|des|de|du|des|de",
+    "boy\n\n\nA: You can use the following code to get the words in the list:\nimport re\n\ndef get_words(text):\n    words = re.findall(r'[a-zA-Z]+",
+    "baby\n\n\nA: You can use the following regex:\n\\b([a-zA-Z]+)\\b\n\n\n\n*\n\n*\\b - word boundary\n\n*([a-zA-Z]+) - Capt",
+    "doctor\nmaman -> mother\nm\u00e8re -> mother\nm\u00e8re -> mother\nm\u00e8re -> mother\nm\u00e8re -> mother\nm\u00e8re -> mother\nm\u00e8re -> mother\nm\u00e8re -> mother\nm\u00e8re -> mother\nm\u00e8re ->",
+    "nurse\n\n\nA: You can use the following regex:\n\\b(noir|blanc|rouge|vert|jaune|bleu|orange|rose|violet|marron|bleu|",
+    "lawyer\n\n\nA: You can use the following regex:\n\\b([a-z]+)([a-z]+)\\b\n\n\n\n*\n\n*\\b - word boundary\n\n*([a-z]+)",
+    "soldier\n\n\nA: You can use the following regex:\n(?<=\\w)\\w+(?=\\w)\n\n\n\n*\n\n*(?<=\\w) - look behind for a word character\n\n*\\w+",
+    "farmer\n\n\nA: You can use the following regex:\n\\b([a-zA-Z]+)\\b\n\n\n\n*\n\n*\\b - word boundary\n\n*([a-zA-Z]+) -",
+    "worker\n\n\nA: You can use the following code to get the desired output:\nimport re\n\ntext = \"L'homme est un animal. Il est doux et il est froid. Il est doux et il est",
+    "artist\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger -> eat\nmanger ->",
+    "musician\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien -> dog\nchien"
+  ],
+  "target_metrics": [
+    {
+      "loss": 8.875,
+      "perplexity": 7150.946467468294,
+      "probability": 0.00013984162859410104,
+      "normalized_probability": 0.00013984162859410104,
+      "total_log_prob": -8.875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.953125,
+      "perplexity": 52.097918711212095,
+      "probability": 0.0003684336193539422,
+      "normalized_probability": 0.019194624751579337,
+      "total_log_prob": -7.90625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.16015625,
+      "perplexity": 8.67249262957695,
+      "probability": 0.001533091874051678,
+      "normalized_probability": 0.11530710289560436,
+      "total_log_prob": -6.48046875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.04296875,
+      "perplexity": 20.967397891114594,
+      "probability": 0.0022746308579195173,
+      "normalized_probability": 0.04769309025340586,
+      "total_log_prob": -6.0859375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 6.9765625,
+      "perplexity": 1071.2296786745287,
+      "probability": 0.0009335066231896564,
+      "normalized_probability": 0.0009335066231896564,
+      "total_log_prob": -6.9765625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.0,
+      "perplexity": 1096.6331584284585,
+      "probability": 0.0009118819655545162,
+      "normalized_probability": 0.0009118819655545162,
+      "total_log_prob": -7.0,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.0859375,
+      "perplexity": 439.63177432431667,
+      "probability": 0.0022746308579195173,
+      "normalized_probability": 0.0022746308579195173,
+      "total_log_prob": -6.0859375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.40234375,
+      "perplexity": 1639.8232653816679,
+      "probability": 0.0006098218150156874,
+      "normalized_probability": 0.0006098218150156874,
+      "total_log_prob": -7.40234375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.64453125,
+      "perplexity": 768.5696961361268,
+      "probability": 0.0013011181744835318,
+      "normalized_probability": 0.0013011181744835318,
+      "total_log_prob": -6.64453125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.59375,
+      "perplexity": 730.5151717727034,
+      "probability": 0.0013688969629109165,
+      "normalized_probability": 0.0013688969629109165,
+      "total_log_prob": -6.59375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.28125,
+      "perplexity": 26.609013186724894,
+      "probability": 0.0014123504170288816,
+      "normalized_probability": 0.037581250870997916,
+      "total_log_prob": -6.5625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.544921875,
+      "perplexity": 34.63697922255266,
+      "probability": 0.0008335275941189099,
+      "normalized_probability": 0.02887087795892099,
+      "total_log_prob": -7.08984375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.626953125,
+      "perplexity": 13.831562592310346,
+      "probability": 0.00037864697550902133,
+      "normalized_probability": 0.07234549581524527,
+      "total_log_prob": -7.87890625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.080078125,
+      "perplexity": 21.760102337787384,
+      "probability": 9.762519034984247e-05,
+      "normalized_probability": 0.04604551109353302,
+      "total_log_prob": -9.234375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 6.81640625,
+      "perplexity": 912.6990968629584,
+      "probability": 0.0010956513526058083,
+      "normalized_probability": 0.0010956513526058083,
+      "total_log_prob": -6.81640625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.5078125,
+      "perplexity": 246.61107487460225,
+      "probability": 0.004054967930813666,
+      "normalized_probability": 0.004054967930813666,
+      "total_log_prob": -5.5078125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 2.5234375,
+      "perplexity": 12.471393479493909,
+      "probability": 0.006429393941474441,
+      "normalized_probability": 0.08018350167880199,
+      "total_log_prob": -5.046875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 5.0234375,
+      "perplexity": 151.93267574549122,
+      "probability": 0.006581862624963848,
+      "normalized_probability": 0.006581862624963848,
+      "total_log_prob": -5.0234375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.15625,
+      "perplexity": 471.65604418826433,
+      "probability": 0.0021201890918646723,
+      "normalized_probability": 0.0021201890918646723,
+      "total_log_prob": -6.15625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.578125,
+      "perplexity": 1954.9599768296307,
+      "probability": 0.0005115194233396561,
+      "normalized_probability": 0.0005115194233396561,
+      "total_log_prob": -7.578125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.17578125,
+      "perplexity": 23.94552000018515,
+      "probability": 0.0017440199750102805,
+      "normalized_probability": 0.04176146519233108,
+      "total_log_prob": -6.3515625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 6.09765625,
+      "perplexity": 444.8140145626792,
+      "probability": 0.002248130605739017,
+      "normalized_probability": 0.002248130605739017,
+      "total_log_prob": -6.09765625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.62890625,
+      "perplexity": 102.40200064874995,
+      "probability": 9.536370525114293e-05,
+      "normalized_probability": 0.009765434206994737,
+      "total_log_prob": -9.2578125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 5.87890625,
+      "perplexity": 357.4181017943673,
+      "probability": 0.0027978437437265785,
+      "normalized_probability": 0.0027978437437265785,
+      "total_log_prob": -5.87890625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.046875,
+      "perplexity": 21.049461966173517,
+      "probability": 0.002256929540148032,
+      "normalized_probability": 0.04750715251567949,
+      "total_log_prob": -6.09375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.1328125,
+      "perplexity": 22.938403163153815,
+      "probability": 0.001900525218918533,
+      "normalized_probability": 0.04359501369329448,
+      "total_log_prob": -6.265625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.064453125,
+      "perplexity": 21.42274322042474,
+      "probability": 0.0021789628985256905,
+      "normalized_probability": 0.04667936266194827,
+      "total_log_prob": -6.12890625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.3203125,
+      "perplexity": 10.17885470120484,
+      "probability": 0.0009482072134553882,
+      "normalized_probability": 0.09824287990687529,
+      "total_log_prob": -6.9609375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.369140625,
+      "perplexity": 29.053548433146837,
+      "probability": 0.0011846815792471309,
+      "normalized_probability": 0.0344192036405134,
+      "total_log_prob": -6.73828125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.21484375,
+      "perplexity": 67.68358948381629,
+      "probability": 0.000218289695262571,
+      "normalized_probability": 0.014774630122699214,
+      "total_log_prob": -8.4296875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.08203125,
+      "perplexity": 8.020744516090527,
+      "probability": 0.0019380097200896599,
+      "normalized_probability": 0.12467670526020198,
+      "total_log_prob": -6.24609375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.09765625,
+      "perplexity": 60.199030648454944,
+      "probability": 0.00027594403073589844,
+      "normalized_probability": 0.016611563163528544,
+      "total_log_prob": -8.1953125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.123046875,
+      "perplexity": 22.715485556228362,
+      "probability": 0.0019380097200896599,
+      "normalized_probability": 0.04402283180452684,
+      "total_log_prob": -6.24609375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.126953125,
+      "perplexity": 22.80439145296227,
+      "probability": 0.001922928008795674,
+      "normalized_probability": 0.043851203048441825,
+      "total_log_prob": -6.25390625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 9.2578125,
+      "perplexity": 10486.169736866585,
+      "probability": 9.536370525114293e-05,
+      "normalized_probability": 9.536370525114293e-05,
+      "total_log_prob": -9.2578125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.875,
+      "perplexity": 2630.686190299136,
+      "probability": 0.0003801289578694637,
+      "normalized_probability": 0.0003801289578694637,
+      "total_log_prob": -7.875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.03515625,
+      "perplexity": 1135.8723783859068,
+      "probability": 0.0008803805947117196,
+      "normalized_probability": 0.0008803805947117196,
+      "total_log_prob": -7.03515625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.42578125,
+      "perplexity": 1678.7105534688412,
+      "probability": 0.0005956953078859412,
+      "normalized_probability": 0.0005956953078859412,
+      "total_log_prob": -7.42578125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.08984375,
+      "perplexity": 1199.7203296635448,
+      "probability": 0.0008335275941189099,
+      "normalized_probability": 0.0008335275941189099,
+      "total_log_prob": -7.08984375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.2890625,
+      "perplexity": 538.6481096972173,
+      "probability": 0.0018564995996405073,
+      "normalized_probability": 0.0018564995996405073,
+      "total_log_prob": -6.2890625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.39453125,
+      "perplexity": 1627.0620594881786,
+      "probability": 0.000614604706789468,
+      "normalized_probability": 0.000614604706789468,
+      "total_log_prob": -7.39453125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.58984375,
+      "perplexity": 727.6671630214879,
+      "probability": 0.0013742546741393497,
+      "normalized_probability": 0.0013742546741393497,
+      "total_log_prob": -6.58984375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.83203125,
+      "perplexity": 927.0720162676876,
+      "probability": 0.0010786648528405746,
+      "normalized_probability": 0.0010786648528405746,
+      "total_log_prob": -6.83203125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.40234375,
+      "perplexity": 603.2572664885378,
+      "probability": 0.0016576675583550565,
+      "normalized_probability": 0.0016576675583550565,
+      "total_log_prob": -6.40234375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.0078125,
+      "perplexity": 406.59292473597867,
+      "probability": 0.002459462374189985,
+      "normalized_probability": 0.002459462374189985,
+      "total_log_prob": -6.0078125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 12.1640625,
+      "perplexity": 191772.0104759084,
+      "probability": 5.214525297609196e-06,
+      "normalized_probability": 5.214525297609196e-06,
+      "total_log_prob": -12.1640625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.3515625,
+      "perplexity": 573.3879280792671,
+      "probability": 0.0017440199750102805,
+      "normalized_probability": 0.0017440199750102805,
+      "total_log_prob": -6.3515625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.619140625,
+      "perplexity": 37.305494633128845,
+      "probability": 0.0007185456998101666,
+      "normalized_probability": 0.026805702747925986,
+      "total_log_prob": -7.23828125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.65234375,
+      "perplexity": 104.83039411284926,
+      "probability": 9.099668324216146e-05,
+      "normalized_probability": 0.009539218167237892,
+      "total_log_prob": -9.3046875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 6.89453125,
+      "perplexity": 986.863024334761,
+      "probability": 0.0010133118531562113,
+      "normalized_probability": 0.0010133118531562113,
+      "total_log_prob": -6.89453125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.34375,
+      "perplexity": 209.29610089202527,
+      "probability": 0.00477791987398702,
+      "normalized_probability": 0.00477791987398702,
+      "total_log_prob": -5.34375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.796875,
+      "perplexity": 329.26898489707213,
+      "probability": 0.003037030652348247,
+      "normalized_probability": 0.003037030652348247,
+      "total_log_prob": -5.796875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.11328125,
+      "perplexity": 22.494734284035275,
+      "probability": 0.0019762335368005445,
+      "normalized_probability": 0.0444548482935275,
+      "total_log_prob": -6.2265625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.875,
+      "perplexity": 130.9741532108186,
+      "probability": 0.007635094218859962,
+      "normalized_probability": 0.007635094218859962,
+      "total_log_prob": -4.875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.578125,
+      "perplexity": 264.57506218047985,
+      "probability": 0.0037796457147493746,
+      "normalized_probability": 0.0037796457147493746,
+      "total_log_prob": -5.578125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.65625,
+      "perplexity": 286.07385163895896,
+      "probability": 0.0034956008536636734,
+      "normalized_probability": 0.0034956008536636734,
+      "total_log_prob": -5.65625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.25390625,
+      "perplexity": 25.891280453627324,
+      "probability": 0.0014917393363558513,
+      "normalized_probability": 0.03862304152129725,
+      "total_log_prob": -6.5078125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 7.67578125,
+      "perplexity": 2155.507017915938,
+      "probability": 0.00046392797225353256,
+      "normalized_probability": 0.00046392797225353256,
+      "total_log_prob": -7.67578125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 11.9921875,
+      "perplexity": 161488.22358374004,
+      "probability": 6.192402008072421e-06,
+      "normalized_probability": 6.192402008072421e-06,
+      "total_log_prob": -11.9921875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.44140625,
+      "perplexity": 84.89424029774196,
+      "probability": 0.00013875337240659363,
+      "normalized_probability": 0.011779362139207439,
+      "total_log_prob": -8.8828125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.86328125,
+      "perplexity": 129.44825810694724,
+      "probability": 0.007725094293457564,
+      "normalized_probability": 0.007725094293457564,
+      "total_log_prob": -4.86328125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.3203125,
+      "perplexity": 4106.443071244924,
+      "probability": 0.00024351975241113875,
+      "normalized_probability": 0.00024351975241113875,
+      "total_log_prob": -8.3203125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.494140625,
+      "perplexity": 32.92198346312245,
+      "probability": 0.0009226309416079341,
+      "normalized_probability": 0.030374840602181506,
+      "total_log_prob": -6.98828125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 6.296875,
+      "perplexity": 542.872779181642,
+      "probability": 0.0018420522051362717,
+      "normalized_probability": 0.0018420522051362717,
+      "total_log_prob": -6.296875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.4765625,
+      "perplexity": 239.02364975839862,
+      "probability": 0.004183686430237278,
+      "normalized_probability": 0.004183686430237278,
+      "total_log_prob": -5.4765625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.015625,
+      "perplexity": 1113.9026178338868,
+      "probability": 0.0008977445460579097,
+      "normalized_probability": 0.0008977445460579097,
+      "total_log_prob": -7.015625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.17578125,
+      "perplexity": 1307.381093591765,
+      "probability": 0.000764887915927178,
+      "normalized_probability": 0.000764887915927178,
+      "total_log_prob": -7.17578125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.6640625,
+      "perplexity": 288.31755666558627,
+      "probability": 0.003468397872002917,
+      "normalized_probability": 0.003468397872002917,
+      "total_log_prob": -5.6640625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.498046875,
+      "perplexity": 33.05083646319603,
+      "probability": 0.0009154509706573315,
+      "normalized_probability": 0.030256420321269524,
+      "total_log_prob": -6.99609375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 7.77734375,
+      "perplexity": 2385.928772621511,
+      "probability": 0.00041912399543313347,
+      "normalized_probability": 0.00041912399543313347,
+      "total_log_prob": -7.77734375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.78515625,
+      "perplexity": 44.04255166984753,
+      "probability": 0.0005155313198998952,
+      "normalized_probability": 0.02270531479411583,
+      "total_log_prob": -7.5703125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 5.51171875,
+      "perplexity": 247.5762833312724,
+      "probability": 0.004039159109040902,
+      "normalized_probability": 0.004039159109040902,
+      "total_log_prob": -5.51171875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.296875,
+      "perplexity": 1475.6812108145175,
+      "probability": 0.0006776531358341546,
+      "normalized_probability": 0.0006776531358341546,
+      "total_log_prob": -7.296875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.88671875,
+      "perplexity": 48.75066069158903,
+      "probability": 0.00042076440037030485,
+      "normalized_probability": 0.02051254251355265,
+      "total_log_prob": -7.7734375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 7.14453125,
+      "perplexity": 1267.1572060351664,
+      "probability": 0.0007891680647335938,
+      "normalized_probability": 0.0007891680647335938,
+      "total_log_prob": -7.14453125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.35546875,
+      "perplexity": 575.6321049777138,
+      "probability": 0.0017372206854909806,
+      "normalized_probability": 0.0017372206854909806,
+      "total_log_prob": -6.35546875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.16796875,
+      "perplexity": 477.21577638600166,
+      "probability": 0.0020954881407590728,
+      "normalized_probability": 0.0020954881407590728,
+      "total_log_prob": -6.16796875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.5,
+      "perplexity": 244.69193226422038,
+      "probability": 0.004086771438464067,
+      "normalized_probability": 0.004086771438464067,
+      "total_log_prob": -5.5,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.953125,
+      "perplexity": 141.61682573322432,
+      "probability": 0.007061307827106542,
+      "normalized_probability": 0.007061307827106542,
+      "total_log_prob": -4.953125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.71484375,
+      "perplexity": 303.3368032308679,
+      "probability": 0.003296665585411691,
+      "normalized_probability": 0.003296665585411691,
+      "total_log_prob": -5.71484375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.01171875,
+      "perplexity": 408.18428444915037,
+      "probability": 0.0024498738390908706,
+      "normalized_probability": 0.0024498738390908706,
+      "total_log_prob": -6.01171875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.978515625,
+      "perplexity": 53.43765380953904,
+      "probability": 0.0003501912059274238,
+      "normalized_probability": 0.018713396429494666,
+      "total_log_prob": -7.95703125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.14453125,
+      "perplexity": 63.08804244970428,
+      "probability": 0.0002512498991460061,
+      "normalized_probability": 0.015850864302807154,
+      "total_log_prob": -8.2890625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 7.69140625,
+      "perplexity": 2189.451314290634,
+      "probability": 0.0004567354357107468,
+      "normalized_probability": 0.0004567354357107468,
+      "total_log_prob": -7.69140625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 2.73046875,
+      "perplexity": 15.340075995482293,
+      "probability": 0.004249569904958726,
+      "normalized_probability": 0.06518872529018133,
+      "total_log_prob": -5.4609375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 8.65625,
+      "perplexity": 5745.946909852821,
+      "probability": 0.00017403571868811687,
+      "normalized_probability": 0.00017403571868811687,
+      "total_log_prob": -8.65625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.78125,
+      "perplexity": 2395.2670338067314,
+      "probability": 0.00041748998582873153,
+      "normalized_probability": 0.00041748998582873153,
+      "total_log_prob": -7.78125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.8046875,
+      "perplexity": 2452.0691545936147,
+      "probability": 0.00040781884072341,
+      "normalized_probability": 0.00040781884072341,
+      "total_log_prob": -7.8046875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.76953125,
+      "perplexity": 43.3597351955915,
+      "probability": 0.0005318960406660279,
+      "normalized_probability": 0.02306287147486253,
+      "total_log_prob": -7.5390625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 6.44140625,
+      "perplexity": 627.2883040361144,
+      "probability": 0.0015941633114562707,
+      "normalized_probability": 0.0015941633114562707,
+      "total_log_prob": -6.44140625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.89453125,
+      "perplexity": 363.0466179050314,
+      "probability": 0.00275446719699669,
+      "normalized_probability": 0.00275446719699669,
+      "total_log_prob": -5.89453125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.0390625,
+      "perplexity": 1140.3180571773948,
+      "probability": 0.0008769483160472604,
+      "normalized_probability": 0.0008769483160472604,
+      "total_log_prob": -7.0390625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.5078125,
+      "perplexity": 246.61107487460225,
+      "probability": 0.004054967930813666,
+      "normalized_probability": 0.004054967930813666,
+      "total_log_prob": -5.5078125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.5546875,
+      "perplexity": 34.97688798216538,
+      "probability": 0.0008174057110581422,
+      "normalized_probability": 0.028590307991662876,
+      "total_log_prob": -7.109375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.40625,
+      "perplexity": 81.9615307508321,
+      "probability": 0.00014886063876446985,
+      "normalized_probability": 0.012200845821682604,
+      "total_log_prob": -8.8125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 7.3203125,
+      "perplexity": 1510.6759822519236,
+      "probability": 0.0006619553178500442,
+      "normalized_probability": 0.0006619553178500442,
+      "total_log_prob": -7.3203125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.3515625,
+      "perplexity": 4236.795567027318,
+      "probability": 0.00023602743728832652,
+      "normalized_probability": 0.00023602743728832652,
+      "total_log_prob": -8.3515625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 10.0234375,
+      "perplexity": 22548.80837829577,
+      "probability": 4.4348241522267954e-05,
+      "normalized_probability": 4.4348241522267954e-05,
+      "total_log_prob": -10.0234375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.515625,
+      "perplexity": 1836.514939511285,
+      "probability": 0.0005445095917739226,
+      "normalized_probability": 0.0005445095917739226,
+      "total_log_prob": -7.515625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 2.09765625,
+      "perplexity": 8.147052863378178,
+      "probability": 0.0018420522051362717,
+      "normalized_probability": 0.12258405349235073,
+      "total_log_prob": -6.296875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 8.6328125,
+      "perplexity": 5612.8421930478125,
+      "probability": 3.1742003550693466e-08,
+      "normalized_probability": 0.00017816285682120578,
+      "total_log_prob": -17.265625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.404296875,
+      "perplexity": 30.093129052017023,
+      "probability": 0.0011042446526686718,
+      "normalized_probability": 0.03323017683775805,
+      "total_log_prob": -6.80859375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 7.375,
+      "perplexity": 1595.5918304990491,
+      "probability": 0.0006267266984484576,
+      "normalized_probability": 0.0006267266984484576,
+      "total_log_prob": -7.375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.306640625,
+      "perplexity": 27.293282919182133,
+      "probability": 0.001342420098900651,
+      "normalized_probability": 0.03663905155569193,
+      "total_log_prob": -6.61328125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 7.515625,
+      "perplexity": 1836.514939511285,
+      "probability": 0.0005445095917739226,
+      "normalized_probability": 0.0005445095917739226,
+      "total_log_prob": -7.515625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.265625,
+      "perplexity": 10568.413785436143,
+      "probability": 8.953243214184171e-09,
+      "normalized_probability": 9.462157900914659e-05,
+      "total_log_prob": -18.53125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.953125,
+      "perplexity": 19.165753221675935,
+      "probability": 0.00272237668213834,
+      "normalized_probability": 0.05217639966630833,
+      "total_log_prob": -5.90625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.626953125,
+      "perplexity": 37.5980852538711,
+      "probability": 0.0007074056812886669,
+      "normalized_probability": 0.026597099114164063,
+      "total_log_prob": -7.25390625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 8.546875,
+      "perplexity": 5150.633521625214,
+      "probability": 0.0001941508740238353,
+      "normalized_probability": 0.0001941508740238353,
+      "total_log_prob": -8.546875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 11.0859375,
+      "perplexity": 65247.14046934286,
+      "probability": 1.532634216314601e-05,
+      "normalized_probability": 1.532634216314601e-05,
+      "total_log_prob": -11.0859375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 11.09375,
+      "perplexity": 65758.88013448668,
+      "probability": 1.5207071622187776e-05,
+      "normalized_probability": 1.5207071622187776e-05,
+      "total_log_prob": -11.09375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 10.828125,
+      "perplexity": 50419.082326944044,
+      "probability": 1.9833760430534416e-05,
+      "normalized_probability": 1.9833760430534416e-05,
+      "total_log_prob": -10.828125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.63671875,
+      "perplexity": 37.9670527218579,
+      "probability": 0.0006937232168439065,
+      "normalized_probability": 0.02633862594828945,
+      "total_log_prob": -7.2734375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.8359375,
+      "perplexity": 125.9566121960733,
+      "probability": 6.303156029161826e-05,
+      "normalized_probability": 0.007939241795764773,
+      "total_log_prob": -9.671875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 8.1640625,
+      "perplexity": 3512.4268928432866,
+      "probability": 0.00028470343455049295,
+      "normalized_probability": 0.00028470343455049295,
+      "total_log_prob": -8.1640625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.7890625,
+      "perplexity": 888.0805958802181,
+      "probability": 0.0011260239269261967,
+      "normalized_probability": 0.0011260239269261967,
+      "total_log_prob": -6.7890625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 13.90625,
+      "perplexity": 1094983.661372048,
+      "probability": 9.132556359306488e-07,
+      "normalized_probability": 9.132556359306488e-07,
+      "total_log_prob": -13.90625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.6875,
+      "perplexity": 802.313957927379,
+      "probability": 0.0012463948683920495,
+      "normalized_probability": 0.0012463948683920495,
+      "total_log_prob": -6.6875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.77734375,
+      "perplexity": 322.9003462251159,
+      "probability": 0.003096930714663377,
+      "normalized_probability": 0.003096930714663377,
+      "total_log_prob": -5.77734375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.9921875,
+      "perplexity": 1088.0990914837041,
+      "probability": 0.0009190339444511671,
+      "normalized_probability": 0.0009190339444511671,
+      "total_log_prob": -6.9921875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.794921875,
+      "perplexity": 44.47476167904283,
+      "probability": 0.0005055600415496265,
+      "normalized_probability": 0.022484662362366632,
+      "total_log_prob": -7.58984375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 7.37109375,
+      "perplexity": 1589.3712074754344,
+      "probability": 0.0006291796373915728,
+      "normalized_probability": 0.0006291796373915728,
+      "total_log_prob": -7.37109375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.59375,
+      "perplexity": 14672.789455589415,
+      "probability": 6.81533666810071e-05,
+      "normalized_probability": 6.81533666810071e-05,
+      "total_log_prob": -9.59375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.5859375,
+      "perplexity": 724.8302576041393,
+      "probability": 0.0013796333548566381,
+      "normalized_probability": 0.0013796333548566381,
+      "total_log_prob": -6.5859375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 15.75,
+      "perplexity": 6920509.831830581,
+      "probability": 1.4449802461092448e-07,
+      "normalized_probability": 1.4449802461092448e-07,
+      "total_log_prob": -15.75,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.46484375,
+      "perplexity": 642.1640174789829,
+      "probability": 0.0015572345581208596,
+      "normalized_probability": 0.0015572345581208596,
+      "total_log_prob": -6.46484375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.18359375,
+      "perplexity": 1317.6350105946774,
+      "probability": 0.0007589355109414391,
+      "normalized_probability": 0.0007589355109414391,
+      "total_log_prob": -7.18359375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.734375,
+      "perplexity": 840.8178087002444,
+      "probability": 0.001189318291849483,
+      "normalized_probability": 0.001189318291849483,
+      "total_log_prob": -6.734375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.33203125,
+      "perplexity": 1528.4833526913917,
+      "probability": 0.0006542433048022244,
+      "normalized_probability": 0.0006542433048022244,
+      "total_log_prob": -7.33203125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.9921875,
+      "perplexity": 1088.0990914837041,
+      "probability": 0.0009190339444511671,
+      "normalized_probability": 0.0009190339444511671,
+      "total_log_prob": -6.9921875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.234375,
+      "perplexity": 1386.2742059875643,
+      "probability": 0.0007213580081637692,
+      "normalized_probability": 0.0007213580081637692,
+      "total_log_prob": -7.234375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.22265625,
+      "perplexity": 504.04031250414465,
+      "probability": 0.001983968296170313,
+      "normalized_probability": 0.001983968296170313,
+      "total_log_prob": -6.22265625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.66015625,
+      "perplexity": 287.1935130368687,
+      "probability": 0.003481972797455297,
+      "normalized_probability": 0.003481972797455297,
+      "total_log_prob": -5.66015625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.4140625,
+      "perplexity": 610.368272250772,
+      "probability": 0.0016383551463322891,
+      "normalized_probability": 0.0016383551463322891,
+      "total_log_prob": -6.4140625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.76953125,
+      "perplexity": 43.3597351955915,
+      "probability": 0.0005318960406660279,
+      "normalized_probability": 0.02306287147486253,
+      "total_log_prob": -7.5390625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.4296875,
+      "perplexity": 30.866995306309306,
+      "probability": 0.0010495697087443705,
+      "normalized_probability": 0.03239706327345691,
+      "total_log_prob": -6.859375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.736328125,
+      "perplexity": 41.943695056893915,
+      "probability": 0.000568416433671333,
+      "normalized_probability": 0.023841485559237558,
+      "total_log_prob": -7.47265625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 11.265625,
+      "perplexity": 78090.60233729969,
+      "probability": 1.280563819549838e-05,
+      "normalized_probability": 1.280563819549838e-05,
+      "total_log_prob": -11.265625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.94140625,
+      "perplexity": 139.96693973881514,
+      "probability": 5.10445131015907e-05,
+      "normalized_probability": 0.007144544289287505,
+      "total_log_prob": -9.8828125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.5234375,
+      "perplexity": 33.90076227087091,
+      "probability": 2.5666793069631218e-05,
+      "normalized_probability": 0.029497861788767083,
+      "total_log_prob": -10.5703125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.71484375,
+      "perplexity": 41.05217218133816,
+      "probability": 0.0005933729119721093,
+      "normalized_probability": 0.02435924695002104,
+      "total_log_prob": -7.4296875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.64453125,
+      "perplexity": 104.01459751366006,
+      "probability": 9.242967249221398e-05,
+      "normalized_probability": 0.009614035182597054,
+      "total_log_prob": -9.2890625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 6.08984375,
+      "perplexity": 441.35244443864343,
+      "probability": 0.0022657629126126193,
+      "normalized_probability": 0.0022657629126126193,
+      "total_log_prob": -6.08984375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.40625,
+      "perplexity": 30.151962130172098,
+      "probability": 0.0010999396107533182,
+      "normalized_probability": 0.03316533748891029,
+      "total_log_prob": -6.8125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 7.50390625,
+      "perplexity": 1815.118892385283,
+      "probability": 0.0005509280985367745,
+      "normalized_probability": 0.0005509280985367745,
+      "total_log_prob": -7.50390625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.53515625,
+      "perplexity": 93.2380826167318,
+      "probability": 0.00011503058597079503,
+      "normalized_probability": 0.010725231278196056,
+      "total_log_prob": -9.0703125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.4140625,
+      "perplexity": 82.60436300370014,
+      "probability": 0.00014655276847396972,
+      "normalized_probability": 0.012105898086221019,
+      "total_log_prob": -8.828125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.63671875,
+      "perplexity": 37.9670527218579,
+      "probability": 0.0006937232168439065,
+      "normalized_probability": 0.02633862594828945,
+      "total_log_prob": -7.2734375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.39453125,
+      "perplexity": 29.800681131145613,
+      "probability": 0.0011260239269261967,
+      "normalized_probability": 0.033556279992367995,
+      "total_log_prob": -6.7890625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.443359375,
+      "perplexity": 11.511647800524438,
+      "probability": 0.000656803940697575,
+      "normalized_probability": 0.08692511019966266,
+      "total_log_prob": -7.328125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.6484375,
+      "perplexity": 104.4216991379013,
+      "probability": 9.171037907429409e-05,
+      "normalized_probability": 0.009576553611518816,
+      "total_log_prob": -9.296875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.509765625,
+      "perplexity": 33.4404292647954,
+      "probability": 0.0008942445717626129,
+      "normalized_probability": 0.029903922347454905,
+      "total_log_prob": -7.01953125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 8.1015625,
+      "perplexity": 3299.619705314332,
+      "probability": 0.0003030652285138832,
+      "normalized_probability": 0.0003030652285138832,
+      "total_log_prob": -8.1015625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.58984375,
+      "perplexity": 98.4790416094955,
+      "probability": 0.00010311275085006726,
+      "normalized_probability": 0.010154444881433316,
+      "total_log_prob": -9.1796875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 1.939453125,
+      "perplexity": 6.95494644409525,
+      "probability": 0.0029782891621149424,
+      "normalized_probability": 0.14387619828328718,
+      "total_log_prob": -5.81640625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 7.125,
+      "perplexity": 1242.6481670549958,
+      "probability": 0.0008047330101246132,
+      "normalized_probability": 0.0008047330101246132,
+      "total_log_prob": -7.125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.5390625,
+      "perplexity": 691.6378635020337,
+      "probability": 0.0014458433419717767,
+      "normalized_probability": 0.0014458433419717767,
+      "total_log_prob": -6.5390625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.13671875,
+      "perplexity": 23.028181534732802,
+      "probability": 0.0018857352143269448,
+      "normalized_probability": 0.043425052841959154,
+      "total_log_prob": -6.2734375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.5546875,
+      "perplexity": 95.0770390179677,
+      "probability": 0.00011062383342527846,
+      "normalized_probability": 0.01051778652689236,
+      "total_log_prob": -9.109375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.208984375,
+      "perplexity": 9.106462943391431,
+      "probability": 0.001321607804332139,
+      "normalized_probability": 0.10974065083526248,
+      "total_log_prob": -6.62890625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.66015625,
+      "perplexity": 38.867415430562446,
+      "probability": 0.0006619553178500442,
+      "normalized_probability": 0.02572849233534768,
+      "total_log_prob": -7.3203125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.125,
+      "perplexity": 22.75989509352673,
+      "probability": 8.481823524646916e-05,
+      "normalized_probability": 0.04393693362340742,
+      "total_log_prob": -9.375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.609375,
+      "perplexity": 36.942956250241515,
+      "probability": 0.0007327177438630043,
+      "normalized_probability": 0.027068759555306635,
+      "total_log_prob": -7.21875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 5.83203125,
+      "perplexity": 341.05073527023916,
+      "probability": 0.002932115068473984,
+      "normalized_probability": 0.002932115068473984,
+      "total_log_prob": -5.83203125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.525390625,
+      "perplexity": 33.96703939987107,
+      "probability": 0.0008667315587023905,
+      "normalized_probability": 0.029440305003555763,
+      "total_log_prob": -7.05078125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.443359375,
+      "perplexity": 31.291903031786116,
+      "probability": 0.0010212593565209615,
+      "normalized_probability": 0.03195714875455821,
+      "total_log_prob": -6.88671875,
+      "num_target_tokens": 2
+    }
+  ]
+}

@@ -1,0 +1,308 @@
+{
+  "task_name": "compositional:lower_reverse_last",
+  "model_id": "allenai/OLMo-2-0425-1B",
+  "backend": "transformers",
+  "checkpoint": "stage1-step220000-tokens462B",
+  "split": "test",
+  "eval_mode": "all",
+  "num_examples": 26,
+  "metrics": {
+    "exact_match": {
+      "accuracy": 1.0,
+      "correct": 26,
+      "total": 26,
+      "accuracy_lower_reverse_last": 1.0,
+      "correct_lower_reverse_last": 26,
+      "total_lower_reverse_last": 26
+    },
+    "continuous": {
+      "mean_loss": 8.525991586538462,
+      "mean_perplexity": 8027.271582407222,
+      "mean_probability": 0.0002825291783964115,
+      "mean_normalized_probability": 0.0002825291783964115,
+      "num_valid_examples": 26,
+      "num_total_examples": 26
+    }
+  },
+  "config": {
+    "model_config": {
+      "model_id": "allenai/OLMo-2-0425-1B",
+      "backend": "transformers",
+      "checkpoint": "stage1-step220000-tokens462B",
+      "local_path": null,
+      "api_key": null,
+      "temperature": 0.0,
+      "max_tokens": 50,
+      "top_p": 1.0,
+      "tensor_parallel_size": null,
+      "trust_remote_code": true,
+      "generation_kwargs": {}
+    },
+    "eval_config": {
+      "output_dir": "results/olmo2_continuous_1b_early_revised/OLMo-2-0425-1B_stage1-step220000-tokens462B",
+      "save_predictions": true,
+      "save_detailed_results": true,
+      "batch_size": 1,
+      "retry_attempts": 3,
+      "retry_delay": 1.0,
+      "eval_mode": "all",
+      "compute_loss": true,
+      "compute_perplexity": true
+    },
+    "task_config": {
+      "name": "compositional:lower_reverse_last",
+      "description": "Compositional task with chained string operations",
+      "data_path": "dataset/compositional.csv",
+      "data_format": "csv",
+      "input_column": "input",
+      "output_column": "output",
+      "demonstrations_path": null,
+      "num_demonstrations": 5,
+      "prompt_template": null,
+      "evaluation_metrics": [
+        "accuracy"
+      ],
+      "metadata": {},
+      "in_memory_data": null,
+      "in_memory_demonstrations": null
+    }
+  },
+  "predictions": [
+    " b\nA -> a\nD -> d\nE -> e\nF -> f\nG -> g\nH -> h\nI -> i\nV -> v\nH -> h\nC -> c\nM -> m\nB -> b\n",
+    " a\nB -> b\nC -> c\nD -> d\nE -> e\nF -> f\nG -> g\nH -> h\nI -> i\nJ -> j\nK -> k\nL -> l\nM -> m\n",
+    " d\nF -> f\nG -> g\nH -> h\nJ -> j\nK -> k\nL -> l\nM -> m\nN -> n\nO -> o\nP -> p\nQ -> q\nR -> r\n",
+    " e\nF -> f\nH -> h\nI -> i\nJ -> j\nK -> k\nL -> l\nM -> m\nN -> n\nO -> o\nP -> p\nQ -> q\nR -> r\n",
+    " f\nG -> g\nX -> x\nY -> y\nZ -> z\nA -> a\nB -> b\nC -> c\nD -> d\nE -> e\nF -> f\nG -> g\nH -> h\n",
+    " g\nV -> v\nW -> w\nX -> x\nY -> y\nZ -> z\nX -> x\nY -> y\nZ -> z\nX -> x\nY -> y\nZ -> z\nX -> x\n",
+    " h\nV -> v\nW -> w\nX -> x\nY -> y\nZ -> z\nA -> a\nB -> b\nC -> c\nD -> d\nE -> e\nF -> f\nG -> g\n",
+    " i\nJ -> j\nK -> k\nL -> l\nM -> m\nO -> o\nP -> p\nQ -> q\nR -> r\nS -> s\nT -> t\nU -> u\nV -> v\n",
+    " j\nK -> k\nL -> l\nM -> m\nO -> o\nP -> p\nQ -> q\nR -> r\nS -> s\nT -> t\nU -> u\nD -> d\nS -> s\n",
+    " c\nD -> d\nF -> f\nG -> g\nH -> h\nI -> i\nJ -> j\nK -> k\nL -> l\nM -> m\nN -> n\nO -> o\nP -> p\n",
+    " k\nL -> l\nM -> m\nN -> n\nO -> o\nP -> p\nQ -> q\nR -> r\nS -> s\nT -> t\nU -> u\nB -> b\nT -> t\n",
+    " l\nM -> m\nN -> n\nP -> p\nR -> r\nS -> s\nT -> t\nU -> u\nV -> v\nW -> w\nX -> x\nY -> y\nZ -> z\n",
+    " m\nN -> n\nZ -> z\nX -> x\nY -> y\nZ -> z\nX -> x\nY -> y\nZ -> z\nX -> x\nY -> y\nZ -> z\nX -> x\n",
+    " n\nT -> t\nV -> v\nW -> w\nX -> x\nY -> y\nZ -> z\nA -> a\nB -> b\nC -> c\nD -> d\nE -> e\nF -> f\n",
+    " o\nP -> p\nQ -> q\nR -> r\nS -> s\nT -> t\nU -> u\nV -> v\nW -> w\nX -> x\nC -> c\nN -> n\nO -> o\n",
+    " p\nQ -> q\nR -> r\nT -> t\nU -> u\nV -> v\nW -> w\nX -> x\nY -> y\nZ -> z\nA -> a\nZ -> z\nS -> s\n",
+    " q\nR -> r\nT -> t\nU -> u\nV -> v\nW -> w\nX -> x\nY -> y\nZ -> z\nA -> a\nB -> b\nC -> c\nD -> d\n",
+    " r\nS -> s\nT -> t\nU -> u\nV -> v\nW -> w\nX -> x\nY -> y\nZ -> z\nA -> a\nB -> b\nC -> c\nD -> d\n",
+    " s\nT -> t\nU -> u\nV -> v\nW -> w\nX -> x\nY -> y\nZ -> z\nA -> a\nB -> b\nC -> c\nD -> d\nE -> e\n",
+    " t\nU -> u\nV -> v\nW -> w\nX -> x\nY -> y\nZ -> z\nA -> a\nB -> b\nC -> c\nD -> d\nE -> e\nF -> f\n",
+    " u\nW -> w\nX -> x\nY -> y\nZ -> z\nA -> a\nB -> b\nC -> c\nD -> d\nE -> e\nF -> f\nG -> g\nH -> h\n",
+    " v\nX -> x\nY -> y\nZ -> z\nA -> a\nB -> b\nC -> c\nD -> d\nE -> e\nF -> f\nG -> g\nH -> h\nI -> i\n",
+    " w\nX -> x\nY -> y\nZ -> z\nW -> w\nX -> x\nY -> y\nZ -> z\nW -> w\nX -> x\nY -> y\nZ -> z\nW -> w\n",
+    " x\nK -> k\nL -> l\nM -> m\nN -> n\nO -> o\nP -> p\nR -> r\nS -> s\nT -> t\nU -> u\nV -> v\nW -> w\n",
+    " y\nZ -> z\nX -> x\nY -> y\nZ -> z\nX -> x\nY -> y\nZ -> z\nX -> x\nY -> y\nZ -> z\nX -> x\nY -> y\n",
+    " z\nX -> x\nY -> y\nZ -> z\nX -> x\nY -> y\nZ -> z\nX -> x\nY -> y\nZ -> z\nX -> x\nY -> y\nZ -> z\n"
+  ],
+  "target_metrics": [
+    {
+      "loss": 10.359375,
+      "perplexity": 31551.455499139025,
+      "probability": 3.169425892340491e-05,
+      "normalized_probability": 3.169425892340491e-05,
+      "total_log_prob": -10.359375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.0234375,
+      "perplexity": 8295.243025289385,
+      "probability": 0.00012055101905409388,
+      "normalized_probability": 0.00012055101905409388,
+      "total_log_prob": -9.0234375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 10.40625,
+      "perplexity": 33065.6414636259,
+      "probability": 3.0242873137666396e-05,
+      "normalized_probability": 3.0242873137666396e-05,
+      "total_log_prob": -10.40625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.2421875,
+      "perplexity": 10323.596743779093,
+      "probability": 9.686546509118452e-05,
+      "normalized_probability": 9.686546509118452e-05,
+      "total_log_prob": -9.2421875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.1171875,
+      "perplexity": 3351.5811548805077,
+      "probability": 0.00029836663765214793,
+      "normalized_probability": 0.00029836663765214793,
+      "total_log_prob": -8.1171875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.25,
+      "perplexity": 3827.6258214399063,
+      "probability": 0.00026125855730166754,
+      "normalized_probability": 0.00026125855730166754,
+      "total_log_prob": -8.25,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.22265625,
+      "perplexity": 1370.1236222908349,
+      "probability": 0.0007298611480969934,
+      "normalized_probability": 0.0007298611480969934,
+      "total_log_prob": -7.22265625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.0234375,
+      "perplexity": 3051.6493685247633,
+      "probability": 0.0003276916444969635,
+      "normalized_probability": 0.0003276916444969635,
+      "total_log_prob": -8.0234375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.1171875,
+      "perplexity": 1232.9778022981784,
+      "probability": 0.0008110446093482581,
+      "normalized_probability": 0.0008110446093482581,
+      "total_log_prob": -7.1171875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.0390625,
+      "perplexity": 3099.705853489035,
+      "probability": 0.00032261125644370356,
+      "normalized_probability": 0.00032261125644370356,
+      "total_log_prob": -8.0390625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.078125,
+      "perplexity": 3223.184097166442,
+      "probability": 0.0003102522132940274,
+      "normalized_probability": 0.0003102522132940274,
+      "total_log_prob": -8.078125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.03125,
+      "perplexity": 3075.5837511620985,
+      "probability": 0.00032514152788788584,
+      "normalized_probability": 0.00032514152788788584,
+      "total_log_prob": -8.03125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.9140625,
+      "perplexity": 7435.807790500043,
+      "probability": 0.00013448437993214345,
+      "normalized_probability": 0.00013448437993214345,
+      "total_log_prob": -8.9140625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.578125,
+      "perplexity": 5314.132180380701,
+      "probability": 0.0001881774796065311,
+      "normalized_probability": 0.0001881774796065311,
+      "total_log_prob": -8.578125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.9453125,
+      "perplexity": 7671.845667278888,
+      "probability": 0.00013034673054817695,
+      "normalized_probability": 0.00013034673054817695,
+      "total_log_prob": -8.9453125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.16015625,
+      "perplexity": 1287.112028449327,
+      "probability": 0.0007769331479286766,
+      "normalized_probability": 0.0007769331479286766,
+      "total_log_prob": -7.16015625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.80859375,
+      "perplexity": 2461.6662819146695,
+      "probability": 0.0004062289057403044,
+      "normalized_probability": 0.0004062289057403044,
+      "total_log_prob": -7.80859375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.7265625,
+      "perplexity": 6164.501175517202,
+      "probability": 0.00016221912714877535,
+      "normalized_probability": 0.00016221912714877535,
+      "total_log_prob": -8.7265625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 10.328125,
+      "perplexity": 30580.71926586695,
+      "probability": 3.2700342699792625e-05,
+      "normalized_probability": 3.2700342699792625e-05,
+      "total_log_prob": -10.328125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.1796875,
+      "perplexity": 9698.121636324744,
+      "probability": 0.00010311275085006726,
+      "normalized_probability": 0.00010311275085006726,
+      "total_log_prob": -9.1796875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.5546875,
+      "perplexity": 1909.673377742745,
+      "probability": 0.0005236497568929882,
+      "normalized_probability": 0.0005236497568929882,
+      "total_log_prob": -7.5546875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.984375,
+      "perplexity": 7977.457255453756,
+      "probability": 0.00012535322571817655,
+      "normalized_probability": 0.00012535322571817655,
+      "total_log_prob": -8.984375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.28125,
+      "perplexity": 3949.1277076439605,
+      "probability": 0.0002532204765281185,
+      "normalized_probability": 0.0002532204765281185,
+      "total_log_prob": -8.28125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.2265625,
+      "perplexity": 3738.9589647857524,
+      "probability": 0.0002674541254445945,
+      "normalized_probability": 0.0002674541254445945,
+      "total_log_prob": -8.2265625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.4765625,
+      "perplexity": 13050.249090978768,
+      "probability": 7.662688987992337e-05,
+      "normalized_probability": 7.662688987992337e-05,
+      "total_log_prob": -9.4765625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.6015625,
+      "perplexity": 2001.3205166651069,
+      "probability": 0.0004996700886604343,
+      "normalized_probability": 0.0004996700886604343,
+      "total_log_prob": -7.6015625,
+      "num_target_tokens": 1
+    }
+  ]
+}

@@ -1,0 +1,615 @@
+{
+  "task_name": "fact_extraction",
+  "model_id": "allenai/OLMo-2-1124-7B",
+  "backend": "transformers",
+  "checkpoint": "stage1-step501000-tokens2102B",
+  "split": "test",
+  "eval_mode": "all",
+  "num_examples": 60,
+  "metrics": {
+    "exact_match": {
+      "accuracy": 0.7166666666666667,
+      "correct": 43,
+      "total": 60,
+      "accuracy_extract_entity": 0.9,
+      "accuracy_extract_number": 1.0,
+      "accuracy_extract_location": 0.25
+    },
+    "continuous": {
+      "mean_loss": 5.352552652359009,
+      "mean_perplexity": 3184.6205222147496,
+      "mean_probability": 0.09747196482187616,
+      "mean_normalized_probability": 0.12072897563472647,
+      "num_valid_examples": 60,
+      "num_total_examples": 60
+    }
+  },
+  "config": {
+    "model_config": {
+      "model_id": "allenai/OLMo-2-1124-7B",
+      "backend": "transformers",
+      "checkpoint": "stage1-step501000-tokens2102B",
+      "local_path": null,
+      "api_key": null,
+      "temperature": 0.0,
+      "max_tokens": 50,
+      "top_p": 1.0,
+      "tensor_parallel_size": null,
+      "trust_remote_code": true,
+      "quantization": null,
+      "generation_kwargs": {}
+    },
+    "eval_config": {
+      "output_dir": "results/olmo2_continuous_7b_early_revised/OLMo-2-1124-7B_stage1-step501000-tokens2102B",
+      "save_predictions": true,
+      "save_detailed_results": true,
+      "batch_size": 1,
+      "retry_attempts": 3,
+      "retry_delay": 1.0,
+      "eval_mode": "all",
+      "compute_loss": true,
+      "compute_perplexity": true
+    },
+    "task_config": {
+      "name": "fact_extraction",
+      "description": null,
+      "data_path": null,
+      "data_format": "csv",
+      "input_column": "input",
+      "output_column": "output",
+      "demonstrations_path": null,
+      "num_demonstrations": 5,
+      "prompt_template": null,
+      "evaluation_metrics": [
+        "accuracy"
+      ],
+      "metadata": {},
+      "in_memory_data": null,
+      "in_memory_demonstrations": null
+    }
+  },
+  "predictions": [
+    " Bob\n\nPassage: \"The dog was trained by the owner.\"\nQuestion: Who trained the dog?\nAnswer: The owner\n\nPassage: \"The dog was trained by the owner.\"\nQuestion: Who trained the dog?\nAnswer: The owner\n\n",
+    " Dr. Smith\n\nPassage: \"The dog was trained by Mr. and Mrs. Smith.\"\nQuestion: Who trained the dog?\nAnswer: Mr. and Mrs. Smith\n\nPassage: \"The car was driven by Mr. and Mrs.",
+    " Leonardo\n\nPassage: \"The book was written by Charles Dickens in 1859.\"\nQuestion: Who wrote the book?\nAnswer: Charles Dickens\n\nPassage: \"The book was written by Charles Dickens in 1859.\"\nQuestion: Who wrote",
+    " Mary\n\nPassage: \"The dog was trained by the owner.\"\nQuestion: Who trained the dog?\nAnswer: The owner\n\nPassage: \"The car was driven by the mechanic.\"\nQuestion: Who drove the car?\nAnswer: The mechanic\n\n",
+    " Professor Chen\n\nPassage: \"The book was written by Charles Dickens in 1859.\"\nQuestion: When was the book written?\nAnswer: 1859\n\nPassage: \"The book was written by Charles Dickens in 1859.\"\nQuestion",
+    " Emma\n\nPassage: \"The dog was trained by the owner to fetch the newspaper.\"\nQuestion: Who trained the dog?\nAnswer: The owner\n\nPassage: \"The dog was trained by the owner to fetch the newspaper.\"\nQuestion: Who trained",
+    " Sarah\n\nPassage: \"The dog was trained by Mr. and Mrs. Smith.\"\nQuestion: Who trained the dog?\nAnswer: Mr. and Mrs. Smith\n\nPassage: \"The car was driven by Mr. and Mrs. Smith.\"\n",
+    " Queen Victoria\n\nPassage: \"The book was written by Charles Dickens in 1859.\"\nQuestion: Who wrote the book?\nAnswer: Charles Dickens\n\nPassage: \"The book was written by Charles Dickens in 1859.\"\nQuestion: Who",
+    " Coach Martinez\n\nPassage: \"The company was founded by John Smith.\"\nQuestion: Who founded the company?\nAnswer: John Smith\n\nPassage: \"The book was written by Charles Dickens in 1859.\"\nQuestion: When was the book written",
+    " Dr. Park and her team\n\nPassage: \"The book was written by Charles Dickens in 1859.\"\nQuestion: Who wrote the book?\nAnswer: Charles Dickens\n\nPassage: \"The cake was baked by Aunt Martha for the birthday.\"\n",
+    " James\n\nPassage: \"The dog was trained by the owner.\"\nQuestion: Who trained the dog?\nAnswer: The owner\n\nPassage: \"The car was driven by the driver.\"\nQuestion: Who drove the car?\nAnswer: The driver\n\n",
+    " Helen\n\nPassage: \"The book was written by Charles Dickens in 1859.\"\nQuestion: Who wrote the book?\nAnswer: Charles Dickens\n\nPassage: \"The book was written by Charles Dickens in 1859.\"\nQuestion: Who wrote",
+    " Officer Wilson\n\nPassage: \"The dog was trained by the police.\"\nQuestion: Who trained the dog?\nAnswer: The police\n\nPassage: \"The police officer was trained by the police.\"\nQuestion: Who trained the police officer?\nAnswer:",
+    " Grandma Rose\n\nPassage: \"The book was written by Charles Dickens in 1859.\"\nQuestion: Who wrote the book?\nAnswer: Charles Dickens\n\nPassage: \"The book was written by Charles Dickens in 1859.\"\nQuestion: Who",
+    " Daniel\n\nPassage: \"The dog was trained by the owner.\"\nQuestion: Who trained the dog?\nAnswer: The owner\n\nPassage: \"The dog was trained by the owner.\"\nQuestion: Who trained the dog?\nAnswer: The owner\n\n",
+    " Engineer Clara Nguyen\n\nPassage: \"The book was written by Charles Dickens in 1859.\"\nQuestion: When was the book written?\nAnswer: 1859\n\nPassage: \"The book was written by Charles Dickens in 1859.\"\n",
+    " Principal Adams\n\nPassage: \"The police officer arrested the suspect.\"\nQuestion: Who was arrested?\nAnswer: The suspect\n\nPassage: \"The teacher gave the students a test.\"\nQuestion: Who took the test?\nAnswer: The students\n\nPass",
+    " Marcus\n\nPassage: \"The book was written by Charles Dickens in 1859.\"\nQuestion: When was the book written?\nAnswer: 1859\n\nPassage: \"The book was written by Charles Dickens in 1859.\"\nQuestion:",
+    " Lisa\n\nPassage: \"The dog was trained by the owner.\"\nQuestion: Who trained the dog?\nAnswer: The owner\n\nPassage: \"The car was driven by the mechanic.\"\nQuestion: Who drove the car?\nAnswer: The mechanic\n\n",
+    " Yuki Tanaka\n\nPassage: \"The book was written by the author Charles Dickens.\"\nQuestion: Who wrote the book?\nAnswer: Charles Dickens\n\nPassage: \"The book was written by Charles Dickens in 1859.\"\nQuestion: Who",
+    " 5\n\nPassage: \"The store was open from 9 AM to 5 PM.\"\nQuestion: How many hours was the store open?\nAnswer: 8\n\nPassage: \"The store was open from 9 AM to 5",
+    " 14\n\nPassage: \"The store was open from 9 AM to 5 PM.\"\nQuestion: How many hours was the store open?\nAnswer: 8\n\nPassage: \"The store was open from 9 AM to 5",
+    " 32\n\nPassage: \"There are 12 months in a year.\"\nQuestion: How many months are in a year?\nAnswer: 12\n\nPassage: \"There are 7 days in a week.\"\nQuestion: How many days are",
+    " 97\n\nPassage: \"The car is 10 feet long.\"\nQuestion: How long is the car?\nAnswer: 10 feet\n\nPassage: \"The car is 10 feet long.\"\nQuestion: How many feet is the car?\n",
+    " 3\n\nPassage: \"The store is open from 9 AM to 5 PM.\"\nQuestion: How many hours is the store open?\nAnswer: 8\n\nPassage: \"The store is open from 9 AM to 5",
+    " 26\n\nPassage: \"The marathon was 42 kilometers long.\"\nQuestion: How many kilometers was the marathon?\nAnswer: 42\n\nPassage: \"The marathon was 42 kilometers long.\"\nQuestion: How many kilometers was the marathon?\n",
+    " 12000\n\nPassage: \"The store has 1000 different items for sale.\"\nQuestion: How many items does the store have?\nAnswer: 1000\n\nPassage: \"The store has 1000 different items for sale.\"\n",
+    " 8\n\nPassage: \"The car traveled 100 miles in 2 hours.\"\nQuestion: How many miles did the car travel in 2 hours?\nAnswer: 100\n\nPassage: \"The movie was 2 hours long.\"\nQuestion",
+    " 50\n\nPassage: \"The car has 4 wheels.\"\nQuestion: How many wheels does the car have?\nAnswer: 4\n\nPassage: \"The dog has 4 legs.\"\nQuestion: How many legs does the dog have?\n",
+    " 15\n\nPassage: \"The car has 4 wheels.\"\nQuestion: How many wheels does the car have?\nAnswer: 4\n\nPassage: \"The dog has 4 legs.\"\nQuestion: How many legs does the dog have?\n",
+    " 200\n\nPassage: \"The store was open from 9 AM to 5 PM.\"\nQuestion: How many hours was the store open?\nAnswer: 8\n\nPassage: \"The store was open from 9 AM to 5",
+    " 4500\n\nPassage: \"The store was open from 9 AM to 5 PM.\"\nQuestion: How many hours was the store open?\nAnswer: 8\n\nPassage: \"The store was open from 9 AM to ",
+    " 6\n\nPassage: \"There are 12 months in a year.\"\nQuestion: How many months are in a year?\nAnswer: 12\n\nPassage: \"There are 30 days in a month.\"\nQuestion: How many days are",
+    " 480\n\nPassage: \"The train travels 100 miles per hour.\"\nQuestion: How many miles per hour does the train travel?\nAnswer: 100\n\nPassage: \"The car travels 60 miles per hour.\"\nQuestion: How many",
+    " 7\n\nPassage: \"There are 12 months in a year.\"\nQuestion: How many months are in a year?\nAnswer: 12\n\nPassage: \"There are 30 days in a month.\"\nQuestion: How many days are",
+    " 42\n\nPassage: \"The car traveled 42 miles in 2 hours.\"\nQuestion: How many miles did the car travel in 2 hours?\nAnswer: 42\n\nPassage: \"The marathon was 42 kilometers long.\"\nQuestion",
+    " 18\n\nPassage: \"The store was open from 9 AM to 5 PM.\"\nQuestion: How many hours was the store open?\nAnswer: 8\n\nPassage: \"The store was open from 9 AM to 5",
+    " 3\n\nPassage: \"There are 12 months in a year.\"\nQuestion: How many months are in a year?\nAnswer: 12\n\nPassage: \"There are 7 days in a week.\"\nQuestion: How many days are",
+    " 120\n\nPassage: \"The store has 1000 items in stock.\"\nQuestion: How many items are in stock?\nAnswer: 1000\n\nPassage: \"The store has 1000 items in stock.\"\nQuestion: How many",
+    " 4\n\nPassage: \"The car has 4 wheels.\"\nQuestion: How many wheels does the car have?\nAnswer: 4\n\nPassage: \"The car has 4 wheels.\"\nQuestion: How many wheels does the car have?\n",
+    " in the kitchen\n\nPassage: \"The dog was barking at the cat.\"\nQuestion: What was the dog doing?\nAnswer: barking\n\nPassage: \"The cat was chasing the dog.\"\nQuestion: What was the cat doing?\nAnswer",
+    " on the table by the front door\n\nPassage: \"The dog was barking at the mailman.\"\nQuestion: What was the dog doing?\nAnswer: barking at the mailman\n\nPassage: \"The dog was barking at the",
+    " in Conference Room B\n\nPassage: \"The dog was barking at the cat.\"\nQuestion: What was the dog doing?\nAnswer: barking\n\nPassage: \"The dog was barking at the cat.\"\nQuestion: What was the cat",
+    " in the underground garage\n\nPassage: \"The cat was sitting on the table.\"\nQuestion: Where was the cat?\nAnswer: on the table\n\nPassage: \"The dog was sitting on the rug.\"\nQuestion: Where was the dog?\nAnswer",
+    " in the backyard\n\nPassage: \"The dog was barking at the cat.\"\nQuestion: What was the dog doing?\nAnswer: barking\n\nPassage: \"The cat was chasing the dog.\"\nQuestion: What was the cat doing?\nAnswer",
+    " on Fifth Avenue\n\nPassage: \"The cat was sitting on the table.\"\nQuestion: Where was the cat?\nAnswer: on the table\n\nPassage: \"The dog was sitting on the rug.\"\nQuestion: Where was the dog?\nAnswer:",
+    " under the sofa cushion\n\nPassage: \"The dog was barking at the mailman.\"\nQuestion: What was the dog doing?\nAnswer: barking at the mailman\n\nPassage: \"The dog was barking at the mailman.\"\n",
+    " Madison Square Garden\n\nPassage: \"The car was parked in the driveway.\"\nQuestion: Where was the car parked?\nAnswer: in the driveway\n\nPassage: \"The dog was barking at the mailman.\"\nQuestion: What was the dog",
+    " in the filing cabinet\n\nPassage: \"The cat was sitting on the table.\"\nQuestion: Where was the cat?\nAnswer: on the table\n\nPassage: \"The dog was sitting on the floor.\"\nQuestion: Where was the dog?\nAnswer",
+    " in the old oak tree\n\nPassage: \"The cat was sitting on the mat.\"\nQuestion: Where was the cat?\nAnswer: on the mat\n\nPassage: \"The man was sitting on the bench.\"\nQuestion: Where was the man?\n",
+    " in the town square\n\nPassage: \"The dog was barking at the cat.\"\nQuestion: What was the dog doing?\nAnswer: barking at the cat\n\nPassage: \"The cat was chasing the dog.\"\nQuestion: What was the",
+    " above the fireplace\n\nPassage: \"The cat was sitting on the table.\"\nQuestion: Where was the cat?\nAnswer: on the table\n\nPassage: \"The dog was sitting on the rug.\"\nQuestion: Where was the dog?\nAnswer:",
+    " on a remote island\n\nPassage: \"The dog was barking at the mailman.\"\nQuestion: Who was the dog barking at?\nAnswer: the mailman\n\nPassage: \"The dog was barking at the mailman.\"\nQuestion",
+    " in the shed behind the house\n\nPassage: \"The cat was sitting on the table.\"\nQuestion: Where was the cat?\nAnswer: on the table\n\nPassage: \"The dog was sitting on the rug.\"\nQuestion: Where was the dog",
+    " along the fence\n\nPassage: \"The cat was sitting on the table.\"\nQuestion: Where was the cat?\nAnswer: on the table\n\nPassage: \"The dog was barking at the cat.\"\nQuestion: Where was the dog?\nAnswer",
+    " at the library\n\nPassage: \"The cat is on the mat.\"\nQuestion: Where is the cat?\nAnswer: on the mat\n\nPassage: \"The dog is in the yard.\"\nQuestion: Where is the dog?\nAnswer: in the",
+    " in a garden by the lake\n\nPassage: \"The dog was barking at the cat.\"\nQuestion: What was the dog doing?\nAnswer: barking at the cat\n\nPassage: \"The cat was chasing the dog.\"\nQuestion: What",
+    " at the restaurant\n\nPassage: \"The cat was sitting on the table.\"\nQuestion: Where was the cat?\nAnswer: on the table\n\nPassage: \"The dog was sitting on the rug.\"\nQuestion: Where was the dog?\nAnswer:",
+    " Tokyo\n\nPassage: \"The car is parked in the garage.\"\nQuestion: Where is the car?\nAnswer: in the garage\n\nPassage: \"The cat is on the mat.\"\nQuestion: Where is the cat?\nAnswer: on the mat",
+    " on the windowsill\n\nPassage: \"The cat was sitting on the windowsill.\"\nQuestion: Where was the cat?\nAnswer: on the windowsill\n\nPassage: \"The cat was sitting on the windowsill.\"\nQuestion: Where was the"
+  ],
+  "target_metrics": [
+    {
+      "loss": 9.421875,
+      "perplexity": 12355.727503305474,
+      "probability": 8.093412546792363e-05,
+      "normalized_probability": 8.093412546792363e-05,
+      "total_log_prob": -9.421875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 2.978515625,
+      "perplexity": 19.658614220966218,
+      "probability": 0.00013136905262640898,
+      "normalized_probability": 0.05083517886775326,
+      "total_log_prob": -8.9375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.36328125,
+      "perplexity": 78.51433738825796,
+      "probability": 0.00016221912714877535,
+      "normalized_probability": 0.012736527279787664,
+      "total_log_prob": -8.7265625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 9.1015625,
+      "perplexity": 8969.296285781338,
+      "probability": 0.00011149146690418283,
+      "normalized_probability": 0.00011149146690418283,
+      "total_log_prob": -9.1015625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.17578125,
+      "perplexity": 65.09067188950593,
+      "probability": 0.00023602743728832652,
+      "normalized_probability": 0.015363184477455398,
+      "total_log_prob": -8.3515625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 7.6015625,
+      "perplexity": 2001.3205166651069,
+      "probability": 0.0004996700886604343,
+      "normalized_probability": 0.0004996700886604343,
+      "total_log_prob": -7.6015625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.46875,
+      "perplexity": 12948.69124683357,
+      "probability": 7.722788202587939e-05,
+      "normalized_probability": 7.722788202587939e-05,
+      "total_log_prob": -9.46875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.26953125,
+      "perplexity": 71.48811770889668,
+      "probability": 0.00019567361820152106,
+      "normalized_probability": 0.013988338650516045,
+      "total_log_prob": -8.5390625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.96875,
+      "perplexity": 143.8469662358426,
+      "probability": 4.8327973667425135e-05,
+      "normalized_probability": 0.006951832396384793,
+      "total_log_prob": -9.9375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.939453125,
+      "perplexity": 18.90550453688997,
+      "probability": 0.00014770219608298515,
+      "normalized_probability": 0.05286022217841177,
+      "total_log_prob": -8.8203125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 8.9140625,
+      "perplexity": 7435.807790500043,
+      "probability": 0.00013448437993214345,
+      "normalized_probability": 0.00013448437993214345,
+      "total_log_prob": -8.9140625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 0.0006780624389648438,
+      "perplexity": 1.000678292375268,
+      "probability": 0.9993221673934208,
+      "normalized_probability": 0.9993221673934208,
+      "total_log_prob": -0.0006780624389648438,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.111328125,
+      "perplexity": 22.450842133517945,
+      "probability": 8.81970096254195e-05,
+      "normalized_probability": 0.04451276991177979,
+      "total_log_prob": -9.3359375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.142578125,
+      "perplexity": 23.16350836406023,
+      "probability": 8.030429110667905e-05,
+      "normalized_probability": 0.043143255957095616,
+      "total_log_prob": -9.4296875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 9.5078125,
+      "perplexity": 13464.508465838502,
+      "probability": 7.426932832618075e-05,
+      "normalized_probability": 7.426932832618075e-05,
+      "total_log_prob": -9.5078125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.18359375,
+      "perplexity": 65.60118435636834,
+      "probability": 3.5283243080289442e-06,
+      "normalized_probability": 0.015223791670956471,
+      "total_log_prob": -12.5546875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.49609375,
+      "perplexity": 89.66618776422116,
+      "probability": 0.00012437771917636007,
+      "normalized_probability": 0.011152475921353074,
+      "total_log_prob": -8.9921875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 8.9453125,
+      "perplexity": 7671.845667278888,
+      "probability": 0.00013034673054817695,
+      "normalized_probability": 0.00013034673054817695,
+      "total_log_prob": -8.9453125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 0.00540924072265625,
+      "perplexity": 1.0054238970799256,
+      "probability": 0.9946053628766152,
+      "normalized_probability": 0.9946053628766152,
+      "total_log_prob": -0.00540924072265625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 2.181640625,
+      "perplexity": 8.860831642021981,
+      "probability": 0.00016221912714877535,
+      "normalized_probability": 0.11285622393021869,
+      "total_log_prob": -8.7265625,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 8.296875,
+      "perplexity": 4011.317419955544,
+      "probability": 0.00024929465691874434,
+      "normalized_probability": 0.00024929465691874434,
+      "total_log_prob": -8.296875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.65625,
+      "perplexity": 5745.946909852821,
+      "probability": 0.00017403571868811687,
+      "normalized_probability": 0.00017403571868811687,
+      "total_log_prob": -8.65625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.609375,
+      "perplexity": 14903.852268089833,
+      "probability": 6.709674666737461e-05,
+      "normalized_probability": 6.709674666737461e-05,
+      "total_log_prob": -9.609375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.2890625,
+      "perplexity": 10819.0364959287,
+      "probability": 9.242967249221398e-05,
+      "normalized_probability": 9.242967249221398e-05,
+      "total_log_prob": -9.2890625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.7578125,
+      "perplexity": 6360.183448360342,
+      "probability": 0.00015722816930033686,
+      "normalized_probability": 0.00015722816930033686,
+      "total_log_prob": -8.7578125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.6796875,
+      "perplexity": 5882.208114053411,
+      "probability": 0.0001700041856069086,
+      "normalized_probability": 0.0001700041856069086,
+      "total_log_prob": -8.6796875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.765625,
+      "perplexity": 43.19069160819034,
+      "probability": 0.0005360677530166963,
+      "normalized_probability": 0.023153137001639675,
+      "total_log_prob": -7.53125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 8.8046875,
+      "perplexity": 6665.415025056756,
+      "probability": 0.0001500281672245135,
+      "normalized_probability": 0.0001500281672245135,
+      "total_log_prob": -8.8046875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.5625,
+      "perplexity": 5231.744197360583,
+      "probability": 0.00019114084371795175,
+      "normalized_probability": 0.00019114084371795175,
+      "total_log_prob": -8.5625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.8515625,
+      "perplexity": 2569.7464103366397,
+      "probability": 0.0003891434563261045,
+      "normalized_probability": 0.0003891434563261045,
+      "total_log_prob": -7.8515625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.59375,
+      "perplexity": 14672.789455589415,
+      "probability": 6.81533666810071e-05,
+      "normalized_probability": 6.81533666810071e-05,
+      "total_log_prob": -9.59375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.57421875,
+      "perplexity": 96.95226558425567,
+      "probability": 0.0001063859009186544,
+      "normalized_probability": 0.01031435412028569,
+      "total_log_prob": -9.1484375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 8.640625,
+      "perplexity": 5656.864259972339,
+      "probability": 0.00017677638246969176,
+      "normalized_probability": 0.00017677638246969176,
+      "total_log_prob": -8.640625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.625,
+      "perplexity": 15138.553790426726,
+      "probability": 6.605650802868481e-05,
+      "normalized_probability": 6.605650802868481e-05,
+      "total_log_prob": -9.625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.625,
+      "perplexity": 5569.162708566004,
+      "probability": 0.00017956020542583297,
+      "normalized_probability": 0.00017956020542583297,
+      "total_log_prob": -8.625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.85546875,
+      "perplexity": 2579.804113414313,
+      "probability": 0.0003876263297667675,
+      "normalized_probability": 0.0003876263297667675,
+      "total_log_prob": -7.85546875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.49609375,
+      "perplexity": 1800.9935250997423,
+      "probability": 0.0005552490811673618,
+      "normalized_probability": 0.0005552490811673618,
+      "total_log_prob": -7.49609375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.75,
+      "perplexity": 6310.688108089024,
+      "probability": 0.00015846132511575126,
+      "normalized_probability": 0.00015846132511575126,
+      "total_log_prob": -8.75,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.1015625,
+      "perplexity": 3299.619705314332,
+      "probability": 0.0003030652285138832,
+      "normalized_probability": 0.0003030652285138832,
+      "total_log_prob": -8.1015625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.9296875,
+      "perplexity": 7552.904724691445,
+      "probability": 0.0001323993928760769,
+      "normalized_probability": 0.0001323993928760769,
+      "total_log_prob": -8.9296875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.71484375,
+      "perplexity": 111.59137365930344,
+      "probability": 8.030429110667905e-05,
+      "normalized_probability": 0.0089612661553309,
+      "total_log_prob": -9.4296875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 0.01654052734375,
+      "perplexity": 1.0166780792131367,
+      "probability": 0.9674601392316521,
+      "normalized_probability": 0.9835955160693098,
+      "total_log_prob": -0.0330810546875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.04296875,
+      "perplexity": 20.967397891114594,
+      "probability": 0.00010806123508405339,
+      "normalized_probability": 0.04763103028786328,
+      "total_log_prob": -9.1328125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.51171875,
+      "perplexity": 12.326097344475713,
+      "probability": 0.0005339778229086999,
+      "normalized_probability": 0.08112867942327083,
+      "total_log_prob": -7.53515625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.73046875,
+      "perplexity": 113.34868209247811,
+      "probability": 7.783358781165646e-05,
+      "normalized_probability": 0.008822334600980426,
+      "total_log_prob": -9.4609375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 0.00554656982421875,
+      "perplexity": 1.0055619805216216,
+      "probability": 0.9889681623386329,
+      "normalized_probability": 0.9944687839940644,
+      "total_log_prob": -0.0110931396484375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 1.9677734375,
+      "perplexity": 7.154728290396484,
+      "probability": 0.00038161674054486614,
+      "normalized_probability": 0.1397677115624728,
+      "total_log_prob": -7.87109375,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 2.029296875,
+      "perplexity": 7.608734586012058,
+      "probability": 0.00029836663765214793,
+      "normalized_probability": 0.1314278989095514,
+      "total_log_prob": -8.1171875,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 2.80078125,
+      "perplexity": 16.457499171202052,
+      "probability": 0.00022521895401214571,
+      "normalized_probability": 0.060841742782159994,
+      "total_log_prob": -8.3984375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.25,
+      "perplexity": 9.487735836358526,
+      "probability": 0.00012340980408667956,
+      "normalized_probability": 0.10539922456186433,
+      "total_log_prob": -9.0,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 3.017578125,
+      "perplexity": 20.44172438427552,
+      "probability": 0.0001177584577054612,
+      "normalized_probability": 0.049015191417106724,
+      "total_log_prob": -9.046875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.873046875,
+      "perplexity": 17.690837939037834,
+      "probability": 0.00018096851357139753,
+      "normalized_probability": 0.05656324799811683,
+      "total_log_prob": -8.6171875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 0.0095062255859375,
+      "perplexity": 1.009551553266246,
+      "probability": 0.9811671454859832,
+      "normalized_probability": 0.990538815739183,
+      "total_log_prob": -0.019012451171875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.09765625,
+      "perplexity": 60.199030648454944,
+      "probability": 0.00027594403073589844,
+      "normalized_probability": 0.016611563163528544,
+      "total_log_prob": -8.1953125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.3125,
+      "perplexity": 10.099642225480054,
+      "probability": 0.0009706932995199089,
+      "normalized_probability": 0.0990134083638263,
+      "total_log_prob": -6.9375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.17578125,
+      "perplexity": 65.09067188950593,
+      "probability": 0.00023602743728832652,
+      "normalized_probability": 0.015363184477455398,
+      "total_log_prob": -8.3515625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 0.024658203125,
+      "perplexity": 1.0249647309047931,
+      "probability": 0.906075346490757,
+      "normalized_probability": 0.9756433268852527,
+      "total_log_prob": -0.0986328125,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 4.421875,
+      "perplexity": 83.25223705241488,
+      "probability": 0.00014428067839590176,
+      "normalized_probability": 0.012011689239898848,
+      "total_log_prob": -8.84375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.859375,
+      "perplexity": 128.94358717585138,
+      "probability": 6.014513499670094e-05,
+      "normalized_probability": 0.0077553294576504575,
+      "total_log_prob": -9.71875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.048828125,
+      "perplexity": 21.090614371389922,
+      "probability": 0.0001063859009186544,
+      "normalized_probability": 0.0473835969221752,
+      "total_log_prob": -9.1484375,
+      "num_target_tokens": 3
+    }
+  ]
+}

@@ -1,0 +1,309 @@
+{
+  "task_name": "compositional:lower_reverse_last",
+  "model_id": "LLM360/Amber",
+  "backend": "transformers",
+  "checkpoint": "ckpt_032",
+  "split": "test",
+  "eval_mode": "all",
+  "num_examples": 26,
+  "metrics": {
+    "exact_match": {
+      "accuracy": 1.0,
+      "correct": 26,
+      "total": 26,
+      "accuracy_lower_reverse_last": 1.0,
+      "correct_lower_reverse_last": 26,
+      "total_lower_reverse_last": 26
+    },
+    "continuous": {
+      "mean_loss": 8.088341346153847,
+      "mean_perplexity": 3983.125145979207,
+      "mean_probability": 0.0003734123770333994,
+      "mean_normalized_probability": 0.0003734123770333994,
+      "num_valid_examples": 26,
+      "num_total_examples": 26
+    }
+  },
+  "config": {
+    "model_config": {
+      "model_id": "LLM360/Amber",
+      "backend": "transformers",
+      "checkpoint": "ckpt_032",
+      "local_path": null,
+      "api_key": null,
+      "temperature": 0.0,
+      "max_tokens": 50,
+      "top_p": 1.0,
+      "tensor_parallel_size": null,
+      "trust_remote_code": true,
+      "quantization": null,
+      "generation_kwargs": {}
+    },
+    "eval_config": {
+      "output_dir": "results/amber/Amber_ckpt_032",
+      "save_predictions": true,
+      "save_detailed_results": true,
+      "batch_size": 1,
+      "retry_attempts": 3,
+      "retry_delay": 1.0,
+      "eval_mode": "all",
+      "compute_loss": true,
+      "compute_perplexity": true
+    },
+    "task_config": {
+      "name": "compositional:lower_reverse_last",
+      "description": "Compositional task with chained string operations",
+      "data_path": "dataset/compositional.csv",
+      "data_format": "csv",
+      "input_column": "input",
+      "output_column": "output",
+      "demonstrations_path": null,
+      "num_demonstrations": 5,
+      "prompt_template": null,
+      "evaluation_metrics": [
+        "accuracy"
+      ],
+      "metadata": {},
+      "in_memory_data": null,
+      "in_memory_demonstrations": null
+    }
+  },
+  "predictions": [
+    "b\nA -> a\nC -> c\nD -> d\nE -> e\nF -> f\nG -> g\nB -> b\nA -> a\nC -> c\nD -> d\nE -> e\nF -> f\n",
+    "a\nB -> b\nC -> c\nD -> d\nE -> e\nF -> f\nG -> g\nH -> h\nI -> i\nJ -> j\nK -> k\nL -> l\nM -> m\n",
+    "d\nE -> e\nF -> f\nG -> g\nH -> h\nI -> i\nJ -> j\nK -> k\nL -> l\nM -> m\nN -> n\nO -> o\nP -> p\n",
+    "e\nD -> d\nS -> s\nT -> t\nF -> f\nG -> g\nH -> h\nC -> c\nP -> p\nE -> e\nD -> d\nS -> s\nT -> t\n",
+    "f\nG -> g\nS -> s\nT -> t\nI -> i\nO -> o\nP -> p\nQ -> q\nA -> a\nW -> w\nH -> h\nU -> u\nF -> f\n",
+    "g\nH -> h\nA -> a\nB -> b\nC -> c\nD -> d\nE -> e\nF -> f\nG -> g\nH -> h\nA -> a\nB -> b\nC -> c\n",
+    "h\nA -> a\nR -> r\nT -> t\nN -> n\nO -> o\nP -> p\nQ -> q\nZ -> z\n\n\nA: You can use a recursive function to generate the permutations.",
+    "i\nS -> s\nV -> v\nW -> w\nE -> e\nN -> n\nO -> o\nP -> p\nQ -> q\nR -> r\nS -> s\nT -> t\nU -> u\n",
+    "j\nS -> s\nE -> e\nR -> r\nI -> i\nN -> n\nO -> o\nP -> p\nQ -> q\nD -> d\nF -> f\nG -> g\nH -> h\n",
+    "c\nD -> d\nE -> e\nF -> f\nG -> g\nH -> h\nI -> i\nJ -> j\nK -> k\nL -> l\nM -> m\nN -> n\nO -> o\n",
+    "k\nS -> s\nA -> a\n\n\nA: You can use a recursive function to do this:\nfunctor :: (a -> b) -> (a -> b) -> (a -> b)\nfunctor f g",
+    "l\nS -> s\nT -> t\nV -> v\nW -> w\nX -> x\nY -> y\nZ -> z\n_ -> _\n\n\nA: You can use a recursive function to do this:\nfun",
+    "m\nN -> n\nS -> s\nT -> t\nV -> v\nW -> w\nX -> x\nY -> y\nZ -> z\n_ -> _\n\n\n\n\n\n\n\n\n\n\n\n\n",
+    "n\nS -> s\nT -> t\nV -> v\nW -> w\nX -> x\nY -> y\nZ -> z\n_ -> _\n\n\nA: You can use a recursive function to generate the permutations.",
+    "o\nS -> s\nT -> t\nA -> a\nR -> r\nN -> n\nE -> e\nD -> d\nO -> o\nS -> s\nT -> t\nA -> a\nR -> r\n",
+    "p\nS -> s\nE -> e\nD -> d\nF -> f\nG -> g\nH -> h\nI -> i\nJ -> j\nK -> k\nL -> l\nM -> m\nN -> n\n",
+    "q\nT -> t\nR -> r\nV -> v\nD -> d\nU -> u\nS -> s\nQ -> q\nT -> t\nR -> r\nV -> v\nD -> d\nU -> u\n",
+    "r\nS -> s\nT -> t\nU -> u\nV -> v\nW -> w\nX -> x\nY -> y\nZ -> z\n\n\nA: You can use a recursive function to generate a list of all",
+    "s\nT -> t\nR -> r\nV -> v\nW -> w\nN -> n\nD -> d\nQ -> q\nS -> s\nT -> t\nR -> r\nV -> v\nW -> w\n",
+    "t\nN -> n\nO -> o\nP -> p\nQ -> q\nR -> r\nS -> s\nT -> t\nN -> n\nO -> o\nP -> p\nQ -> q\nR -> r\n",
+    "u\nV -> v\nW -> w\nZ -> z\n_ -> _\n_ -> _\n_ -> _\n_ -> _\n_ -> _\n_ -> _\n_ -> _\n_ -> _\n_ -> _\n",
+    "v\nS -> s\nT -> t\nU -> u\nN -> n\nE -> e\nO -> o\nP -> p\nQ -> q\nR -> r\nS -> s\nT -> t\nU -> u\n",
+    "w\nS -> s\nT -> t\nN -> n\nV -> v\nM -> m\nN -> n\nE -> e\nO -> o\nR -> r\nJ -> j\nI -> i\nW -> w\n",
+    "x\nY -> y\nZ -> z\n\n\nA: You can use a recursive function to generate a list of all possible combinations of the letters in the alphabet.\ndef generate_all_combinations(n):\n    combinations",
+    "y\nS -> s\nT -> t\nV -> v\nW -> w\nZ -> z\nS -> s\nT -> t\nV -> v\nW -> w\nZ -> z\nS -> s\nT -> t\n",
+    "z\n\n\nA: You can use a recursive function to do this:\nfunctor f (A : Type) (B : Type) (C : Type) (D : Type) (E : Type) (F : Type)"
+  ],
+  "target_metrics": [
+    {
+      "loss": 8.5390625,
+      "perplexity": 5110.550973561067,
+      "probability": 0.00019567361820152106,
+      "normalized_probability": 0.00019567361820152106,
+      "total_log_prob": -8.5390625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.6484375,
+      "perplexity": 2097.36589361631,
+      "probability": 0.0004767885293852017,
+      "normalized_probability": 0.0004767885293852017,
+      "total_log_prob": -7.6484375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.5390625,
+      "perplexity": 5110.550973561067,
+      "probability": 0.00019567361820152106,
+      "normalized_probability": 0.00019567361820152106,
+      "total_log_prob": -8.5390625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.90234375,
+      "perplexity": 2703.611497823697,
+      "probability": 0.0003698756277686204,
+      "normalized_probability": 0.0003698756277686204,
+      "total_log_prob": -7.90234375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.171875,
+      "perplexity": 1302.284097746097,
+      "probability": 0.0007678816025863563,
+      "normalized_probability": 0.0007678816025863563,
+      "total_log_prob": -7.171875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.734375,
+      "perplexity": 6212.849957466045,
+      "probability": 0.00016095672788593417,
+      "normalized_probability": 0.00016095672788593417,
+      "total_log_prob": -8.734375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.28125,
+      "perplexity": 1452.8028942027192,
+      "probability": 0.0006883246199401248,
+      "normalized_probability": 0.0006883246199401248,
+      "total_log_prob": -7.28125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.39453125,
+      "perplexity": 1627.0620594881786,
+      "probability": 0.000614604706789468,
+      "normalized_probability": 0.000614604706789468,
+      "total_log_prob": -7.39453125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.6796875,
+      "perplexity": 796.0703011721198,
+      "probability": 0.0012561704645024665,
+      "normalized_probability": 0.0012561704645024665,
+      "total_log_prob": -6.6796875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.8515625,
+      "perplexity": 6985.29497096595,
+      "probability": 0.0001431578772487709,
+      "normalized_probability": 0.0001431578772487709,
+      "total_log_prob": -8.8515625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.03125,
+      "perplexity": 3075.5837511620985,
+      "probability": 0.00032514152788788584,
+      "normalized_probability": 0.00032514152788788584,
+      "total_log_prob": -8.03125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.4609375,
+      "perplexity": 1738.7773972863772,
+      "probability": 0.0005751167467213744,
+      "normalized_probability": 0.0005751167467213744,
+      "total_log_prob": -7.4609375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.9140625,
+      "perplexity": 2735.480814627413,
+      "probability": 0.00036556644618112785,
+      "normalized_probability": 0.00036556644618112785,
+      "total_log_prob": -7.9140625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.82421875,
+      "perplexity": 2500.4318851599323,
+      "probability": 0.0003999309103099356,
+      "normalized_probability": 0.0003999309103099356,
+      "total_log_prob": -7.82421875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.0625,
+      "perplexity": 3173.213259472856,
+      "probability": 0.000315137974737356,
+      "normalized_probability": 0.000315137974737356,
+      "total_log_prob": -8.0625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.5703125,
+      "perplexity": 5272.7772756597515,
+      "probability": 0.0001896533738711495,
+      "normalized_probability": 0.0001896533738711495,
+      "total_log_prob": -8.5703125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.640625,
+      "perplexity": 2081.0440627413286,
+      "probability": 0.0004805280281680892,
+      "normalized_probability": 0.0004805280281680892,
+      "total_log_prob": -7.640625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.515625,
+      "perplexity": 13570.111914573114,
+      "probability": 7.369135982777617e-05,
+      "normalized_probability": 7.369135982777617e-05,
+      "total_log_prob": -9.515625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.1796875,
+      "perplexity": 9698.121636324744,
+      "probability": 0.00010311275085006726,
+      "normalized_probability": 0.00010311275085006726,
+      "total_log_prob": -9.1796875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.5546875,
+      "perplexity": 5191.03044101011,
+      "probability": 0.00019263997993535412,
+      "normalized_probability": 0.00019263997993535412,
+      "total_log_prob": -8.5546875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.171875,
+      "perplexity": 3539.9751983943984,
+      "probability": 0.00028248785484530033,
+      "normalized_probability": 0.00028248785484530033,
+      "total_log_prob": -8.171875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.25,
+      "perplexity": 3827.6258214399063,
+      "probability": 0.00026125855730166754,
+      "normalized_probability": 0.00026125855730166754,
+      "total_log_prob": -8.25,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.5546875,
+      "perplexity": 5191.03044101011,
+      "probability": 0.00019263997993535412,
+      "normalized_probability": 0.00019263997993535412,
+      "total_log_prob": -8.5546875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.80859375,
+      "perplexity": 2461.6662819146695,
+      "probability": 0.0004062289057403044,
+      "normalized_probability": 0.0004062289057403044,
+      "total_log_prob": -7.80859375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.828125,
+      "perplexity": 2510.218298856524,
+      "probability": 0.00039837172745315756,
+      "normalized_probability": 0.00039837172745315756,
+      "total_log_prob": -7.828125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.1875,
+      "perplexity": 3595.7216962228085,
+      "probability": 0.00027810828659249914,
+      "normalized_probability": 0.00027810828659249914,
+      "total_log_prob": -8.1875,
+      "num_target_tokens": 1
+    }
+  ]
+}
