@@ -41,13 +41,56 @@ MODEL_COLORS = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd']
 MODEL_MARKERS = ['o', 's', '^', 'D', 'v']
 
 
-def extract_tokens_from_checkpoint(checkpoint: str) -> Optional[int]:
-    """Extract token count (in billions) from checkpoint name."""
-    if checkpoint == "main":
+def extract_tokens_from_checkpoint(checkpoint: str) -> Optional[float]:
+    """Extract token count (in billions) from checkpoint name.
+
+    Supports multiple formats:
+    - OLMo: 'stage1-step100000-tokens210B' -> 210
+    - K2-V2: 'base_1245000' -> 12450B (12.45T) - checkpoint number in units of 10M tokens
+    - Crystal: 'CrystalCoder_phase{N}_checkpoint_{XXXXXX}' -> cumulative tokens in B
+    - Generic: 'tokens100B' -> 100
+    """
+    if checkpoint in ("main", "base_final", "final"):
         return None
+
+    # Try explicit token count first (e.g., 'tokens210B')
     match = re.search(r'tokens(\d+)B', checkpoint)
     if match:
         return int(match.group(1))
+
+    # Try K2-V2 format: 'base_XXXXXXX' (step number)
+    # K2-V2 tech report: batch_size B = 9.8×10^6 tokens/step, T = 1.25×10^6 steps, D = 12.25T
+    # e.g., base_1245000 = 1,245,000 * 9.8M = 12.201T tokens = 12201B
+    match = re.search(r'base_(\d+)', checkpoint)
+    if match:
+        checkpoint_num = int(match.group(1))
+        # Each step = 9.8M tokens = 0.0098B tokens
+        tokens_b = checkpoint_num * 9.8e6 / 1e9
+        return tokens_b
+
+    # Try Crystal format: 'CrystalCoder_phase{N}_checkpoint_{XXXXXX}'
+    # 3-phase training: Phase 1 (345B), Phase 2 (927B), Phase 3 (110B)
+    # Tokens per step: ~4.33M (phase 1-2), ~3.97M (phase 3)
+    match = re.search(r'CrystalCoder_phase(\d+)_checkpoint_(\d+)', checkpoint)
+    if match:
+        phase = int(match.group(1))
+        step = int(match.group(2))
+        if phase == 1:
+            tokens_b = step * 4.33e6 / 1e9
+        elif phase == 2:
+            tokens_b = 345 + step * 4.32e6 / 1e9
+        elif phase == 3:
+            tokens_b = 345 + 927 + step * 3.97e6 / 1e9
+        else:
+            return None
+        return tokens_b
+
+    # Try generic step format: 'step100000'
+    match = re.search(r'step(\d+)', checkpoint)
+    if match:
+        # If no token info, return step number as proxy (will be sorted correctly)
+        return int(match.group(1))
+
     return None
 
 
@@ -73,6 +116,38 @@ def load_accuracy_data(pivot_file: Path) -> Tuple[np.ndarray, np.ndarray, str]:
     accuracy = df[task_name].values.astype(float)
     
     return tokens, accuracy, task_name
+
+
+def load_combined_pivot(pivot_file: Path) -> Dict[str, Tuple[np.ndarray, np.ndarray]]:
+    """Load data from a combined accuracy_pivot.csv with multiple tasks as columns.
+
+    Args:
+        pivot_file: Path to combined pivot file with columns: model, checkpoint, task1, task2, ...
+
+    Returns:
+        Dictionary mapping task_name -> (tokens_array, accuracy_array)
+    """
+    df = pd.read_csv(pivot_file)
+
+    # Extract tokens from checkpoint names
+    df['tokens'] = df['checkpoint'].apply(extract_tokens_from_checkpoint)
+    df = df[df['tokens'].notna() & (df['tokens'] > 0)]
+    df = df.sort_values('tokens')
+
+    if len(df) == 0:
+        return {}
+
+    # Get task columns (everything except model, checkpoint, tokens)
+    task_columns = [c for c in df.columns if c not in ['model', 'checkpoint', 'tokens']]
+
+    result = {}
+    tokens = df['tokens'].values.astype(float)
+
+    for task_name in task_columns:
+        accuracy = df[task_name].values.astype(float)
+        result[task_name] = (tokens, accuracy)
+
+    return result
 
 
 def smooth_trajectory(accuracy: np.ndarray, sigma: float = 1.0) -> np.ndarray:
@@ -289,14 +364,14 @@ def analyze_all_tasks(
     **kwargs,
 ) -> Tuple[pd.DataFrame, List[str]]:
     """Analyze emergence points for all tasks in a results directory.
-    
+
     Args:
-        results_dir: Directory containing accuracy_pivot_*.csv files
+        results_dir: Directory containing accuracy_pivot_*.csv or accuracy_pivot.csv
         method: Emergence detection method
         smooth_sigma: Smoothing parameter
         min_max_accuracy: Skip tasks with max accuracy below this threshold
         **kwargs: Method-specific parameters
-    
+
     Returns:
         Tuple of:
         - DataFrame with emergence data for all tasks
@@ -304,39 +379,75 @@ def analyze_all_tasks(
     """
     results = []
     skipped_tasks = []
-    
-    for pivot_file in sorted(results_dir.glob("accuracy_pivot_*.csv")):
-        try:
-            tokens, accuracy, task_name = load_accuracy_data(pivot_file)
-            
-            if len(tokens) == 0:
-                continue
-            
-            max_acc = float(accuracy.max())
-            
-            # Skip tasks with trivial performance
-            if max_acc <= min_max_accuracy:
-                skipped_tasks.append(task_name)
-                continue
-            
-            emergence_data = find_emergence(
-                tokens, accuracy,
-                method=method,
-                smooth_sigma=smooth_sigma,
-                **kwargs
-            )
-            
-            results.append({
-                "task": task_name,
-                "emergence_tokens_B": emergence_data["emergence_tokens"],
-                "max_accuracy": emergence_data["max_accuracy"],
-                "final_accuracy": emergence_data["final_accuracy"],
-                "n_checkpoints": emergence_data["n_checkpoints"],
-            })
-            
-        except Exception as e:
-            print(f"Warning: Failed to process {pivot_file.name}: {e}")
-    
+
+    # First try per-task pivot files
+    pivot_files = sorted(results_dir.glob("accuracy_pivot_*.csv"))
+
+    if pivot_files:
+        # Use per-task files
+        for pivot_file in pivot_files:
+            try:
+                tokens, accuracy, task_name = load_accuracy_data(pivot_file)
+
+                if len(tokens) == 0:
+                    continue
+
+                max_acc = float(accuracy.max())
+
+                # Skip tasks with trivial performance
+                if max_acc <= min_max_accuracy:
+                    skipped_tasks.append(task_name)
+                    continue
+
+                emergence_data = find_emergence(
+                    tokens, accuracy,
+                    method=method,
+                    smooth_sigma=smooth_sigma,
+                    **kwargs
+                )
+
+                results.append({
+                    "task": task_name,
+                    "emergence_tokens_B": emergence_data["emergence_tokens"],
+                    "max_accuracy": emergence_data["max_accuracy"],
+                    "final_accuracy": emergence_data["final_accuracy"],
+                    "n_checkpoints": emergence_data["n_checkpoints"],
+                })
+
+            except Exception as e:
+                print(f"Warning: Failed to process {pivot_file.name}: {e}")
+    else:
+        # Try combined pivot file
+        combined_file = results_dir / "accuracy_pivot.csv"
+        if combined_file.exists():
+            print(f"Using combined pivot file: {combined_file}")
+            task_data = load_combined_pivot(combined_file)
+
+            for task_name, (tokens, accuracy) in task_data.items():
+                if len(tokens) == 0:
+                    continue
+
+                max_acc = float(accuracy.max())
+
+                if max_acc <= min_max_accuracy:
+                    skipped_tasks.append(task_name)
+                    continue
+
+                emergence_data = find_emergence(
+                    tokens, accuracy,
+                    method=method,
+                    smooth_sigma=smooth_sigma,
+                    **kwargs
+                )
+
+                results.append({
+                    "task": task_name,
+                    "emergence_tokens_B": emergence_data["emergence_tokens"],
+                    "max_accuracy": emergence_data["max_accuracy"],
+                    "final_accuracy": emergence_data["final_accuracy"],
+                    "n_checkpoints": emergence_data["n_checkpoints"],
+                })
+
     return pd.DataFrame(results), skipped_tasks
 
 
@@ -430,7 +541,7 @@ def plot_all_tasks_emergence(
     **kwargs,
 ) -> Tuple[pd.DataFrame, List[str]]:
     """Plot emergence for all tasks across multiple models.
-    
+
     Args:
         results_dirs: List of results directories (one per model)
         model_names: List of model names (same order as results_dirs)
@@ -440,67 +551,81 @@ def plot_all_tasks_emergence(
         min_max_accuracy: Skip tasks below this threshold
         tasks: Optional list of specific tasks to plot
         **kwargs: Method-specific parameters
-    
+
     Returns:
         Tuple of (results DataFrame, skipped tasks list)
     """
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # Discover all tasks across all directories
-    all_task_files = {}  # task_name -> {model_name -> pivot_file}
-    
+    # all_task_data: task_name -> {model_name -> (tokens, accuracy)}
+    all_task_data = {}
+
     for results_dir, model_name in zip(results_dirs, model_names):
         results_path = Path(results_dir)
         if not results_path.exists():
             print(f"Warning: {results_path} does not exist")
             continue
-        
-        for pivot_file in results_path.glob("accuracy_pivot_*.csv"):
-            # Extract task name from filename
-            prefix = "accuracy_pivot_"
-            sanitized_task = pivot_file.stem.replace(prefix, "")
-            
-            if sanitized_task not in all_task_files:
-                all_task_files[sanitized_task] = {}
-            all_task_files[sanitized_task][model_name] = pivot_file
-    
+
+        # First try per-task pivot files
+        pivot_files = list(results_path.glob("accuracy_pivot_*.csv"))
+
+        if pivot_files:
+            for pivot_file in pivot_files:
+                # Extract task name from filename
+                prefix = "accuracy_pivot_"
+                sanitized_task = pivot_file.stem.replace(prefix, "")
+
+                try:
+                    tokens, accuracy, task_name = load_accuracy_data(pivot_file)
+                    if len(tokens) > 0:
+                        if sanitized_task not in all_task_data:
+                            all_task_data[sanitized_task] = {"_task_name": task_name}
+                        all_task_data[sanitized_task][model_name] = (tokens, accuracy)
+                except Exception as e:
+                    print(f"Warning: Failed to load {pivot_file}: {e}")
+        else:
+            # Try combined pivot file
+            combined_file = results_path / "accuracy_pivot.csv"
+            if combined_file.exists():
+                print(f"Using combined pivot file for {model_name}: {combined_file}")
+                task_data = load_combined_pivot(combined_file)
+
+                for task_name, (tokens, accuracy) in task_data.items():
+                    sanitized_task = task_name.replace(":", "_").replace("/", "_")
+                    if sanitized_task not in all_task_data:
+                        all_task_data[sanitized_task] = {"_task_name": task_name}
+                    all_task_data[sanitized_task][model_name] = (tokens, accuracy)
+
     # Filter to requested tasks if specified
     if tasks:
         sanitized_requested = {t.replace(":", "_").replace("/", "_") for t in tasks}
-        all_task_files = {k: v for k, v in all_task_files.items() if k in sanitized_requested}
-    
+        all_task_data = {k: v for k, v in all_task_data.items() if k in sanitized_requested}
+
     results = []
     skipped_tasks = []
-    
-    print(f"Processing {len(all_task_files)} tasks...")
-    
-    for sanitized_task, model_files in sorted(all_task_files.items()):
-        # Load data for all models
-        model_data = {}
-        task_name = None
-        max_acc_any = 0.0
-        
-        for model_name, pivot_file in model_files.items():
-            try:
-                tokens, accuracy, task_name = load_accuracy_data(pivot_file)
-                if len(tokens) > 0:
-                    model_data[model_name] = (tokens, accuracy)
-                    max_acc_any = max(max_acc_any, accuracy.max())
-            except Exception as e:
-                print(f"Warning: Failed to load {pivot_file}: {e}")
-        
+
+    print(f"Processing {len(all_task_data)} tasks...")
+
+    for sanitized_task, task_info in sorted(all_task_data.items()):
+        # Extract task name and model data
+        task_name = task_info.pop("_task_name", None)
+        model_data = {k: v for k, v in task_info.items() if k != "_task_name"}
+
         if not model_data:
             continue
-        
+
+        max_acc_any = max(acc.max() for _, acc in model_data.values())
+
         # Skip if max accuracy is too low
         if max_acc_any <= min_max_accuracy:
             skipped_tasks.append(task_name or sanitized_task)
             continue
-        
+
         display_name = task_name or sanitized_task.replace("_", ":", 1)
         print(f"  {display_name}")
-        
+
         # Create plot
         output_path = output_dir / f"{sanitized_task}_emergence.png"
         plot_task_emergence(
@@ -511,7 +636,7 @@ def plot_all_tasks_emergence(
             output_path=output_path,
             **kwargs
         )
-        
+
         # Collect results for each model
         for model_name, (tokens, accuracy) in model_data.items():
             emergence_result = find_emergence(
@@ -527,7 +652,7 @@ def plot_all_tasks_emergence(
                 "max_accuracy": emergence_result["max_accuracy"],
                 "final_accuracy": emergence_result["final_accuracy"],
             })
-    
+
     return pd.DataFrame(results), skipped_tasks
 
 
@@ -750,21 +875,27 @@ Examples:
             for task in skipped_tasks:
                 print(f"    - {task}")
             print()
-        
+
+        # Handle empty results
+        if df.empty:
+            print("\n⚠️  No tasks found or all tasks were skipped.")
+            print("Check that your results directory contains accuracy_pivot_*.csv or accuracy_pivot.csv files.")
+            return 1
+
         # Sort by emergence point
         df = df.sort_values("emergence_tokens_B", na_position="last")
-        
+
         if args.output:
             df.to_csv(args.output, index=False)
             print(f"Saved to {args.output}")
         else:
             print(df.to_string(index=False))
-        
+
         # Summary stats
         emerged = df["emergence_tokens_B"].notna().sum()
         print(f"\n{emerged}/{len(df)} tasks emerged")
         if emerged > 0:
-            print(f"Median emergence: {df['emergence_tokens_B'].median():.0f} B tokens")
+            print(f"Median emergence: {df['emergence_tokens_B'].median():.2f} B tokens")
     
     return 0
 

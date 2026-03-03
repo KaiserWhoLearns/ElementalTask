@@ -56,6 +56,12 @@ Both models with 7 checkpoints each (10k, 100k, 200k, 300k, 400k, 500k, main)
 - **Pre-training Sequence Length:** 8,192
 - **License:** Apache 2.0
 
+## Token Calculation
+- Global token batch size: **B = 9.8 × 10^6 tokens/step** (1200 sequences × 8192 seq_len)
+- Total training steps: **T = 1.25 × 10^6**
+- Total tokens: **D = 12.25T**
+- Formula: `tokens = step_number × 9.8M`
+
 ## Checkpoint Format
 Pretrain checkpoints are stored as branches/tags on the HuggingFace repo with format `base_XXXXXXX` (step number, zero-padded to 7 digits). The final pretrain checkpoint is `base_final`.
 
@@ -93,3 +99,72 @@ tokenizer = AutoTokenizer.from_pretrained("LLM360/K2-V2")
 - The tokenizer is the same across all checkpoints; loading from `main` is sufficient
 - This is a base (pretrained) model, not instruction-tuned. For instruction-tuned variant, see `LLM360/K2-V2-Instruct`
 - K2-V2 also has mid-training checkpoints (`mid_1_*`, `mid_2_*`, `mid_3_*`, `mid_4_*`) which are not included in the default config
+
+---
+
+# LLM360 CrystalCoder Checkpoints
+
+## Model Overview
+- **Model:** `LLM360/CrystalCoder` ([HuggingFace](https://huggingface.co/LLM360/CrystalCoder))
+- **Parameters:** 7B
+- **Architecture:** GPT-like (LLaMA-7B equivalent) with Maximal Update Parameterization (muP), LayerNorm, Rotary position embeddings on first 25% of hidden dims
+- **Vocab Size:** 32,032
+- **Pre-training Tokens:** ~1.4T tokens across 3 phases
+- **Pre-training Sequence Length:** 2,048
+- **License:** Apache 2.0
+
+## Training Phases
+CrystalCoder was trained in 3 phases with different data mixes:
+
+| Phase | Data | Tokens | Steps | Cumulative Tokens |
+|-------|------|--------|-------|-------------------|
+| 1 | SlimPajama (first half) | 345B | 79,721 | 345B |
+| 2 | SlimPajama (second half) + StarCoder (2x) | 927B | 214,387 | 1,272B |
+| 3 | Python/web data + SlimPajama sample | 110B | 27,728 | 1,382B |
+
+Tokens per step: ~4.3M (phase 1-2), ~4.0M (phase 3)
+
+## Checkpoint Format
+Checkpoints are stored as branches on the HuggingFace repo with format `CrystalCoder_phase{N}_checkpoint_{XXXXXX}` (step number, zero-padded to 6 digits). The final checkpoint is `CrystalCoder_phase3_checkpoint_027728` (also available as `main`).
+
+Total available checkpoints: ~120 across all 3 phases.
+
+## Available Configurations
+
+### `crystal_checkpoints.json`
+11 checkpoints sampled uniformly across training (by token count):
+
+| Checkpoint | Phase | Cumulative Tokens |
+|-----------|-------|-------------------|
+| `CrystalCoder_phase1_checkpoint_001500` | 1 | ~6.5B |
+| `CrystalCoder_phase1_checkpoint_033000` | 1 | ~143B |
+| `CrystalCoder_phase1_checkpoint_064500` | 1 | ~279B |
+| `CrystalCoder_phase2_checkpoint_018000` | 2 | ~423B |
+| `CrystalCoder_phase2_checkpoint_051000` | 2 | ~565B |
+| `CrystalCoder_phase2_checkpoint_081000` | 2 | ~695B |
+| `CrystalCoder_phase2_checkpoint_114000` | 2 | ~838B |
+| `CrystalCoder_phase2_checkpoint_144000` | 2 | ~967B |
+| `CrystalCoder_phase2_checkpoint_174000` | 2 | ~1,097B |
+| `CrystalCoder_phase2_checkpoint_207000` | 2 | ~1,239B |
+| `CrystalCoder_phase3_checkpoint_027728` | 3 | ~1,382B |
+
+### `crystal_sanity_check.json`
+Single final checkpoint for quick testing.
+
+## Loading
+```python
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+model = AutoModelForCausalLM.from_pretrained(
+    "LLM360/CrystalCoder",
+    revision="CrystalCoder_phase1_checkpoint_055500",
+    trust_remote_code=True  # REQUIRED for custom muP architecture
+)
+tokenizer = AutoTokenizer.from_pretrained("LLM360/CrystalCoder", trust_remote_code=True)
+```
+
+## Notes
+- **`trust_remote_code=True` is mandatory** — CrystalCoder uses a custom architecture with muP modifications
+- 7B checkpoints are ~13GB each (3 shards); ensure sufficient disk space and set `HF_HOME` appropriately
+- The tokenizer is the same across all checkpoints
+- 250 branches total exist on HuggingFace (including older `mdl_phase*_step_*` naming convention — use the `CrystalCoder_phase*_checkpoint_*` naming)

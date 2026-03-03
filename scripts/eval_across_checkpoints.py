@@ -152,9 +152,11 @@ def run_single_evaluation(
         )
         evaluator = TaskEvaluator(model_config, eval_config)
 
-    # Load vLLM model once and reuse across all tasks for this checkpoint
-    # (avoids gloo process group errors from repeated init/teardown on multi-GPU)
+    # Load model once and reuse across all tasks for this checkpoint
+    # (avoids repeated init/teardown overhead)
     vllm_model = None
+    hf_model = None
+    hf_tokenizer = None
     if eval_mode == "exact_match" and load_vllm:
         import vllm as _vllm
         import torch
@@ -168,16 +170,21 @@ def run_single_evaluation(
             quantization=quantization,
             gpu_memory_utilization=0.9,
             max_model_len=1024,  # prompts are short; avoids KV cache OOM on large models
+            dtype="bfloat16",  # avoid float16 overflow (NaN logits) at early K2-V2 checkpoints
         )
+    elif eval_mode == "exact_match" and not load_vllm:
+        from models.evaluate_models import load_model_revision
+        print(f"  Loading HuggingFace model: {model_id} @ {checkpoint}")
+        hf_model, hf_tokenizer = load_model_revision(model_id, checkpoint)
 
     results = []
     for i, task_name in enumerate(tasks, 1):
         display_name = f"{task_name} (spaced)" if spaced else task_name
         print(f"\n[{i}/{len(tasks)}] Task: {display_name}")
-        
+
         # Use sanitized task name for file operations
         task_name_sanitized = sanitize_task_name(task_name, spaced=spaced)
-        
+
         # Check for existing results
         if skip_existing:
             existing_metrics = check_existing_results(output_dir, model_id, checkpoint, task_name_sanitized)
@@ -192,7 +199,7 @@ def run_single_evaluation(
                     "cached": True,
                 })
                 continue
-        
+
         try:
             if eval_mode == "exact_match":
                 # Use original evaluate_model for exact match only
@@ -208,7 +215,8 @@ def run_single_evaluation(
                     num_shots=num_shots,
                     spaced=spaced,
                     quantization=quantization,
-                    model=vllm_model,
+                    model=vllm_model or hf_model,
+                    tokenizer=hf_tokenizer,
                 )
             else:
                 # Use new evaluator for continuous/all modes
@@ -274,6 +282,18 @@ def run_single_evaluation(
         except Exception:
             pass
         print("  ✓ vLLM engine cleaned up")
+
+    if hf_model is not None:
+        import gc
+        del hf_model
+        del hf_tokenizer
+        gc.collect()
+        try:
+            import torch
+            torch.cuda.empty_cache()
+        except Exception:
+            pass
+        print("  ✓ HuggingFace model cleaned up")
 
     if evaluator is not None:
         import gc

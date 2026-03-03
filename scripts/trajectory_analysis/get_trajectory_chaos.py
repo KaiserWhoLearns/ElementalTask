@@ -34,13 +34,55 @@ import numpy as np
 import pandas as pd
 
 
-def extract_tokens_from_checkpoint(checkpoint: str) -> Optional[int]:
-    """Extract token count (in billions) from checkpoint name."""
-    if checkpoint == "main":
+def extract_tokens_from_checkpoint(checkpoint: str) -> Optional[float]:
+    """Extract token count (in billions) from checkpoint name.
+
+    Supports multiple formats:
+    - OLMo: 'stage1-step100000-tokens210B' -> 210
+    - K2-V2: 'base_1245000' -> 12450B (12.45T) - checkpoint number in units of 10M tokens
+    - Crystal: 'CrystalCoder_phase{N}_checkpoint_{XXXXXX}' -> cumulative tokens in B
+    - Generic: 'tokens100B' -> 100
+    """
+    if checkpoint in ("main", "base_final", "final"):
         return None
+
+    # Try explicit token count first (e.g., 'tokens210B')
     match = re.search(r'tokens(\d+)B', checkpoint)
     if match:
         return int(match.group(1))
+
+    # Try K2-V2 format: 'base_XXXXXXX' (step number)
+    # K2-V2 tech report: batch_size B = 9.8×10^6 tokens/step, T = 1.25×10^6 steps, D = 12.25T
+    # e.g., base_1245000 = 1,245,000 * 9.8M = 12.201T tokens = 12201B
+    match = re.search(r'base_(\d+)', checkpoint)
+    if match:
+        checkpoint_num = int(match.group(1))
+        # Each step = 9.8M tokens = 0.0098B tokens
+        tokens_b = checkpoint_num * 9.8e6 / 1e9
+        return tokens_b
+
+    # Try Crystal format: 'CrystalCoder_phase{N}_checkpoint_{XXXXXX}'
+    # 3-phase training: Phase 1 (345B), Phase 2 (927B), Phase 3 (110B)
+    # Tokens per step: ~4.33M (phase 1-2), ~3.97M (phase 3)
+    match = re.search(r'CrystalCoder_phase(\d+)_checkpoint_(\d+)', checkpoint)
+    if match:
+        phase = int(match.group(1))
+        step = int(match.group(2))
+        if phase == 1:
+            tokens_b = step * 4.33e6 / 1e9
+        elif phase == 2:
+            tokens_b = 345 + step * 4.32e6 / 1e9
+        elif phase == 3:
+            tokens_b = 345 + 927 + step * 3.97e6 / 1e9
+        else:
+            return None
+        return tokens_b
+
+    # Try generic step format: 'step100000'
+    match = re.search(r'step(\d+)', checkpoint)
+    if match:
+        return int(match.group(1))
+
     return None
 
 
