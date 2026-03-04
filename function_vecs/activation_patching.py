@@ -32,12 +32,18 @@ class HeadSwap:
                 B, T, D = self.src.shape
                 x = x.view(B, T, D)
             B, T, D = x.shape
+            dev = x.device
             # gather Hd slice for head_index at t_star_src from src, 
             # and write into x at t_star_dst
             start = head_index * self.Hd
             end = start + self.Hd
-            b_idx = torch.arange(B, device=x.device)
+            b_idx = torch.arange(B, device=dev)
+            # Ensure index tensors and source are on the same device as x
+            # (needed for device_map="auto" multi-GPU setups)
+            _t_star_dst = t_star_dst.to(dev) if t_star_dst.device != dev else t_star_dst
+            _t_star_src = t_star_src.to(dev) if t_star_src.device != dev else t_star_src
+            _src = self.src.to(dev) if self.src.device != dev else self.src
             # Read from control at control's decision token, write to ICL at ICL's decision token
-            x[b_idx, t_star_dst, start:end] = self.src[b_idx, t_star_src, start:end]
+            x[b_idx, _t_star_dst, start:end] = _src[b_idx, _t_star_src, start:end]
             return (x,)  # must return tuple for pre-hook
         return _hook

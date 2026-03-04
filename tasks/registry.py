@@ -155,6 +155,10 @@ class TaskRegistry:
             'simple': lambda: self._create_simple_task(),
             'math': lambda: self._create_math_task(),
             'compositional': lambda: self._create_compositional_task(subtask_specs, spaced=spaced),
+            'multistep_arithmetic': lambda: self._import_and_call('tasks.implementations.multistep_arithmetic_task', 'create_multistep_arithmetic_task', category=subtask_specs),
+            'logical_ops': lambda: self._import_and_call('tasks.implementations.logical_ops_task', 'create_logical_ops_task', category=subtask_specs),
+            'fact_extraction': lambda: self._import_and_call('tasks.implementations.fact_extraction_task', 'create_fact_extraction_task', category=subtask_specs),
+            'coreference': lambda: self._import_and_call('tasks.implementations.coreference_task', 'create_coreference_task', category=subtask_specs),
         }
         
         if base_name in factory_map:
@@ -181,7 +185,7 @@ class TaskRegistry:
                 print(f"Falling back to default config...")
         
         # Fallback: create with minimal config
-        task_class = self.get_task_class(name)
+        task_class = self.get_task_class(base_name)
         return task_class(config=TaskConfig(name=name))
     
     def _import_and_call(self, module_name: str, function_name: str, **kwargs):

@@ -20,8 +20,12 @@ import numpy as np
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
+import io
+import contextlib
+
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
 
 from tasks.base_task import BaseTask, TaskConfig
 from function_vecs.extract_function_vecs import (
@@ -88,8 +92,25 @@ def load_task_performance(
     return performance
 
 
-def discover_icl_tasks() -> List[BaseTask]:
-    """Discover all tasks that support ICL format, including subtasks."""
+def discover_icl_tasks(
+    results_dir: str = None,
+    checkpoint: str = "main",
+    holdout_compositional: bool = False
+) -> List[BaseTask]:
+    """Discover all tasks that support ICL format, including subtasks.
+    
+    Args:
+        results_dir: If provided, dynamically discover compositional tasks
+            from the evaluation results directory.
+        checkpoint: Checkpoint name to look for results (default: "main")
+        holdout_compositional: If True, return (non_comp_tasks, comp_tasks)
+            instead of a single list. Used for train/test splitting where
+            compositional tasks are held out.
+    
+    Returns:
+        If holdout_compositional: tuple of (train_tasks, test_tasks)
+        Otherwise: list of all tasks
+    """
     print("\n" + "="*70)
     print("DISCOVERING ICL TASKS")
     print("="*70)
@@ -101,35 +122,38 @@ def discover_icl_tasks() -> List[BaseTask]:
     base_tasks = list_tasks()
     print(f"\nFound {len(base_tasks)} registered base tasks")
     
-    # Define all tasks to try, including subtasks
-    # These are the tasks we want to analyze
-    task_names_to_try = [
+    # ── Non-compositional tasks ──────────────────────────────────────
+    non_comp_names = [
         # Base tasks
         "basic_arithmetic",
         "copying",
+        "math",
         "token_reversal",
         "string_analogy",
-        # "ignoring_context",  # May have format issues
-        # "ioi_task",  # Known incompatible format
+        # "ignoring_context",  # Format issues, only 1 instance
+        # "ioi_task",  # 0% accuracy, incompatible format
+        # "part_of_speech",  # 0% accuracy
         
-        # simple_icl subtasks
+        # simple_icl subtasks (all that have individual detailed JSONL files)
         "simple_icl:uppercase",
         "simple_icl:lowercase",
         "simple_icl:first_letter",
-        "simple_icl:last_letter",
+        # "simple_icl:last_letter",  # No individual detailed file
         "simple_icl:translate_eng_fr",
         "simple_icl:translate_fr_eng",
-        "simple_icl:translate_eng_sp",
+        # "simple_icl:translate_eng_sp",  # No individual detailed file
         "simple_icl:translate_sp_eng",
-        "simple_icl:present_to_gerund",
+        # "simple_icl:present_to_gerund",  # No individual detailed file
         "simple_icl:singular_to_plural",
         "simple_icl:country_to_capital",
         "simple_icl:country_to_currency",
         
-        # textfrct subtasks (objective ones with enough data)
+        # textfrct subtasks (all with detailed JSONL files)
         "textfrct:CV1",
         "textfrct:CV2",
         "textfrct:CV3",
+        # "textfrct:FA3",  # 0 instances
+        # "textfrct:FE1",  # 0 instances
         "textfrct:I1",
         "textfrct:I2",
         "textfrct:MA2",
@@ -139,13 +163,88 @@ def discover_icl_tasks() -> List[BaseTask]:
         "textfrct:RG3",
         "textfrct:RL1",
         "textfrct:RL3",
+        "textfrct:RL4",
         "textfrct:V1",
         "textfrct:V2",
         "textfrct:V3",
         "textfrct:V4",
         "textfrct:V5",
-        
-        # compositional subtasks
+
+        # New elemental tasks (subtask variants with detailed JSONL results)
+        "multistep_arithmetic:two_step",
+        "multistep_arithmetic:three_step",
+        "logical_ops:negation",
+        "logical_ops:conjunction",
+        "logical_ops:conditional",
+        "fact_extraction:extract_entity",
+        "fact_extraction:extract_number",
+        "fact_extraction:extract_location",
+    ]
+    
+    # ── Compositional tasks included in training ─────────────────────
+    # A few string-only compositions to teach the basis what "composition" 
+    # looks like, while still holding out the majority for testing.
+    comp_train_names = [
+        "compositional:lower_reverse_first",   # lower→reverse→first (26/26 correct)
+        "compositional:upper_reverse_last",     # upper→reverse→last  (26/26 correct)
+    ]
+    
+    # ── Compositional tasks ──────────────────────────────────────────
+    # Dynamically discover from results dir if available, otherwise use static list
+    comp_names = _discover_compositional_tasks(results_dir, checkpoint)
+    
+    # Remove comp_train tasks from the test set
+    comp_test_names = [c for c in comp_names if c not in set(comp_train_names)]
+    
+    all_train_names = non_comp_names + comp_train_names
+    
+    print(f"\nAttempting to load {len(non_comp_names)} non-compositional "
+          f"+ {len(comp_train_names)} compositional-train "
+          f"+ {len(comp_test_names)} compositional-test tasks...")
+    
+    def _load_tasks(names: List[str], label: str) -> List[BaseTask]:
+        tasks = []
+        for task_name in names:
+            try:
+                task = get_task(task_name)
+                task._full_name = task_name
+                try:
+                    sample_data = task.get_split("test")
+                    n_examples = len(sample_data) if sample_data else 0
+                    if n_examples > 0:
+                        tasks.append(task)
+                        print(f"  ✓ [{label}] {task_name} ({n_examples} examples)")
+                    else:
+                        print(f"  ✗ [{label}] {task_name} (no data)")
+                except Exception as data_err:
+                    print(f"  ✗ [{label}] {task_name} (data error: {data_err})")
+            except Exception as e:
+                print(f"  ✗ [{label}] {task_name} (error: {e})")
+        return tasks
+    
+    train_tasks = _load_tasks(all_train_names, "TRAIN")
+    comp_tasks = _load_tasks(comp_test_names, "TEST/COMP")
+    
+    print(f"\n✓ Loaded {len(train_tasks)} training ({len(non_comp_names)} non-comp + {len(comp_train_names)} comp)"
+          f" + {len(comp_tasks)} compositional test tasks")
+    
+    if holdout_compositional:
+        return train_tasks, comp_tasks
+    else:
+        return train_tasks + comp_tasks
+
+
+def _discover_compositional_tasks(
+    results_dir: str = None, 
+    checkpoint: str = "main"
+) -> List[str]:
+    """Discover compositional tasks from evaluation results directory.
+    
+    Looks for detailed JSONL files matching compositional task patterns.
+    Falls back to a static list if no results_dir is provided.
+    """
+    # Static fallback list (original 14 tasks)
+    static_comp_names = [
         "compositional:upper_reverse",
         "compositional:lower_reverse",
         "compositional:reverse_upper",
@@ -162,34 +261,55 @@ def discover_icl_tasks() -> List[BaseTask]:
         "compositional:plural_reverse",
     ]
     
-    print(f"\nAttempting to load {len(task_names_to_try)} tasks...")
+    if not results_dir:
+        return static_comp_names
     
-    icl_tasks = []
-    for task_name in task_names_to_try:
-        try:
-            task = get_task(task_name)
-            
-            # Store the full task name (including subtask) as an attribute
-            # This is needed because task.config.name doesn't include the subtask
-            task._full_name = task_name
-            
-            # Try to get sample data to verify task works
-            try:
-                sample_data = task.get_split("test")
-                n_examples = len(sample_data) if sample_data else 0
-                if n_examples > 0:
-                    icl_tasks.append(task)
-                    print(f"  ✓ {task_name} ({n_examples} examples)")
-                else:
-                    print(f"  ✗ {task_name} (no data)")
-            except Exception as data_err:
-                print(f"  ✗ {task_name} (data error: {data_err})")
-                
-        except Exception as e:
-            print(f"  ✗ {task_name} (error: {e})")
+    results_path = Path(results_dir)
     
-    print(f"\n✓ Found {len(icl_tasks)} ICL-compatible tasks")
-    return icl_tasks
+    # Find the checkpoint directory
+    checkpoint_dirs = list(results_path.glob(f"*_{checkpoint}"))
+    if not checkpoint_dirs:
+        print(f"  ⚠️  No checkpoint dir for '{checkpoint}' in {results_path}, using static list")
+        return static_comp_names
+    
+    checkpoint_dir = checkpoint_dirs[0]
+    
+    # Find all compositional detailed JSONL files
+    # Pattern: *_compositional_<subtask>_<subtask>_detailed.jsonl  (new tasks, doubled name)
+    # or:      *_compositional_<subtask>_detailed.jsonl  (could exist for old-style)
+    import re
+    comp_names = set()
+    
+    for f in checkpoint_dir.glob("*_compositional_*_detailed.jsonl"):
+        fname = f.name
+        # Skip the aggregate file
+        if fname.endswith("_compositional_detailed.jsonl"):
+            continue
+        
+        # Extract the subtask name
+        # New pattern: ..._compositional_<name>_<name>_detailed.jsonl
+        # Old pattern: ..._compositional_<name>_detailed.jsonl
+        match = re.search(r'_compositional_(.+?)_detailed\.jsonl$', fname)
+        if match:
+            subtask_raw = match.group(1)
+            
+            # Handle doubled name pattern: "gerund_lower_gerund_lower" -> "gerund_lower"
+            # Try splitting in half
+            parts = subtask_raw
+            half = len(parts) // 2
+            if half > 0 and parts[:half] == parts[half+1:] and parts[half] == '_':
+                subtask = parts[:half]
+            else:
+                subtask = subtask_raw
+            
+            comp_names.add(f"compositional:{subtask}")
+    
+    if comp_names:
+        print(f"\n  📦 Discovered {len(comp_names)} compositional tasks from results dir")
+        return sorted(comp_names)
+    else:
+        print(f"  ⚠️  No compositional tasks found in {checkpoint_dir}, using static list")
+        return static_comp_names
 
 
 def get_task_display_name(task: BaseTask) -> str:
@@ -1055,12 +1175,101 @@ def visualize_task_projections_interactive(
     task_names = basis.task_names
     var_ratios = basis.explained_variance_ratio()
     
+    # TextFRCT category_id → (display_name, category, color)
+    TEXTFRCT_ID_MAP = {
+        'cv1': ('Scrambled Words',    'String Manipulation', '#3498db'),
+        'cv2': ('Hidden Words',       'String Manipulation', '#3498db'),
+        'cv3': ('Incomplete Words',   'String Manipulation', '#3498db'),
+        'i1':  ('Letter Sets',        'Pattern Recognition', '#e67e22'),
+        'i2':  ('Locations Test',     'Pattern Recognition', '#e67e22'),
+        'ma2': ('Object-Number',      'Associative Memory',  '#8e44ad'),
+        'ma3': ('Name Recall',        'Associative Memory',  '#8e44ad'),
+        'rg1': ('Arith Aptitude',     'Math',               '#e74c3c'),
+        'rg2': ('Math Aptitude',      'Math',               '#e74c3c'),
+        'rg3': ('Arith Ops',          'Math',               '#e74c3c'),
+        'rl1': ('Syllogisms',         'Logic',              '#f39c12'),
+        'rl3': ('Inference',          'Logic',              '#f39c12'),
+        'rl4': ('Decipher Language',  'String Manipulation', '#3498db'),
+        'v1':  ('Vocab I',            'Vocabulary',         '#1abc9c'),
+        'v2':  ('Vocab II',           'Vocabulary',         '#1abc9c'),
+        'v3':  ('Vocab III',          'Vocabulary',         '#1abc9c'),
+        'v4':  ('Vocab IV',           'Vocabulary',         '#1abc9c'),
+        'v5':  ('Vocab V',            'Vocabulary',         '#1abc9c'),
+        'fa3': ('Figures of Speech',  'Vocabulary',         '#1abc9c'),
+        'xu1': ('Combining Objects',  'Semantic Reasoning', '#16a085'),
+        'xu2': ('Substitute Uses',    'Semantic Reasoning', '#16a085'),
+    }
+
+    # Task display names (for point labels in plot)
+    DISPLAY_NAME_MAP = {
+        # New elemental tasks
+        'multistep_arithmetic:two_step':       '2-Step Arith',
+        'multistep_arithmetic:three_step':     '3-Step Arith',
+        'logical_ops:negation':                'Negation',
+        'logical_ops:conjunction':             'Conjunction',
+        'logical_ops:conditional':             'Conditional',
+        'fact_extraction:extract_entity':      'Extract Entity',
+        'fact_extraction:extract_number':      'Extract Number',
+        'fact_extraction:extract_location':    'Extract Location',
+        # simple_icl
+        'simple_icl:uppercase':                'Uppercase',
+        'simple_icl:lowercase':                'Lowercase',
+        'simple_icl:first_letter':             'First Letter',
+        'simple_icl:last_letter':              'Last Letter',
+        'simple_icl:translate_eng_fr':         'Eng→Fr',
+        'simple_icl:translate_fr_eng':         'Fr→Eng',
+        'simple_icl:translate_eng_sp':         'Eng→Sp',
+        'simple_icl:translate_sp_eng':         'Sp→Eng',
+        'simple_icl:present_to_gerund':        '→Gerund',
+        'simple_icl:singular_to_plural':       '→Plural',
+        'simple_icl:country_to_capital':       '→Capital',
+        'simple_icl:country_to_currency':      '→Currency',
+        # base tasks
+        'basic_arithmetic':  'Arithmetic',
+        'copying':           'Copying',
+        'math':              'Math',
+        'token_reversal':    'Reversal',
+        'string_analogy':    'Str. Analogy',
+    }
+
+    def get_display_name(name):
+        """Return a short human-readable label for a task."""
+        if name in DISPLAY_NAME_MAP:
+            return DISPLAY_NAME_MAP[name]
+        # textfrct:XY → look up in TEXTFRCT_ID_MAP
+        if name.startswith('textfrct:'):
+            tid = name.split(':', 1)[1].lower()
+            if tid in TEXTFRCT_ID_MAP:
+                return TEXTFRCT_ID_MAP[tid][0]
+            return name.split(':', 1)[1]  # fallback: keep the ID
+        # compositional: strip prefix, shorten
+        if name.startswith('compositional:'):
+            return name.replace('compositional:', '').replace('_', '→')[:20]
+        return name
+
     # Categorize tasks
     def categorize_task(name):
         name_lower = name.lower()
-        
+
+        # ── TextFRCT by category_id ──────────────────────────────────
+        if name_lower.startswith('textfrct:'):
+            tid = name_lower.split(':', 1)[1]
+            if tid in TEXTFRCT_ID_MAP:
+                _, cat, color = TEXTFRCT_ID_MAP[tid]
+                return cat, color
+            return 'Other', '#95a5a6'
+
+        # ── New elemental tasks ──────────────────────────────────────
+        if name_lower.startswith('logical_ops'):
+            return 'Logic', '#f39c12'
+        if name_lower.startswith('fact_extraction'):
+            return 'Reading Comprehension', '#27ae60'
+        if name_lower.startswith('multistep_arithmetic'):
+            return 'Math', '#e74c3c'
+
+        # ── Existing task rules ──────────────────────────────────────
         if any(kw in name_lower for kw in ['arithmetic', 'add_one', 'math']):
-            return 'Arithmetic', '#e74c3c'
+            return 'Math', '#e74c3c'
         if any(kw in name_lower for kw in [
             'capitalization', 'uppercase', 'lowercase',
             'first_letter', 'last_letter', 'first_character', 'last_character',
@@ -1077,12 +1286,12 @@ def visualize_task_projections_interactive(
         ]):
             return 'Grammatical', '#9b59b6'
         if any(kw in name_lower for kw in [
-            'opposites', 'nonsense_syllogisms', 'inference', 
+            'opposites', 'nonsense_syllogisms', 'inference',
             'analogy', 'rhyming', 'deciphering_languages'
         ]):
-            return 'Semantic Reasoning', '#f39c12'
+            return 'Semantic Reasoning', '#16a085'
         if any(kw in name_lower for kw in [
-            'vocabulary_test', 'controlled_association', 
+            'vocabulary_test', 'controlled_association',
             'first_and_last_name', 'objest-number'
         ]):
             return 'Vocabulary', '#1abc9c'
@@ -1094,17 +1303,19 @@ def visualize_task_projections_interactive(
             'ignoring_context', 'ioi_task'
         ]):
             return 'Meta-Cognitive', '#34495e'
-        
+
         # Default
         return 'Other', '#95a5a6'
     
     # Build data for plotly
     categories = []
     cat_colors = []
+    display_names = []
     for name in task_names:
         cat, color = categorize_task(name)
         categories.append(cat)
         cat_colors.append(color)
+        display_names.append(get_display_name(name))
     
     # Get performance values if available
     perf_values = []
@@ -1143,7 +1354,7 @@ def visualize_task_projections_interactive(
         # Build hover text with performance info
         hover_texts = []
         for i, name in enumerate(task_names):
-            text = f'<b>{name}</b><br>Category: {categories[i]}'
+            text = f'<b>{display_names[i]}</b><br><i>{name}</i><br>Category: {categories[i]}'
             if has_performance and not np.isnan(perf_values[i]):
                 text += f'<br>Accuracy: {perf_values[i]:.1%}'
             hover_texts.append(text)
@@ -1154,7 +1365,7 @@ def visualize_task_projections_interactive(
             z=projections[:, 2],
             mode='markers+text',
             marker=marker_dict,
-            text=task_names,
+            text=display_names,
             textposition='top center',
             textfont=dict(size=8),
             customdata=hover_texts,
@@ -1264,10 +1475,11 @@ def visualize_task_projections_interactive(
                 y=projections[:, 1],
                 mode='markers+text',
                 marker=marker_dict,
-                text=task_names,
+                text=display_names,
+                customdata=task_names,
                 textposition='top center',
                 textfont=dict(size=7),
-                hovertemplate='<b>%{text}</b><br>C1: %{x:.3f}<br>C2: %{y:.3f}<extra></extra>',
+                hovertemplate='<b>%{text}</b><br><i>%{customdata}</i><br>C1: %{x:.3f}<br>C2: %{y:.3f}<extra></extra>',
                 showlegend=False
             ),
             row=1, col=1
@@ -1280,10 +1492,11 @@ def visualize_task_projections_interactive(
                 y=projections[:, 2],
                 mode='markers+text',
                 marker=marker_dict,
-                text=task_names,
+                text=display_names,
+                customdata=task_names,
                 textposition='top center',
                 textfont=dict(size=7),
-                hovertemplate='<b>%{text}</b><br>C1: %{x:.3f}<br>C3: %{y:.3f}<extra></extra>',
+                hovertemplate='<b>%{text}</b><br><i>%{customdata}</i><br>C1: %{x:.3f}<br>C3: %{y:.3f}<extra></extra>',
                 showlegend=False
             ),
             row=1, col=2
@@ -1296,10 +1509,11 @@ def visualize_task_projections_interactive(
                 y=projections[:, 2],
                 mode='markers+text',
                 marker=marker_dict,
-                text=task_names,
+                text=display_names,
+                customdata=task_names,
                 textposition='top center',
                 textfont=dict(size=7),
-                hovertemplate='<b>%{text}</b><br>C2: %{x:.3f}<br>C3: %{y:.3f}<extra></extra>',
+                hovertemplate='<b>%{text}</b><br><i>%{customdata}</i><br>C2: %{x:.3f}<br>C3: %{y:.3f}<extra></extra>',
                 showlegend=False
             ),
             row=1, col=3
@@ -1483,18 +1697,40 @@ def main():
                        choices=["category", "performance", "both"],
                        help="How to color tasks in visualizations (default: both)")
     
+    # Compositional holdout
+    parser.add_argument("--holdout-compositional", action="store_true",
+                       help="Hold out compositional tasks for testing. All non-compositional "
+                            "tasks are used to build the basis, compositional tasks are tested "
+                            "for reconstruction quality. Overrides --train-ratio and "
+                            "--use-synthetic-tests.")
+    
+    # Model dtype
+    parser.add_argument("--dtype", type=str, default=None,
+                       choices=["float32", "float16", "bfloat16"],
+                       help="Model dtype (default: None = model default). "
+                            "Use bfloat16 for 7B+ models to reduce memory.")
+    
+    # Cache management
+    parser.add_argument("--cleanup-cache", action="store_true",
+                       help="Delete downloaded model files from HF cache after analysis. "
+                            "Useful for large models to reclaim disk space.")
+    
     args = parser.parse_args()
     
-    # Validate filtering args
-    if args.only_correct and not args.results_dir:
-        print("⚠️  Warning: --only-correct requires --results-dir. Disabling filtering.")
-        args.only_correct = False
+    # Parse dtype
+    torch_dtype = None
+    if args.dtype == "bfloat16":
+        torch_dtype = torch.bfloat16
+    elif args.dtype == "float16":
+        torch_dtype = torch.float16
+    elif args.dtype == "float32":
+        torch_dtype = torch.float32
     
     # Validate filtering args
     if args.only_correct and not args.results_dir:
         print("⚠️  Warning: --only-correct requires --results-dir. Disabling filtering.")
         args.only_correct = False
-    
+
     print("="*70)
     print("REAL TASK FUNCTION VECTOR ANALYSIS")
     print("="*70)
@@ -1508,75 +1744,80 @@ def main():
     print(f"  Only correct instances: {args.only_correct}")
     if args.only_correct:
         print(f"  Results dir: {args.results_dir}")
-    print(f"  Use synthetic tests: {args.use_synthetic_tests}")
-    if not args.use_synthetic_tests:
-        print(f"  Train ratio: {args.train_ratio}")
+    print(f"  Holdout compositional: {args.holdout_compositional}")
+    if not args.holdout_compositional:
+        print(f"  Use synthetic tests: {args.use_synthetic_tests}")
+        if not args.use_synthetic_tests:
+            print(f"  Train ratio: {args.train_ratio}")
     print(f"  Seed: {args.seed}")
     
     # Phase 1: Discover ICL tasks
-    icl_tasks = discover_icl_tasks()
-    
-    if len(icl_tasks) < 2:
-        print("\n❌ Need at least 2 ICL tasks to perform analysis!")
-        return
-    
-    # Phase 2: Split into train/test
-    print("\n" + "="*70)
-    print("SPLITTING TASKS")
-    print("="*70)
-    
-    if args.use_synthetic_tests:
-        # Use ALL real tasks for training basis, PLUS some simple ICL test tasks
-        print("\nAdding simple ICL test tasks to basis...")
-        from tests.test_basic_icl_tasks import (
-            SimpleArithmeticTask,
-            SimpleNegationTask,
-            SimpleCapitalizationTask,
-            SimpleRhymingTask,
-            FirstCharacterTask,
-            LastCharacterTask,
-            ReverseStringTask,
-            AddOneTask,
-            StringLengthTask,
-            VowelCountTask,
-            #ReverseCapitalizeTask,
+    if args.holdout_compositional:
+        train_tasks, test_tasks = discover_icl_tasks(
+            results_dir=args.results_dir,
+            checkpoint=args.checkpoint,
+            holdout_compositional=True
+        )
+        print(f"\n{'='*70}")
+        print("COMPOSITIONAL HOLDOUT MODE")
+        print(f"{'='*70}")
+        print(f"  Training (non-compositional): {len(train_tasks)} tasks")
+        print(f"  Testing  (compositional):     {len(test_tasks)} tasks")
+    else:
+        icl_tasks = discover_icl_tasks(
+            results_dir=args.results_dir,
+            checkpoint=args.checkpoint,
+            holdout_compositional=False
         )
         
-        # Add non-test simple ICL tasks to training
-        # Excluding test tasks (see below)
-        train_tasks = icl_tasks + [
-            SimpleArithmeticTask(),
-            SimpleCapitalizationTask(),  # Component of composite task
-            FirstCharacterTask(),
-            StringLengthTask(),
-        ]
+        if len(icl_tasks) < 2:
+            print("\n❌ Need at least 2 ICL tasks to perform analysis!")
+            return
+    
+    # Phase 2: Split into train/test (only if not using holdout mode)
+    if not args.holdout_compositional:
+        print("\n" + "="*70)
+        print("SPLITTING TASKS")
+        print("="*70)
         
-        # Test tasks covering different transformation types
-        # Held out from training to measure generalization
-        test_tasks = [
-            # Arithmetic operations
-            AddOneTask(),              # Increment: tests numeric transformation
+        if args.use_synthetic_tests:
+            # Use ALL real tasks for training basis, PLUS some simple ICL test tasks
+            print("\nAdding simple ICL test tasks to basis...")
+            from tests.test_basic_icl_tasks import (
+                SimpleArithmeticTask,
+                SimpleNegationTask,
+                SimpleCapitalizationTask,
+                SimpleRhymingTask,
+                FirstCharacterTask,
+                LastCharacterTask,
+                ReverseStringTask,
+                AddOneTask,
+                StringLengthTask,
+                VowelCountTask,
+                #ReverseCapitalizeTask,
+            )
             
-            # Semantic operations
-            SimpleNegationTask(),      # Semantic opposites: tests word meanings
+            train_tasks = icl_tasks + [
+                SimpleArithmeticTask(),
+                SimpleCapitalizationTask(),
+                FirstCharacterTask(),
+                StringLengthTask(),
+            ]
             
-            # String manipulations
-            ReverseStringTask(),       # Reverse: tests position manipulation (component of composite)
-            LastCharacterTask(),       # Extract last char: tests indexing
-            VowelCountTask(),          # Count vowels: tests counting/filtering
+            test_tasks = [
+                AddOneTask(),
+                SimpleNegationTask(),
+                ReverseStringTask(),
+                LastCharacterTask(),
+                VowelCountTask(),
+                SimpleRhymingTask(),
+            ]
             
-            # Pattern recognition
-            SimpleRhymingTask(),       # Rhyme detection: tests phonetic patterns
-            
-            # Composite task (should need multiple components)
-           #CompositeReverseCapitalizeTask(),  # Reverse + Capitalize: tests composition
-        ]
-        
-        print(f"\nUsing {len(icl_tasks)} real tasks + {len(train_tasks) - len(icl_tasks)} simple ICL tasks for basis training")
-        print(f"Testing with {len(test_tasks)} held-out synthetic tasks (including 1 composite)")
-    else:
-        # Original behavior: split real tasks
-        train_tasks, test_tasks = split_tasks(icl_tasks, args.train_ratio, args.seed)
+            print(f"\nUsing {len(icl_tasks)} real tasks + {len(train_tasks) - len(icl_tasks)} simple ICL tasks for basis training")
+            print(f"Testing with {len(test_tasks)} held-out synthetic tasks")
+        else:
+            # Original behavior: split real tasks
+            train_tasks, test_tasks = split_tasks(icl_tasks, args.train_ratio, args.seed)
     
     print(f"\nTraining tasks ({len(train_tasks)}):")
     for task in train_tasks:
@@ -1592,13 +1833,35 @@ def main():
     print("="*70)
     
     print(f"\nLoading {args.model} (checkpoint: {args.checkpoint})...")
-    # Note: use_fast=False is a workaround for older tokenizers library versions
-    tokenizer = AutoTokenizer.from_pretrained(args.model, revision=args.checkpoint, trust_remote_code=True, use_fast=False)
+    if torch_dtype:
+        print(f"  Using dtype: {torch_dtype}")
+    # Note: use_fast=False is a workaround for older tokenizers library versions;
+    # fall back to fast tokenizer if the slow one doesn't exist (e.g. GPTNeoX/Pythia)
+    try:
+        tokenizer = AutoTokenizer.from_pretrained(args.model, revision=args.checkpoint, trust_remote_code=True, use_fast=False)
+    except ValueError:
+        tokenizer = AutoTokenizer.from_pretrained(args.model, revision=args.checkpoint, trust_remote_code=True, use_fast=True)
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
-    model = AutoModelForCausalLM.from_pretrained(args.model, revision=args.checkpoint, trust_remote_code=True).eval()
-    if args.device == "cuda" and torch.cuda.is_available():
-        model = model.cuda()
+    dtype_kwargs = {"torch_dtype": torch_dtype} if torch_dtype is not None else {}
+
+    # FV extraction requires all tensors on one device — always load on a single GPU
+    n_gpus = torch.cuda.device_count() if torch.cuda.is_available() else 0
+    if args.device == "cuda" and n_gpus > 1:
+        print(f"  {n_gpus} GPUs available; loading on cuda:0 for FV extraction (single-device required)")
+        model = AutoModelForCausalLM.from_pretrained(
+            args.model, revision=args.checkpoint, trust_remote_code=True,
+            device_map={"":0}, **dtype_kwargs
+        ).eval()
+        effective_device = "cuda:0"
+        print(f"  Input device: {effective_device}")
+    else:
+        model = AutoModelForCausalLM.from_pretrained(
+            args.model, revision=args.checkpoint, trust_remote_code=True, **dtype_kwargs
+        ).eval()
+        if args.device == "cuda" and torch.cuda.is_available():
+            model = model.cuda()
+        effective_device = args.device
     print("✓ Model loaded")
     
     # Normalize layer index (support negative indexing)
@@ -1614,7 +1877,7 @@ def main():
     config = ExtractConfig(
         model_name=args.model,
         checkpoint=args.checkpoint,
-        device=args.device,
+        device=effective_device,
         batch_size=4,
         num_samples_per_task=args.num_samples,
         layers=[layer_idx],
@@ -1636,6 +1899,8 @@ def main():
         train_tasks, 
         max_screen_tasks=None,  # Try all tasks
         min_screen_tasks=5,     # Need at least 5 successful
+        model=model,
+        tokenizer=tokenizer,
     )
     
     print(f"\n✓ Selected {len(headset.heads)} heads:")
@@ -1794,7 +2059,15 @@ def main():
     with open(summary_path, 'w') as f:
         json.dump(summary, f, indent=2)
     print(f"✓ Saved summary to: {summary_path}")
-    
+
+    # Save human-readable summary.md by re-running the print functions into a file
+    summary_md_path = output_dir / "summary.md"
+    with open(summary_md_path, 'w') as f:
+        with contextlib.redirect_stdout(f):
+            print_summary(train_tasks, test_tasks, basis, results, similarity_matrix, test_vecs, train_vecs)
+            interpret_principal_components(basis, train_vecs, test_vecs, n_components=10, top_k=5)
+    print(f"✓ Saved console summary to: {summary_md_path}")
+
     print("\n" + "="*70)
     print("✓ ANALYSIS COMPLETE!")
     print("="*70)
@@ -1805,6 +2078,47 @@ def main():
     print(f"    --basis {basis_path} \\")
     print(f"    --vecs {test_vec_dir}/*.npz \\")
     print(f"    --output {output_dir}/visualizations")
+
+    # ── Cleanup model cache ──
+    if args.cleanup_cache:
+        print("\n" + "="*70)
+        print("CLEANING UP MODEL CACHE")
+        print("="*70)
+        _cleanup_model_cache(args.model)
+
+
+def _cleanup_model_cache(model_name: str):
+    """Delete downloaded model files from the HuggingFace cache."""
+    import shutil
+    
+    # Determine HF cache directory
+    cache_root = Path(os.environ.get("HF_HOME", 
+                      os.environ.get("TRANSFORMERS_CACHE",
+                      Path.home() / ".cache" / "huggingface")))
+    
+    # HF hub stores models as models--{org}--{name}
+    model_dir_name = "models--" + model_name.replace("/", "--")
+    
+    # Check both hub/ subdirectory and direct path
+    candidates = [
+        cache_root / "hub" / model_dir_name,
+        cache_root / model_dir_name,
+    ]
+    
+    deleted = False
+    for model_cache_dir in candidates:
+        if model_cache_dir.exists():
+            size_bytes = sum(f.stat().st_size for f in model_cache_dir.rglob("*") if f.is_file())
+            size_gb = size_bytes / (1024 ** 3)
+            print(f"  Deleting {model_cache_dir} ({size_gb:.1f} GB)...")
+            shutil.rmtree(model_cache_dir)
+            print(f"  ✓ Freed {size_gb:.1f} GB")
+            deleted = True
+    
+    if not deleted:
+        print(f"  ⚠️  No cache found for {model_name} in {cache_root}")
+    else:
+        print(f"  ✓ Cache cleanup complete")
 
 
 if __name__ == "__main__":
