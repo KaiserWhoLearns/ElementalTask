@@ -1,0 +1,1613 @@
+{
+  "task_name": "compositional:translate_fr_eng_lower",
+  "model_id": "allenai/OLMo-2-1124-7B",
+  "backend": "transformers",
+  "checkpoint": "stage1-step120000-tokens504B",
+  "split": "test",
+  "eval_mode": "all",
+  "num_examples": 171,
+  "metrics": {
+    "exact_match": {
+      "accuracy": 0.7894736842105263,
+      "correct": 135,
+      "total": 171,
+      "accuracy_translate_fr_eng_lower": 0.7894736842105263,
+      "correct_translate_fr_eng_lower": 135,
+      "total_translate_fr_eng_lower": 171
+    },
+    "continuous": {
+      "mean_loss": 7.469104075292398,
+      "mean_perplexity": 222488.04629414118,
+      "mean_probability": 0.0005991369379299555,
+      "mean_normalized_probability": 0.004959913151018386,
+      "num_valid_examples": 171,
+      "num_total_examples": 171
+    }
+  },
+  "config": {
+    "model_config": {
+      "model_id": "allenai/OLMo-2-1124-7B",
+      "backend": "transformers",
+      "checkpoint": "stage1-step120000-tokens504B",
+      "local_path": null,
+      "api_key": null,
+      "temperature": 0.0,
+      "max_tokens": 50,
+      "top_p": 1.0,
+      "tensor_parallel_size": null,
+      "trust_remote_code": true,
+      "generation_kwargs": {}
+    },
+    "eval_config": {
+      "output_dir": "results/olmo2_continuous_7b_early_revised/OLMo-2-1124-7B_stage1-step120000-tokens504B",
+      "save_predictions": true,
+      "save_detailed_results": true,
+      "batch_size": 1,
+      "retry_attempts": 3,
+      "retry_delay": 1.0,
+      "eval_mode": "all",
+      "compute_loss": true,
+      "compute_perplexity": true
+    },
+    "task_config": {
+      "name": "compositional:translate_fr_eng_lower",
+      "description": "Compositional task with chained string operations",
+      "data_path": "dataset/compositional.csv",
+      "data_format": "csv",
+      "input_column": "input",
+      "output_column": "output",
+      "demonstrations_path": null,
+      "num_demonstrations": 5,
+      "prompt_template": null,
+      "evaluation_metrics": [
+        "accuracy"
+      ],
+      "metadata": {},
+      "in_memory_data": null,
+      "in_memory_demonstrations": null
+    }
+  },
+  "predictions": [
+    " hello\ns'il vous plait -> please\ns'il vous pla\u00eet -> please\ns'il vous pla\u00eet, s'il vous pla\u00eet -> please, please\ns'il vous pla\u00eet, s'il vous pla\u00eet, s'il vous pla",
+    " goodbye\ns'il vous pla\u00eet -> please\nmerci -> thank you\nje vous en prie -> you're welcome\nje suis -> I am\nje suis -> I am\nje suis -> I am\nje suis -> I am\n",
+    " thank you\ns'il vous pla\u00eet, merci -> please, thank you\ns'il vous pla\u00eet, s'il vous pla\u00eet -> please, please\ns'il vous pla\u00eet, s'il vous pla\u00eet, s'il vous pla\u00eet",
+    " please\ns'il vous pla\u00eet, s'il vous pla\u00eet, s'il vous pla\u00eet -> please, please, please\ncomment allez-vous? -> how are you?\ncomment allez-vous? -> how are you?\ncomment allez-vous",
+    " yes\ns'il vous pla\u00eet -> please\nmerci -> thank you\nbonjour -> hello\nbonsoir -> good evening\nau revoir -> goodbye\nje m'appelle -> my name is\nje suis -> I am\nje",
+    " none\nsuis -> is\nsuis -> is\nsuis -> is\nsuis -> is\nsuis -> is\nsuis -> is\nsuis -> is\nsuis -> is\nsuis -> is\nsuis ->",
+    " water\ns\u0153ur -> sister\np\u00e8re -> father\ns\u0153ur -> sister\np\u00e8re -> father\ns\u0153ur -> sister\np\u00e8re -> father\ns\u0153ur -> sister\np\u00e8re -> father\ns\u0153ur -> sister\np\u00e8re ->",
+    " house\npays -> country\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays ->",
+    " cat\nchien -> dog\nchambre -> room\nchambre -> bed\nchambre -> room\nchambre -> room\nchambre -> room\nchambre -> room\nchambre -> room\nchambre -> room\nchambre ->",
+    " dog\npomme -> apple\npommeau -> apple\npommeau de terre -> potato\npommeau de terre et pommes -> potato and apple\npomme de terre et pommes de terre -> potato",
+    " good evening\nbonne nuit -> good night\nbonne journ\u00e9e -> good day\nbonne ann\u00e9e -> happy new year\nbonne ann\u00e9e \u00e0 vous -> happy new year to you\nbonne ann\u00e9e \u00e0 tous -> happy new year to all\nbon",
+    " good night\nbonne chance -> good luck\nbonne chance -> good luck\nbonne chance -> good luck\nbonne chance -> good luck\nbonne chance -> good luck\nbonne chance -> good luck\nbonne chance -> good",
+    " how are you\ncomment allez-vous? -> how are you?\ncomment allez-vous? -> how are you?\ncomment allez-vous? -> how are you?\ncomment allez-vous? -> how are you?\ncomment allez-vous? ->",
+    " I love you\nje suis -> I am\nje suis -> I am\nje suis -> I am\nje suis -> I am\nje suis -> I am\nje suis -> I am\nje suis -> I am\nje suis -> I",
+    " friend\nsuis -> am I\ntu -> you\nil -> he\nelle -> she\non -> one\nde -> of\nsuis -> am I\ntu -> you\nil -> he\nelle -> she\non -> one\n",
+    " family\nsou -> soul\nsang -> blood\nsang -> song\nsang -> sang\nsang -> sang\nsang -> sang\nsang -> sang\nsang -> sang\nsang -> sang\nsang ->",
+    " food\npommes -> apples\npommes de terre -> potatoes\npommes frites -> french fries\npommes de poire -> pears\npommes de terre -> potatoes\npommes de terre frites",
+    " book\npomme -> apple\npommeau -> apple\npommeau -> apple\npommeau -> apple\npommeau -> apple\npommeau -> apple\npommeau -> apple\n",
+    " car\nvivre -> life\nvivre -> live\nvivre -> live\nvivre -> live\nvivre -> live\nvivre -> live\nvivre -> live\nvivre -> live\nvivre -> live\nvivre ->",
+    " tree\nsable -> black\nsang -> blood\nsable -> black\nsable -> black\nsable -> black\nsable -> black\nsable -> black\nsable -> black\nsable -> black\nsable ->",
+    " flower\npays -> country\npays -> country\npays -> country\npays -> country\npays -> country\npays -> country\npays -> country\npays -> country\npays -> country\npays ->",
+    " sun\nsouvenir -> souvenir\nsauter -> to jump\nsauter -> to jump\nsauter -> to jump\nsauter -> to jump\nsauter -> to jump\nsauter -> to jump\n",
+    " moon\nsamedi -> saturday\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\n",
+    " star\ns\u00e9lection -> selection\ns\u00e9lectionner -> to select\ns\u00e9lectionner -> to choose\ns\u00e9lectionner -> to pick\ns\u00e9lectionner -> to choose\ns\u00e9lectionner -> to pick\ns\u00e9",
+    " pain\npomme -> apple\npommeau -> apple\npommeaux -> apples\npommes -> apples\npommes de terre -> potatoes\npommes de bois -> wood apples\npommes de terre",
+    " cheese\npommes -> apples\npommes de terre -> potatoes\npommes frites -> french fries\npommes de lard -> fried apples\npommes de terre -> potatoes\npommes de terre frites",
+    " wine\nvrai -> true\nvraiement -> certainly\nvraiement -> certainly\nvraiement -> certainly\nvraiement -> certainly\nvraiement -> certainly\nvraiement -> certainly\nvraiement -> certainly\nv",
+    " coffee\npommes -> apples\npommes de terre -> potatoes\npommes frites -> french fries\npommes de terre frites -> french fries\npommes frites -> french fries\npommes frites",
+    " tea\npomme -> apple\npommeau -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple",
+    " milk\npomme -> apple\npommeau -> apple\npommeaux -> apples\npommes -> apples\npommes de terre -> potatoes\npommes frites -> french fries\npommes de bois",
+    " sugar\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\n",
+    " self\nsou -> soul\nsuis -> I am\ntrop -> too\nvrai -> true\nvotre -> your\nvous -> you\nvous -> you\nvous -> you\nvous -> you\nvous -> you\nvous ->",
+    " pepper\ndix -> ten\nhuit -> eight\nneuf -> nine\nvingt -> twenty\nvingt -> twenty\nsoixante -> sixty\nsoixante-dix -> sixty-nine\nsoixante-vingt -> seventy",
+    " chair\nsalle -> room\nsalle de bain -> bathroom\nsalle de toilette -> toilet\nsalle de m\u00e9nage -> kitchen\nsalle de cuisine -> kitchen\nsalle de cuisine -> kitchen\nsalle de cuisine",
+    " door\nsalle -> room\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\ns",
+    " window\nsouffle -> foam\nsouffle -> breath\nsouffle -> breath\nsouffle -> breath\nsouffle -> breath\nsouffle -> breath\nsouffle -> breath",
+    " street\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\n",
+    " town\npays -> country\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays ->",
+    " country\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays ->",
+    " world\nsouvenir -> memory\nsouffrir -> suffer\nsouvenir -> memory\nsouffrir -> suffer\nsouffrir -> suffer\nsouffrir -> suffer\nsouffrir -> suffer\ns",
+    " time\nsombre -> sad\nsombre -> serious\nsombre -> dark\nsombre -> gloomy\nsombre -> somber\nsombre -> dark\nsombre -> dark\nsombre -> dark\nsombre -> dark\ns",
+    " day\nsaison -> season\npays -> country\npaysage -> landscape\npaysage -> scenery\npaysage -> scenery\npaysage -> scenery\npaysage -> scenery\npaysage -> scenery\npays",
+    " night\nsamedi -> saturday\nsamedi -> saturday\nsamedi -> saturday\nsamedi -> saturday\nsamedi -> saturday\nsamedi -> saturday\nsamedi -> saturday\nsamedi -> saturday\n",
+    " girl\ns\u0153ur -> sister\ns\u0153ur d'\u00e2me -> soul sister\ns\u0153ur d'\u00e2me -> soul sister\ns\u0153ur d'\u00e2me -> soul sister\ns\u0153ur d'\u00e2me -> soul sister\ns\u0153ur d",
+    " month\nsaint -> saint\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\ns",
+    " and\nde -> of\ndeux -> two\ntrois -> three\nquatre -> four\ncinq -> five\nsix -> six\nsept -> seven\nhuit -> eight\nneuf -> nine\ndix -> ten\n",
+    " today\nd\u00e9j\u00e0 -> already\nsamedi -> Saturday\nsamedi soir -> Saturday night\nsamedi soir\u00e9e -> Saturday night\nsamedi soir\u00e9e de nuit -> Saturday night party\nsamedi soir\u00e9e de nuit de lune -> Saturday",
+    " tomorrow\nsamedi -> saturday\ndimanche -> sunday\nmonday -> monday\ntuesday -> tuesday\nwednesday -> wednesday\nthursday -> thursday\nfriday -> friday\nsaturday -> saturday\nsunday ->",
+    " high\nsaint -> saint\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\ns",
+    " child\npomme -> apple\npommeau -> apple\npommeaux -> apples\npommes -> apples\npommes de terre -> potatoes\npommes de bois -> wood\npommes de soie",
+    " school\nfemme -> woman\nfils -> son\ngros -> fat\nh\u00f4tel -> hotel\nh\u00f4telier -> hotelier\nh\u00f4telier -> hotelier\nh\u00f4telier -> hotelier\nh\u00f4tel",
+    " student\npomme -> apple\npommeau -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple",
+    " teacher\npommes de terre -> potatoes\npommes frites -> french fries\npommes de terre frites -> french fries\npommes de terre frites pommes de terre -> french fries\npommes de terre",
+    " apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\n",
+    " fish\npomme -> apple\npommeau -> apple\npommeaux -> apples\npommes -> apples\npommes de terre -> potatoes\npommes de bois -> wood apples\npommes de terre",
+    " bird\npomme -> apple\npommeau -> apple\npommeaux -> apples\npommes -> apples\npommes de terre -> potatoes\npommes de bois -> wood apples\npommes de terre",
+    " horse\npomme -> apple\npommeau -> apple\npommeau de terre -> apple pie\npommeau de bois -> apple pie\npommeau de bois et de sucre -> apple pie with sugar",
+    " letter\np\u00e8re -> father\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur ->",
+    " move\npomme -> apple\nsaisie -> seat\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\n",
+    " sentence\npomme -> apple\npommeau -> apple\npommeau de terre -> apple pie\npomme de terre -> potato\npomme de vie -> apple of life\npomme de vie -> apple",
+    " music\nsac -> bag\nsalle -> room\nsauter -> to jump\nsauter \u00e0 la -> to jump off\nsauter \u00e0 la pente -> to jump off a roof\nsauter \u00e0 la pente",
+    " song\npays -> country\npaysage -> landscape\npaysage -> scenery\npaysage -> scenery\npaysage -> scenery\npaysage -> scenery\npaysage -> scenery\npaysage -> scenery\np",
+    " dance\npomme -> apple\npommeau -> apple\npommeau -> apple\npommeau -> apple\npommeau -> apple\npommeau -> apple\npommeau -> apple\n",
+    " play\njeune -> young\njeu -> game\njeune -> young\njeu -> game\njeune -> young\njeu -> game\njeune -> young\njeu -> game\njeune -> young\njeu ->",
+    " ball\npommes -> apples\npommes de terre -> potatoes\npommes frites -> french fries\npommes de poire -> pears\npommes de terre -> potatoes\npommes de terre frites",
+    " day\nsamedi -> saturday\nsouvenir -> souvenir\nsamedi soir -> saturday night\nsamedi soir\u00e9e -> saturday night\nsamedi soir\u00e9e de nuit -> saturday night party\nsamedi soir\u00e9e de nuit de",
+    " foot\npomme -> apple\npommeau -> apple\npommeaux -> apples\npommes -> apples\npommes de terre -> potatoes\npommes de bois -> wood apples\npommes de terre",
+    " head\npomme -> apple\npommeau -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple",
+    " eye\nsouvenir -> souvenir\ns'il vous pla\u00eet -> please\njeudi -> Thursday\nsamedi -> Saturday\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\n",
+    " ear\npommes frites -> french fries\npomme -> apple\npommeau -> apple cider\npommeau -> apple cider vinegar\npommes de terre -> potatoes\npommes de terre -> potatoes\n",
+    " nose\nsouffle -> puff\npomme -> apple\npommeau -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme ->",
+    " mouth\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\n",
+    " heart\nsouffrir -> suffer\nsouffrir -> suffer\nsouffrir -> suffer\nsouffrir -> suffer\nsouffrir -> suffer\nsouffrir -> suffer\nsouffrir -> suffer",
+    " brain\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\n",
+    " body\nd\u00e9faut -> fault\nd\u00e9fier -> to defy\nd\u00e9finition -> definition\nd\u00e9finition -> definition\nd\u00e9finition -> definition\nd\u00e9finition -> definition\nd\u00e9finition ->",
+    " red\nsouffre -> suffer\nsouffrir -> suffer\nsouffrir de -> suffer from\nsouffrir de la -> suffer from the\nsouffrir de la -> suffer from\nsouffrir",
+    " blue\npays -> country\npays -> country\npays -> country\npays -> country\npays -> country\npays -> country\npays -> country\npays -> country\npays -> country\npays ->",
+    " green\npomme -> apple\npommeau -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple",
+    " yellow\nsable -> black\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\ns",
+    " black\ns'il vous pla\u00eet -> please\ns'il vous pla\u00eet -> please\ns'il vous pla\u00eet -> please\ns'il vous pla\u00eet -> please\ns'il vous pla\u00eet -> please\ns'il vous pla\u00eet -> please\n",
+    " white\nbleu -> blue\nbleu -> blue\nbleu -> blue\nbleu -> blue\nbleu -> blue\nbleu -> blue\nbleu -> blue\nbleu -> blue\nbleu -> blue\nbleu ->",
+    " violet\nsable -> black\nsable -> black\nsable -> black\nsable -> black\nsable -> black\nsable -> black\nsable -> black\nsable -> black\nsable -> black\nsable ->",
+    " rose\npomme -> apple\npommeau -> apple\npomme de terre -> potato\npomme de pin -> pear\npomme de terre -> potato\npomme de terre -> potato\npomme",
+    " grey\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\n",
+    " brown\ns'il vous pla\u00eet -> please\naujourd'hui -> today\ns'il vous pla\u00eet -> please\ns'il vous pla\u00eet -> please\ns'il vous pla\u00eet -> please\ns'il vous pla\u00eet -> please\ns'il",
+    " great\ngrandeur -> greatness\ngrandeur -> grandeur\ngrandeur -> grandeur\ngrandeur -> grandeur\ngrandeur -> grandeur\ngrandeur -> grandeur\ngrandeur -> grandeur\ngrandeur -> grandeur\ngrand",
+    " small\nsouvenir -> souvenir\nsalle -> room\nsalle -> room\nsalle -> room\nsalle -> room\nsalle -> room\nsalle -> room\nsalle -> room\nsalle -> room\nsalle",
+    " cold\nsouffl\u00e9 -> souffle\npommes frites -> french fries\npommes de terre -> potatoes\npommes de l'air -> clouds\npommes de bois -> apples\npommes de",
+    " cold\nfemme -> woman\nfils -> son\nfemme -> woman\nfemme -> woman\nfemme -> woman\nfemme -> woman\nfemme -> woman\nfemme -> woman\nfemme -> woman\nfemme ->",
+    " new\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\n",
+    " old\nvrai -> true\nvraiement -> truly\nvraiement -> truly\nvraiement -> truly\nvraiement -> truly\nvraiement -> truly\nvraiement -> truly\nvraiement -> truly\nv",
+    " good\nbonne -> good\nbonne -> good\nbonne -> good\nbonne -> good\nbonne -> good\nbonne -> good\nbonne -> good\nbonne -> good\nbonne -> good\nbonne ->",
+    " bad\nbon -> good\nbelle -> beautiful\nbelle -> beautiful\nbelle -> beautiful\nbelle -> beautiful\nbelle -> beautiful\nbelle -> beautiful\nbelle -> beautiful\nbelle -> beautiful\nbelle -> beautiful",
+    " happy\ndoux -> sweet\nsouris -> mouse\npomme -> apple\npommeau -> apple\npommeau vert -> green apple\npommeau jaune -> yellow apple\npommeau rouge",
+    " sad\nsombre -> serious\nsouris -> mouse\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\np",
+    " fast\nd\u00e9licat -> delicate\nd\u00e9licatesse -> delicacy\nd\u00e9licatesse -> delicacy\nd\u00e9licatesse -> delicacy\nd\u00e9licatesse -> delicacy\nd\u00e9licatesse",
+    " long\npays -> country\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays ->",
+    " strong\np\u00e8re -> father\ns\u0153ur -> sister\npomme -> apple\npommeau -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\np",
+    " weak\nsouffre -> suffer\ns'il vous pla\u00eet -> please\ns'il vous pla\u00eet -> please\ns'il vous pla\u00eet -> please\ns'il vous pla\u00eet -> please\ns'il vous pla\u00eet -> please\ns",
+    " handsome\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur ->",
+    " drunk\nlaissez-faire -> laissez-faire\nlaissez-faire -> laissez-faire\nlaissez-faire -> laissez-faire\nlaissez-faire -> laissez-faire\nlaissez-f",
+    " young\nsable -> black\npomme -> apple\npommeau -> apple\npommeaux -> apples\npommes -> apples\npommes de terre -> potatoes\npommes de bois -> wood apples\n",
+    " rich\nsalle -> room\nsalle -> room\nsalle -> room\nsalle -> room\nsalle -> room\nsalle -> room\nsalle -> room\nsalle -> room\nsalle -> room\nsalle ->",
+    " poor\ns'il vous pla\u00eet -> please\ns'il vous pla\u00eet, s'il vous pla\u00eet, s'il vous pla\u00eet -> please, please, please\nmerci -> thank you\nmerci beaucoup -> thank you very much\nmer",
+    " proper\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\n",
+    " dirty\ns'il vous pla\u00eet -> please\ns'il vous pla\u00eet -> please\ns'il vous pla\u00eet -> please\ns'il vous pla\u00eet -> please\ns'il vous pla\u00eet -> please\ns'il vous pla\u00eet -> please\n",
+    " easy\nfemme -> woman\nfils -> son\ngros -> fat\njoli -> pretty\nmots -> words\nnuit -> night\npays -> country\npomme -> apple\nsaisie -> search\ns",
+    " difficult\ndurable -> durable\ndurable -> durable\ndurable -> durable\ndurable -> durable\ndurable -> durable\ndurable -> durable\ndurable -> durable\ndurable -> durable\ndurable -> durable\ndurable ->",
+    " long\ndans -> in\nsous -> under\nsouvenir -> souvenir\ns'aimer -> to like\ns'aimer -> to love\ns'aimer -> to like\ns'aimer -> to love\n",
+    " court\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\n",
+    " high\npomme -> apple\npommeau -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple",
+    " bottom\npommes -> apples\npomme -> apple\npommes -> apples\npommes -> apples\npommes -> apples\npommes -> apples\npommes -> apples\npommes -> apples\n",
+    " large\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\n",
+    " wide\ngros -> fat\ngros -> big\ngros -> long\ngros -> tall\ngros -> great\ngros -> big\ngros -> long\ngros -> great\ngros -> big\ngros ->",
+    " heavy\nbouche -> mouth\nbouche -> mouth\nbouche -> mouth\nbouche -> mouth\nbouche -> mouth\nbouche -> mouth\nbouche -> mouth\nbouche -> mouth\n",
+    " light\ns\u00e9lection -> selection\ns\u00e9lectionner -> to select\ns\u00e9lectionner -> to choose\ns\u00e9lectionner -> to pick\ns\u00e9lectionner -> to choose\ns\u00e9lectionner -> to pick\ns\u00e9",
+    " full\nsous -> under\ndeux -> two\nquatre -> four\ncinq -> five\nseize -> six\nsept -> seven\nhuit -> eight\nneuf -> nine\ndouze -> twelve\ndix",
+    " empty\nsou -> soul\npomme -> apple\npommeau -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\n",
+    " right\nd\u00e9fenseur -> lawyer\nd\u00e9fenseur de droits -> lawyer\nd\u00e9fenseur de la libert\u00e9 -> lawyer\nd\u00e9fenseur de la justice -> lawyer\nd\u00e9fenseur de la",
+    " left\nsaisie -> sit\nsaisonnant -> musical\nsaisonnant -> musical\nsaisonnant -> musical\nsaisonnant -> musical\nsaisonnant -> musical\nsaisonnant -> musical\n",
+    " inside\ndans -> in\ndans -> in\ndans -> in\ndans -> in\ndans -> in\ndans -> in\ndans -> in\ndans -> in\ndans -> in\ndans ->",
+    " outside\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\n",
+    " in front of\nd\u00e9jeuner -> lunch\nd\u00e9j\u00e0 -> already\nd\u00e9j\u00e0 vu -> already seen\nd\u00e9j\u00e0 entendu -> already heard\nd\u00e9j\u00e0 vu -> already seen\nd\u00e9j\u00e0 vu -> already seen\n",
+    " behind\nsous -> under\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\ns",
+    " near\nd\u00e9j\u00e0 -> already\nsouvenir -> memory\nd\u00e9j\u00e0 vu -> already seen\nsouvenir d'une autre vie -> memory of another life\nsouvenir d'une autre vie -> memory of another life\nsou",
+    " loin\npied -> foot\npomme -> apple\npommeau -> apple\npommeaux -> apples\npommes -> apples\npommes de terre -> potatoes\npommes de terre frites -> french",
+    " first\nsous -> under\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\ns",
+    " last\nd\u00e9part -> departure\nd\u00e9jeuner -> lunch\nd\u00e9licatesse -> delicacy\nd\u00e9licatesse -> delicacy\nd\u00e9licatesse -> delicacy\nd\u00e9licatesse -> delicacy",
+    " open\nsous -> under\nsous -> under\nsous -> under\nsous -> under\nsous -> under\nsous -> under\nsou -> sow\nsou -> sow\nsou -> sow\nsou ->",
+    " sick\nfemme -> woman\nfemme de chambre -> nurse\nfemme de travail -> woman worker\nfemme de travail -> woman worker\nfemme de travail -> woman worker\nfemme de travail -> woman worker\nfemme de travail",
+    " one\nune -> one\nun -> one\nun -> one\nun -> one\nun -> one\nun -> one\nun -> one\nun -> one\nun -> one\nun -> one\nun -> one\nun -> one\n",
+    " two\ndeux -> two\ndeux -> two\ndeux -> two\ndeux -> two\ndeux -> two\ndeux -> two\ndeux -> two\ndeux -> two\ndeux -> two\ndeux ->",
+    " three\nsais -> says\nsais -> says\nsais -> says\nsais -> says\nsais -> says\nsais -> says\nsais -> says\nsais -> says\nsais -> says\nsais ->",
+    " four\nsaison -> season\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\ns",
+    " five\ns'il vous pla\u00eet -> please\ns'il vous pla\u00eet, s'il vous pla\u00eet, s'il vous pla\u00eet -> please, please, please\nmerci -> thank you\nmerci beaucoup -> thank you very much\nmer",
+    " six\nsamedi -> Saturday\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\ns",
+    " seven\nsouffre -> suffer\nsouffrir -> suffer\nsouffrir de -> suffer from\nsouffrir de la -> suffer from the\nsouffrir de la -> suffer from the\nsouff",
+    " eight\ncin\u00e9ma -> cinema\ncin\u00e9phile -> film buff\ncin\u00e9phobie -> film hater\ncin\u00e9phobie -> film hater\ncin\u00e9phobie -> film hater\ncin\u00e9phob",
+    " new\npied -> foot\npieds -> feet\npieds de roi -> royal foot\npieds de roi -> royal foot\npieds de roi -> royal foot\npieds de roi -> royal foot\np",
+    " ten\nquatre -> four\ncinq -> five\nsoixante -> sixty\nseptante -> seventy\nhuit -> eight\nneuf -> nine\ndouze -> twelve\ndix-neuf -> nineteen\nvingt ->",
+    " hundred\ncin\u00e9ma -> cinema\ncin\u00e9phile -> film buff\ncin\u00e9phobie -> film hater\ncin\u00e9phobie -> film hater\ncin\u00e9phobie -> film hater\ncin\u00e9phob",
+    " thousand\npied -> foot\npomme -> apple\npoussi\u00e8re -> dust\npoussi\u00e8re -> dust\npoussi\u00e8re -> dust\npoussi\u00e8re -> dust\npoussi\u00e8re -> dust\npou",
+    " brother\ns\u0153ur -> sister\nsouffre -> suffer\nsouffrir -> suffer\nsouffrir de -> suffer from\nsouffrir de la -> suffer from the\nsouffrir de la -> suffer from",
+    " sister\nsouffre -> suffer\nsouffrir -> suffer\nsouffrir de -> suffer from\nsouffrir de la -> suffer from the\nsouffrir de la -> suffer from\nsouffrir",
+    " father\npays -> country\npaysage -> landscape\npaysan -> farmer\npaysi\u00e8re -> farmer's wife\npaysier -> farmer's son\npaysier de fer -> iron worker\npaysier de m\u00e9tal",
+    " mother\np\u00e8re -> father\ns\u0153ur -> sister\nfr\u00e8re -> brother\ns\u0153ur -> sister\np\u00e8re -> father\nfils -> son\nfille -> daughter\nfils -> son\nfille -> daughter\nfils ->",
+    " son\nfemme -> woman\nfils -> son\nfemme -> woman\nfils -> son\nfemme -> woman\nfils -> son\nfemme -> woman\nfils -> son\nfemme -> woman\nfils ->",
+    " daughter\nfils -> son\ns\u0153ur -> sister\nsoeur -> sister\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur ->",
+    " hello\ns'il vous pla\u00eet -> please\ncomment allez-vous -> how are you\ncomment allez-vous -> how are you\ncomment allez-vous -> how are you\ncomment allez-vous -> how are you\ncomment allez-vous",
+    " woman\npays -> country\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays -> pay\npays ->",
+    " grandfather\npommes frites -> french fries\npommes de terre -> potatoes\npommes de l'air -> clouds\npommes de terre -> potatoes\npommes de terre -> potatoes\npommes de terre",
+    " grandmother\ngrand-father -> grandfather\ngrand-p\u00e8re -> grandfather\ngrand-m\u00e8re -> grandmother\ngrand-father -> grandfather\ngrand-p\u00e8re -> grandfather\ngrand-m\u00e8re -> grandmother\ngrand-father -> grandfather\ngrand-p\u00e8re -> grandfather\n",
+    " uncle\ns\u0153ur -> sister\nsoir -> evening\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsouvenir -> souvenir\nsou",
+    " aunt\np\u00e8re -> father\ns\u0153ur -> sister\npomme -> apple\npommes -> apples\npommes de terre -> potatoes\npommes frites -> french fries\npommes de bois -> wooden apples\n",
+    " cousin\nsouvenir -> souvenir\ns'il vous pla\u00eet -> please\nmerci -> thank you\nmerci beaucoup -> thank you very much\ns'il vous pla\u00eet, merci beaucoup -> please, thank you very much\ns'il",
+    " king\ns\u00e9lectionner -> to select\ns\u00e9lectionner -> to choose\ns\u00e9lectionner -> to pick\ns\u00e9lectionner -> to choose\ns\u00e9lectionner -> to pick\ns\u00e9lectionner -> to choose\n",
+    " queen\ns\u0153ur -> sister\ns\u0153ur d'\u00e2me -> soul sister\ns\u0153ur d'\u00e2me -> soul sister\ns\u0153ur d'\u00e2me -> soul sister\ns\u0153ur d'\u00e2me -> soul sister\ns\u0153ur d",
+    " prince\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur -> sister\ns\u0153ur ->",
+    " princess\nsaint -> saint\nsaisie -> seat\nsaisonnant -> sonorous\nsaisonnant -> sonorous\nsaisonnant -> sonorous\nsaisonnant -> sonorous\nsaisonnant ->",
+    " man\npomme -> apple\npommes -> apples\npommes de terre -> potatoes\npommes de pin -> chestnuts\npommes de terre -> potatoes\npommes de pin -> chestnuts\npom",
+    " boy\ns\u0153ur -> sister\nfils -> son\nfemme -> woman\ns\u0153ur -> sister\nfils -> son\nfemme -> woman\ns\u0153ur -> sister\nfils -> son\nfemme -> woman\ns\u0153ur ->",
+    " baby\npomme -> apple\npommeau -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple",
+    " doctor\npomme -> apple\npommeau -> apple\npommeaux -> apples\npommes -> apples\npommes de terre -> potatoes\npommes de bois -> wood apples\npommes de terre",
+    " nurse\nd\u00e9finition -> definition\nd\u00e9finition -> definition\nd\u00e9finition -> definition\nd\u00e9finition -> definition\nd\u00e9finition -> definition\nd\u00e9finition -> definition\nd\u00e9finition -> definition",
+    " lawyer\npomme -> apple\npommeau -> apple brandy\npommeau -> apple cider\npommeau -> apple cider vinegar\npommeau -> apple cider vinegar\npommeau -> apple cider",
+    " police\npommes -> apples\npommes de terre -> potatoes\npommes frites -> french fries\npommes de terre frites -> french fries\npommes de terre frites pommes -> french fries\np",
+    " soldier\nsombre -> sad\nsombre -> dark\nsombre -> gloomy\nsombre -> dark\nsombre -> dark\nsombre -> dark\nsombre -> dark\nsombre -> dark\nsombre -> dark\nsombre",
+    " farmer\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\n",
+    " worker\npays -> country\npaysan -> farmer\npaysan -> peasant\npaysan -> farmer\npaysan -> peasant\npaysan -> peasant\npaysan -> peasant\npaysan -> peasant\np",
+    " artist\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\npomme -> apple\n",
+    " musician\npomme -> apple\npommeau -> apple\npommeaux -> apples\npommes -> apples\npommes de terre -> potatoes\npommes de terre frites -> french fries\npommes"
+  ],
+  "target_metrics": [
+    {
+      "loss": 7.984375,
+      "perplexity": 2934.742517105396,
+      "probability": 0.0003407453956084444,
+      "normalized_probability": 0.0003407453956084444,
+      "total_log_prob": -7.984375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.22265625,
+      "perplexity": 68.21443845541918,
+      "probability": 0.0002149054272209975,
+      "normalized_probability": 0.014659653038902303,
+      "total_log_prob": -8.4453125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.849609375,
+      "perplexity": 46.97471015107385,
+      "probability": 0.00045318109235131115,
+      "normalized_probability": 0.021288050459149874,
+      "total_log_prob": -7.69921875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 5.48828125,
+      "perplexity": 241.84118490494708,
+      "probability": 0.004134945006959995,
+      "normalized_probability": 0.004134945006959995,
+      "total_log_prob": -5.48828125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.25390625,
+      "perplexity": 520.0402695399388,
+      "probability": 0.001922928008795674,
+      "normalized_probability": 0.001922928008795674,
+      "total_log_prob": -6.25390625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.7421875,
+      "perplexity": 17020.733541599173,
+      "probability": 5.875187444512721e-05,
+      "normalized_probability": 5.875187444512721e-05,
+      "total_log_prob": -9.7421875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.04296875,
+      "perplexity": 1144.7811358637066,
+      "probability": 0.0008735294185691895,
+      "normalized_probability": 0.0008735294185691895,
+      "total_log_prob": -7.04296875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.21875,
+      "perplexity": 1364.7820165072585,
+      "probability": 0.0007327177438630043,
+      "normalized_probability": 0.0007327177438630043,
+      "total_log_prob": -7.21875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.453125,
+      "perplexity": 12747.94039639077,
+      "probability": 7.844404420678988e-05,
+      "normalized_probability": 7.844404420678988e-05,
+      "total_log_prob": -9.453125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.671875,
+      "perplexity": 5836.432407343751,
+      "probability": 0.00017133754496012662,
+      "normalized_probability": 0.00017133754496012662,
+      "total_log_prob": -8.671875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.693359375,
+      "perplexity": 40.17959882934157,
+      "probability": 0.0006194251112483582,
+      "normalized_probability": 0.024888252474779306,
+      "total_log_prob": -7.38671875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.263671875,
+      "perplexity": 26.14536361045317,
+      "probability": 0.0014628864857633064,
+      "normalized_probability": 0.038247699091099666,
+      "total_log_prob": -6.52734375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.37109375,
+      "perplexity": 10.709098957841949,
+      "probability": 0.0008142189481977105,
+      "normalized_probability": 0.09337853762829695,
+      "total_log_prob": -7.11328125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.47265625,
+      "perplexity": 32.22221914035047,
+      "probability": 3.0007521231721453e-05,
+      "normalized_probability": 0.031074921533197537,
+      "total_log_prob": -10.4140625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 8.34375,
+      "perplexity": 4203.824562345984,
+      "probability": 0.00023787862342236765,
+      "normalized_probability": 0.00023787862342236765,
+      "total_log_prob": -8.34375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.6171875,
+      "perplexity": 2032.8367289501043,
+      "probability": 0.000491923421964374,
+      "normalized_probability": 0.000491923421964374,
+      "total_log_prob": -7.6171875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.609375,
+      "perplexity": 742.0191118159325,
+      "probability": 0.001347674182613322,
+      "normalized_probability": 0.001347674182613322,
+      "total_log_prob": -6.609375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.8984375,
+      "perplexity": 2693.07111549734,
+      "probability": 0.0003713232800446586,
+      "normalized_probability": 0.0003713232800446586,
+      "total_log_prob": -7.8984375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.2578125,
+      "perplexity": 3857.64626282737,
+      "probability": 0.00025922542707870625,
+      "normalized_probability": 0.00025922542707870625,
+      "total_log_prob": -8.2578125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.68359375,
+      "perplexity": 2172.4128689866334,
+      "probability": 0.0004603176561306555,
+      "normalized_probability": 0.0004603176561306555,
+      "total_log_prob": -7.68359375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.078125,
+      "perplexity": 3223.184097166442,
+      "probability": 0.0003102522132940274,
+      "normalized_probability": 0.0003102522132940274,
+      "total_log_prob": -8.078125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.640625,
+      "perplexity": 765.5733268544279,
+      "probability": 0.0013062106070345731,
+      "normalized_probability": 0.0013062106070345731,
+      "total_log_prob": -6.640625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.234375,
+      "perplexity": 509.98178020909006,
+      "probability": 0.0019608543654049855,
+      "normalized_probability": 0.0019608543654049855,
+      "total_log_prob": -6.234375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.97265625,
+      "perplexity": 2900.5517311511153,
+      "probability": 0.00034476199450617594,
+      "normalized_probability": 0.00034476199450617594,
+      "total_log_prob": -7.97265625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 10.28125,
+      "perplexity": 29180.326173622627,
+      "probability": 3.4269664912242954e-05,
+      "normalized_probability": 3.4269664912242954e-05,
+      "total_log_prob": -10.28125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.80859375,
+      "perplexity": 122.55914747655109,
+      "probability": 6.65745956422723e-05,
+      "normalized_probability": 0.008159325685513008,
+      "total_log_prob": -9.6171875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 8.28125,
+      "perplexity": 3949.1277076439605,
+      "probability": 0.0002532204765281185,
+      "normalized_probability": 0.0002532204765281185,
+      "total_log_prob": -8.28125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.18359375,
+      "perplexity": 1317.6350105946774,
+      "probability": 0.0007589355109414391,
+      "normalized_probability": 0.0007589355109414391,
+      "total_log_prob": -7.18359375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.57421875,
+      "perplexity": 716.3857293204885,
+      "probability": 0.001395896036271587,
+      "normalized_probability": 0.001395896036271587,
+      "total_log_prob": -6.57421875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.39453125,
+      "perplexity": 81.00664999449546,
+      "probability": 0.0001523907670817597,
+      "normalized_probability": 0.01234466553138479,
+      "total_log_prob": -8.7890625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.28515625,
+      "perplexity": 72.61389175398708,
+      "probability": 0.0001896533738711495,
+      "normalized_probability": 0.01377146956105809,
+      "total_log_prob": -8.5703125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 10.40625,
+      "perplexity": 33065.6414636259,
+      "probability": 3.0242873137666396e-05,
+      "normalized_probability": 3.0242873137666396e-05,
+      "total_log_prob": -10.40625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.79296875,
+      "perplexity": 44.387981683814154,
+      "probability": 0.0005075387476061422,
+      "normalized_probability": 0.022528620632567414,
+      "total_log_prob": -7.5859375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 6.81640625,
+      "perplexity": 912.6990968629584,
+      "probability": 0.0010956513526058083,
+      "normalized_probability": 0.0010956513526058083,
+      "total_log_prob": -6.81640625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.8984375,
+      "perplexity": 2693.07111549734,
+      "probability": 0.0003713232800446586,
+      "normalized_probability": 0.0003713232800446586,
+      "total_log_prob": -7.8984375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.66796875,
+      "perplexity": 289.4459996766781,
+      "probability": 0.003454875870169347,
+      "normalized_probability": 0.003454875870169347,
+      "total_log_prob": -5.66796875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.6796875,
+      "perplexity": 15989.499427645738,
+      "probability": 6.25410447978757e-05,
+      "normalized_probability": 6.25410447978757e-05,
+      "total_log_prob": -9.6796875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.1875,
+      "perplexity": 9774.184947038395,
+      "probability": 0.00010231032105679591,
+      "normalized_probability": 0.00010231032105679591,
+      "total_log_prob": -9.1875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.2578125,
+      "perplexity": 3857.64626282737,
+      "probability": 0.00025922542707870625,
+      "normalized_probability": 0.00025922542707870625,
+      "total_log_prob": -8.2578125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.6328125,
+      "perplexity": 5612.8421930478125,
+      "probability": 0.00017816285682120578,
+      "normalized_probability": 0.00017816285682120578,
+      "total_log_prob": -8.6328125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.3359375,
+      "perplexity": 4171.110140058703,
+      "probability": 0.0002397443285892053,
+      "normalized_probability": 0.0002397443285892053,
+      "total_log_prob": -8.3359375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.2265625,
+      "perplexity": 3738.9589647857524,
+      "probability": 0.0002674541254445945,
+      "normalized_probability": 0.0002674541254445945,
+      "total_log_prob": -8.2265625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.515625,
+      "perplexity": 675.6160896504167,
+      "probability": 0.0014801305287407067,
+      "normalized_probability": 0.0014801305287407067,
+      "total_log_prob": -6.515625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 12.3125,
+      "perplexity": 222459.42401932197,
+      "probability": 4.495201785261944e-06,
+      "normalized_probability": 4.495201785261944e-06,
+      "total_log_prob": -12.3125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.71875,
+      "perplexity": 6116.528646774525,
+      "probability": 0.00016349142753174832,
+      "normalized_probability": 0.00016349142753174832,
+      "total_log_prob": -8.71875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 14.9375,
+      "perplexity": 3070957.6222644863,
+      "probability": 3.2563132514430866e-07,
+      "normalized_probability": 3.2563132514430866e-07,
+      "total_log_prob": -14.9375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.953125,
+      "perplexity": 1046.4146698952802,
+      "probability": 0.000955644094802374,
+      "normalized_probability": 0.000955644094802374,
+      "total_log_prob": -6.953125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.302734375,
+      "perplexity": 27.186876493132687,
+      "probability": 0.0013529488302282185,
+      "normalized_probability": 0.036782452748942915,
+      "total_log_prob": -6.60546875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 5.0078125,
+      "perplexity": 149.57717793613415,
+      "probability": 4.469606909146213e-05,
+      "normalized_probability": 0.006685511879539377,
+      "total_log_prob": -10.015625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 6.9453125,
+      "perplexity": 1038.271406328768,
+      "probability": 0.000963139304332677,
+      "normalized_probability": 0.000963139304332677,
+      "total_log_prob": -6.9453125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.70703125,
+      "perplexity": 818.1381828290899,
+      "probability": 0.001222287409373853,
+      "normalized_probability": 0.001222287409373853,
+      "total_log_prob": -6.70703125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.96484375,
+      "perplexity": 389.49216516524257,
+      "probability": 0.002567445739443176,
+      "normalized_probability": 0.002567445739443176,
+      "total_log_prob": -5.96484375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.9140625,
+      "perplexity": 2735.480814627413,
+      "probability": 0.00036556644618112785,
+      "normalized_probability": 0.00036556644618112785,
+      "total_log_prob": -7.9140625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.84765625,
+      "perplexity": 2559.7279185272455,
+      "probability": 0.00039066652075090693,
+      "normalized_probability": 0.00039066652075090693,
+      "total_log_prob": -7.84765625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.1171875,
+      "perplexity": 1232.9778022981784,
+      "probability": 0.0008110446093482581,
+      "normalized_probability": 0.0008110446093482581,
+      "total_log_prob": -7.1171875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.51171875,
+      "perplexity": 672.9821121368258,
+      "probability": 0.0014859235958365076,
+      "normalized_probability": 0.0014859235958365076,
+      "total_log_prob": -6.51171875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.6640625,
+      "perplexity": 5791.012930009886,
+      "probability": 0.00017268136198036305,
+      "normalized_probability": 0.00017268136198036305,
+      "total_log_prob": -8.6640625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.0234375,
+      "perplexity": 3051.6493685247633,
+      "probability": 0.0003276916444969635,
+      "normalized_probability": 0.0003276916444969635,
+      "total_log_prob": -8.0234375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 13.4375,
+      "perplexity": 685223.2660649162,
+      "probability": 1.4593783508589488e-06,
+      "normalized_probability": 1.4593783508589488e-06,
+      "total_log_prob": -13.4375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.7109375,
+      "perplexity": 16497.060623684167,
+      "probability": 6.0616859136975e-05,
+      "normalized_probability": 6.0616859136975e-05,
+      "total_log_prob": -9.7109375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.140625,
+      "perplexity": 1262.217028265557,
+      "probability": 0.000792256781208319,
+      "normalized_probability": 0.000792256781208319,
+      "total_log_prob": -7.140625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.3125,
+      "perplexity": 4074.4864777337,
+      "probability": 0.0002454297015009895,
+      "normalized_probability": 0.0002454297015009895,
+      "total_log_prob": -8.3125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.7265625,
+      "perplexity": 6164.501175517202,
+      "probability": 0.00016221912714877535,
+      "normalized_probability": 0.00016221912714877535,
+      "total_log_prob": -8.7265625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.765625,
+      "perplexity": 6410.066985396673,
+      "probability": 0.00015600460997961275,
+      "normalized_probability": 0.00015600460997961275,
+      "total_log_prob": -8.765625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.125,
+      "perplexity": 3377.8679316735347,
+      "probability": 0.0002960447300568554,
+      "normalized_probability": 0.0002960447300568554,
+      "total_log_prob": -8.125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 10.3125,
+      "perplexity": 30106.60915830866,
+      "probability": 3.3215298167313715e-05,
+      "normalized_probability": 3.3215298167313715e-05,
+      "total_log_prob": -10.3125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.0390625,
+      "perplexity": 3099.705853489035,
+      "probability": 0.00032261125644370356,
+      "normalized_probability": 0.00032261125644370356,
+      "total_log_prob": -8.0390625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.5625,
+      "perplexity": 1924.6511316769472,
+      "probability": 0.0005195746821548384,
+      "normalized_probability": 0.0005195746821548384,
+      "total_log_prob": -7.5625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.55078125,
+      "perplexity": 699.7906717746478,
+      "probability": 0.001428998756819708,
+      "normalized_probability": 0.001428998756819708,
+      "total_log_prob": -6.55078125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.515625,
+      "perplexity": 675.6160896504167,
+      "probability": 0.0014801305287407067,
+      "normalized_probability": 0.0014801305287407067,
+      "total_log_prob": -6.515625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 2.974609375,
+      "perplexity": 19.581972547389178,
+      "probability": 0.0026078771267600553,
+      "normalized_probability": 0.05106737830317957,
+      "total_log_prob": -5.94921875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 7.484375,
+      "perplexity": 1780.0113149866502,
+      "probability": 0.0005617941816327723,
+      "normalized_probability": 0.0005617941816327723,
+      "total_log_prob": -7.484375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.83984375,
+      "perplexity": 934.3431322086527,
+      "probability": 0.0010702706163592639,
+      "normalized_probability": 0.0010702706163592639,
+      "total_log_prob": -6.83984375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.2265625,
+      "perplexity": 10163.544211331155,
+      "probability": 9.839087420755427e-05,
+      "normalized_probability": 9.839087420755427e-05,
+      "total_log_prob": -9.2265625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.2890625,
+      "perplexity": 3980.1011001356896,
+      "probability": 0.0002512498991460061,
+      "normalized_probability": 0.0002512498991460061,
+      "total_log_prob": -8.2890625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.07421875,
+      "perplexity": 1181.120389956714,
+      "probability": 0.0008466537437700558,
+      "normalized_probability": 0.0008466537437700558,
+      "total_log_prob": -7.07421875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.8203125,
+      "perplexity": 916.2713001272898,
+      "probability": 0.0010913798127924323,
+      "normalized_probability": 0.0010913798127924323,
+      "total_log_prob": -6.8203125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.73046875,
+      "perplexity": 2276.66913936313,
+      "probability": 0.0004392381759431841,
+      "normalized_probability": 0.0004392381759431841,
+      "total_log_prob": -7.73046875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.55078125,
+      "perplexity": 1902.2282668101732,
+      "probability": 0.00052569926409352,
+      "normalized_probability": 0.00052569926409352,
+      "total_log_prob": -7.55078125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.63671875,
+      "perplexity": 2072.9308408242946,
+      "probability": 0.00048240876169431345,
+      "normalized_probability": 0.00048240876169431345,
+      "total_log_prob": -7.63671875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.1953125,
+      "perplexity": 1333.166875146264,
+      "probability": 0.000750093644421137,
+      "normalized_probability": 0.000750093644421137,
+      "total_log_prob": -7.1953125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.9140625,
+      "perplexity": 2735.480814627413,
+      "probability": 0.00036556644618112785,
+      "normalized_probability": 0.00036556644618112785,
+      "total_log_prob": -7.9140625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 12.265625,
+      "perplexity": 212272.2653069032,
+      "probability": 4.710931023203621e-06,
+      "normalized_probability": 4.710931023203621e-06,
+      "total_log_prob": -12.265625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.80078125,
+      "perplexity": 2442.509442926133,
+      "probability": 0.0004094149985360946,
+      "normalized_probability": 0.0004094149985360946,
+      "total_log_prob": -7.80078125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.515625,
+      "perplexity": 675.6160896504167,
+      "probability": 0.0014801305287407067,
+      "normalized_probability": 0.0014801305287407067,
+      "total_log_prob": -6.515625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.3671875,
+      "perplexity": 11698.167680299006,
+      "probability": 8.548347291038659e-05,
+      "normalized_probability": 8.548347291038659e-05,
+      "total_log_prob": -9.3671875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.4375,
+      "perplexity": 4616.998049285644,
+      "probability": 0.00021659095137688503,
+      "normalized_probability": 0.00021659095137688503,
+      "total_log_prob": -8.4375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.5390625,
+      "perplexity": 13891.917844844731,
+      "probability": 7.198430131596974e-05,
+      "normalized_probability": 7.198430131596974e-05,
+      "total_log_prob": -9.5390625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.1875,
+      "perplexity": 1322.7920882144774,
+      "probability": 0.0007559767017882707,
+      "normalized_probability": 0.0007559767017882707,
+      "total_log_prob": -7.1875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.21875,
+      "perplexity": 502.07524555352444,
+      "probability": 0.0019917333285323136,
+      "normalized_probability": 0.0019917333285323136,
+      "total_log_prob": -6.21875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.85546875,
+      "perplexity": 2579.804113414313,
+      "probability": 0.0003876263297667675,
+      "normalized_probability": 0.0003876263297667675,
+      "total_log_prob": -7.85546875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.484375,
+      "perplexity": 1780.0113149866502,
+      "probability": 0.0005617941816327723,
+      "normalized_probability": 0.0005617941816327723,
+      "total_log_prob": -7.484375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.45703125,
+      "perplexity": 1731.9985466406467,
+      "probability": 0.0005773676900246723,
+      "normalized_probability": 0.0005773676900246723,
+      "total_log_prob": -7.45703125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.2890625,
+      "perplexity": 3980.1011001356896,
+      "probability": 0.0002512498991460061,
+      "normalized_probability": 0.0002512498991460061,
+      "total_log_prob": -8.2890625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.3125,
+      "perplexity": 4074.4864777337,
+      "probability": 0.0002454297015009895,
+      "normalized_probability": 0.0002454297015009895,
+      "total_log_prob": -8.3125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.76953125,
+      "perplexity": 2367.3613276063093,
+      "probability": 0.00042241122567087037,
+      "normalized_probability": 0.00042241122567087037,
+      "total_log_prob": -7.76953125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.1171875,
+      "perplexity": 9110.542149917466,
+      "probability": 0.0001097629519236744,
+      "normalized_probability": 0.0001097629519236744,
+      "total_log_prob": -9.1171875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.3515625,
+      "perplexity": 4236.795567027318,
+      "probability": 0.00023602743728832652,
+      "normalized_probability": 0.00023602743728832652,
+      "total_log_prob": -8.3515625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.0078125,
+      "perplexity": 1105.234158889827,
+      "probability": 0.0009047856437992004,
+      "normalized_probability": 0.0009047856437992004,
+      "total_log_prob": -7.0078125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.5078125,
+      "perplexity": 4953.315850060822,
+      "probability": 0.0002018849656009158,
+      "normalized_probability": 0.0002018849656009158,
+      "total_log_prob": -8.5078125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.17578125,
+      "perplexity": 1307.381093591765,
+      "probability": 5.850535239314218e-07,
+      "normalized_probability": 0.000764887915927178,
+      "total_log_prob": -14.3515625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 6.90625,
+      "perplexity": 998.495853382024,
+      "probability": 0.0010015064124832178,
+      "normalized_probability": 0.0010015064124832178,
+      "total_log_prob": -6.90625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.0859375,
+      "perplexity": 3248.4638433547952,
+      "probability": 0.0003078378114152772,
+      "normalized_probability": 0.0003078378114152772,
+      "total_log_prob": -8.0859375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.3671875,
+      "perplexity": 78.82163381626928,
+      "probability": 0.00016095672788593417,
+      "normalized_probability": 0.012686872265690001,
+      "total_log_prob": -8.734375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 15.5703125,
+      "perplexity": 5782302.397496557,
+      "probability": 1.7294149133966934e-07,
+      "normalized_probability": 1.7294149133966934e-07,
+      "total_log_prob": -15.5703125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.59375,
+      "perplexity": 5397.817585348465,
+      "probability": 0.00018526005819728775,
+      "normalized_probability": 0.00018526005819728775,
+      "total_log_prob": -8.59375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.44921875,
+      "perplexity": 632.2081871811375,
+      "probability": 0.0015817574341432633,
+      "normalized_probability": 0.0015817574341432633,
+      "total_log_prob": -6.44921875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.31640625,
+      "perplexity": 74.91890411002962,
+      "probability": 0.00017816285682120578,
+      "normalized_probability": 0.013347765986156852,
+      "total_log_prob": -8.6328125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 7.1796875,
+      "perplexity": 1312.498038515131,
+      "probability": 0.0007619059005462061,
+      "normalized_probability": 0.0007619059005462061,
+      "total_log_prob": -7.1796875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 14.28125,
+      "perplexity": 1593191.8264435339,
+      "probability": 6.276708073705662e-07,
+      "normalized_probability": 6.276708073705662e-07,
+      "total_log_prob": -14.28125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 12.09375,
+      "perplexity": 178751.16892939166,
+      "probability": 5.5943690102245385e-06,
+      "normalized_probability": 5.5943690102245385e-06,
+      "total_log_prob": -12.09375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.6640625,
+      "perplexity": 15741.605216017246,
+      "probability": 6.35259229460595e-05,
+      "normalized_probability": 6.35259229460595e-05,
+      "total_log_prob": -9.6640625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 12.2265625,
+      "perplexity": 204140.2425271422,
+      "probability": 4.898593180945406e-06,
+      "normalized_probability": 4.898593180945406e-06,
+      "total_log_prob": -12.2265625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.40234375,
+      "perplexity": 81.641993024771,
+      "probability": 0.0001500281672245135,
+      "normalized_probability": 0.01224859858206291,
+      "total_log_prob": -8.8046875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 8.9765625,
+      "perplexity": 7915.3761905655465,
+      "probability": 0.00012633638325262604,
+      "normalized_probability": 0.00012633638325262604,
+      "total_log_prob": -8.9765625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.94921875,
+      "perplexity": 1042.3350857163095,
+      "probability": 0.0009593843800362759,
+      "normalized_probability": 0.0009593843800362759,
+      "total_log_prob": -6.94921875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.16015625,
+      "perplexity": 1287.112028449327,
+      "probability": 0.0007769331479286766,
+      "normalized_probability": 0.0007769331479286766,
+      "total_log_prob": -7.16015625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.3515625,
+      "perplexity": 11516.804400746194,
+      "probability": 8.68296417307572e-05,
+      "normalized_probability": 8.68296417307572e-05,
+      "total_log_prob": -9.3515625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.6171875,
+      "perplexity": 275.1145344862516,
+      "probability": 0.0036348497612726936,
+      "normalized_probability": 0.0036348497612726936,
+      "total_log_prob": -5.6171875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.5625,
+      "perplexity": 5231.744197360583,
+      "probability": 0.00019114084371795175,
+      "normalized_probability": 0.00019114084371795175,
+      "total_log_prob": -8.5625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.81640625,
+      "perplexity": 2480.973369853562,
+      "probability": 0.00040306760731535963,
+      "normalized_probability": 0.00040306760731535963,
+      "total_log_prob": -7.81640625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.48828125,
+      "perplexity": 657.3924983001216,
+      "probability": 0.0015211612584350887,
+      "normalized_probability": 0.0015211612584350887,
+      "total_log_prob": -6.48828125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.8359375,
+      "perplexity": 18693.618725877364,
+      "probability": 5.349419043278717e-05,
+      "normalized_probability": 5.349419043278717e-05,
+      "total_log_prob": -9.8359375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 12.0546875,
+      "perplexity": 171903.31918537966,
+      "probability": 5.817223336575631e-06,
+      "normalized_probability": 5.817223336575631e-06,
+      "total_log_prob": -12.0546875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.796875,
+      "perplexity": 6613.544353810665,
+      "probability": 0.0001512048527237606,
+      "normalized_probability": 0.0001512048527237606,
+      "total_log_prob": -8.796875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 17.046875,
+      "perplexity": 25314173.139883798,
+      "probability": 3.950356167962081e-08,
+      "normalized_probability": 3.950356167962081e-08,
+      "total_log_prob": -17.046875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.38671875,
+      "perplexity": 1614.4001620868264,
+      "probability": 0.0006194251112483582,
+      "normalized_probability": 0.0006194251112483582,
+      "total_log_prob": -7.38671875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.625,
+      "perplexity": 5569.162708566004,
+      "probability": 0.00017956020542583297,
+      "normalized_probability": 0.00017956020542583297,
+      "total_log_prob": -8.625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.234375,
+      "perplexity": 3768.283983397487,
+      "probability": 0.00026537278092783216,
+      "normalized_probability": 0.00026537278092783216,
+      "total_log_prob": -8.234375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.3671875,
+      "perplexity": 11698.167680299006,
+      "probability": 8.548347291038659e-05,
+      "normalized_probability": 8.548347291038659e-05,
+      "total_log_prob": -9.3671875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.1953125,
+      "perplexity": 490.4446850170856,
+      "probability": 0.002038965923272597,
+      "normalized_probability": 0.002038965923272597,
+      "total_log_prob": -6.1953125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.79296875,
+      "perplexity": 2423.501683641344,
+      "probability": 0.000412626080167391,
+      "normalized_probability": 0.000412626080167391,
+      "total_log_prob": -7.79296875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.8359375,
+      "perplexity": 2529.90618498386,
+      "probability": 0.0003952715740747437,
+      "normalized_probability": 0.0003952715740747437,
+      "total_log_prob": -7.8359375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.50390625,
+      "perplexity": 1815.118892385283,
+      "probability": 0.0005509280985367745,
+      "normalized_probability": 0.0005509280985367745,
+      "total_log_prob": -7.50390625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.57421875,
+      "perplexity": 1947.3383101792642,
+      "probability": 0.0005135214537570228,
+      "normalized_probability": 0.0005135214537570228,
+      "total_log_prob": -7.57421875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.59375,
+      "perplexity": 268.7415131590023,
+      "probability": 0.0037210477393135196,
+      "normalized_probability": 0.0037210477393135196,
+      "total_log_prob": -5.59375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.5234375,
+      "perplexity": 5031.319224605391,
+      "probability": 0.00019875502931906102,
+      "normalized_probability": 0.00019875502931906102,
+      "total_log_prob": -8.5234375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.76171875,
+      "perplexity": 864.1261369598841,
+      "probability": 0.00115723846002175,
+      "normalized_probability": 0.00115723846002175,
+      "total_log_prob": -6.76171875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.8828125,
+      "perplexity": 19590.744219849108,
+      "probability": 5.10445131015907e-05,
+      "normalized_probability": 5.10445131015907e-05,
+      "total_log_prob": -9.8828125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 10.3828125,
+      "perplexity": 32299.676704110814,
+      "probability": 3.096006220621796e-05,
+      "normalized_probability": 3.096006220621796e-05,
+      "total_log_prob": -10.3828125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 2.888671875,
+      "perplexity": 17.969428099556087,
+      "probability": 0.003096930714663377,
+      "normalized_probability": 0.0556500738064504,
+      "total_log_prob": -5.77734375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.84375,
+      "perplexity": 126.94450214932196,
+      "probability": 6.205434652598976e-05,
+      "normalized_probability": 0.007877458125943277,
+      "total_log_prob": -9.6875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.12890625,
+      "perplexity": 62.10995300937982,
+      "probability": 0.00025922542707870625,
+      "normalized_probability": 0.01610047909469486,
+      "total_log_prob": -8.2578125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.5234375,
+      "perplexity": 92.1518260518184,
+      "probability": 0.0001177584577054612,
+      "normalized_probability": 0.010851656910604076,
+      "total_log_prob": -9.046875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 6.92578125,
+      "perplexity": 1018.1894194620162,
+      "probability": 0.000982135524967813,
+      "normalized_probability": 0.000982135524967813,
+      "total_log_prob": -6.92578125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.62109375,
+      "perplexity": 750.765798300995,
+      "probability": 0.0013319733028103163,
+      "normalized_probability": 0.0013319733028103163,
+      "total_log_prob": -6.62109375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.1875,
+      "perplexity": 9774.184947038395,
+      "probability": 0.00010231032105679591,
+      "normalized_probability": 0.00010231032105679591,
+      "total_log_prob": -9.1875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.1875,
+      "perplexity": 3595.7216962228085,
+      "probability": 0.00027810828659249914,
+      "normalized_probability": 0.00027810828659249914,
+      "total_log_prob": -8.1875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.515625,
+      "perplexity": 1836.514939511285,
+      "probability": 2.964906955338039e-07,
+      "normalized_probability": 0.0005445095917739226,
+      "total_log_prob": -15.03125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 8.546875,
+      "perplexity": 5150.633521625214,
+      "probability": 0.0001941508740238353,
+      "normalized_probability": 0.0001941508740238353,
+      "total_log_prob": -8.546875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.3046875,
+      "perplexity": 27.240027749911206,
+      "probability": 0.001347674182613322,
+      "normalized_probability": 0.03671068213222579,
+      "total_log_prob": -6.609375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.978515625,
+      "perplexity": 19.658614220966218,
+      "probability": 0.00258758246594991,
+      "normalized_probability": 0.05086828546304573,
+      "total_log_prob": -5.95703125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.65234375,
+      "perplexity": 38.56494680401705,
+      "probability": 0.0006723795972929537,
+      "normalized_probability": 0.02593028340170916,
+      "total_log_prob": -7.3046875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.84375,
+      "perplexity": 126.94450214932196,
+      "probability": 6.205434652598976e-05,
+      "normalized_probability": 0.007877458125943277,
+      "total_log_prob": -9.6875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.982421875,
+      "perplexity": 19.735555861572347,
+      "probability": 0.00013034673054817695,
+      "normalized_probability": 0.0507029678139792,
+      "total_log_prob": -8.9453125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 7.3046875,
+      "perplexity": 1487.2551219966645,
+      "probability": 0.0006723795972929537,
+      "normalized_probability": 0.0006723795972929537,
+      "total_log_prob": -7.3046875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.5234375,
+      "perplexity": 5031.319224605391,
+      "probability": 0.00019875502931906102,
+      "normalized_probability": 0.00019875502931906102,
+      "total_log_prob": -8.5234375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.54296875,
+      "perplexity": 255.43519818017026,
+      "probability": 1.532634216314601e-05,
+      "normalized_probability": 0.003914887247820301,
+      "total_log_prob": -11.0859375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.1796875,
+      "perplexity": 65.34542957624015,
+      "probability": 0.00023419065719907224,
+      "normalized_probability": 0.015303289097415374,
+      "total_log_prob": -8.359375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 7.82421875,
+      "perplexity": 2500.4318851599323,
+      "probability": 0.0003999309103099356,
+      "normalized_probability": 0.0003999309103099356,
+      "total_log_prob": -7.82421875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.0546875,
+      "perplexity": 8558.562304945235,
+      "probability": 0.00011684205411721881,
+      "normalized_probability": 0.00011684205411721881,
+      "total_log_prob": -9.0546875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.30078125,
+      "perplexity": 1481.4568637723241,
+      "probability": 0.0006750112166301211,
+      "normalized_probability": 0.0006750112166301211,
+      "total_log_prob": -7.30078125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.3671875,
+      "perplexity": 4303.515388958226,
+      "probability": 0.00023236817104587491,
+      "normalized_probability": 0.00023236817104587491,
+      "total_log_prob": -8.3671875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.0625,
+      "perplexity": 58.119428177447986,
+      "probability": 0.0002960447300568554,
+      "normalized_probability": 0.017205950425851383,
+      "total_log_prob": -8.125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.83984375,
+      "perplexity": 126.44959243764188,
+      "probability": 6.25410447978757e-05,
+      "normalized_probability": 0.007908289625315685,
+      "total_log_prob": -9.6796875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 6.19140625,
+      "perplexity": 488.53262239485935,
+      "probability": 4.1899887877016565e-06,
+      "normalized_probability": 0.0020469462102609476,
+      "total_log_prob": -12.3828125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.591796875,
+      "perplexity": 36.299242562272255,
+      "probability": 0.0007589355109414391,
+      "normalized_probability": 0.027548784200785322,
+      "total_log_prob": -7.18359375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 5.015625,
+      "perplexity": 150.7503262825534,
+      "probability": 4.4003120768692036e-05,
+      "normalized_probability": 0.006633484813330926,
+      "total_log_prob": -10.03125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 8.40625,
+      "perplexity": 4474.947952880096,
+      "probability": 0.00022346628620705983,
+      "normalized_probability": 0.00022346628620705983,
+      "total_log_prob": -8.40625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.63671875,
+      "perplexity": 2072.9308408242946,
+      "probability": 0.00048240876169431345,
+      "normalized_probability": 0.00048240876169431345,
+      "total_log_prob": -7.63671875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.9765625,
+      "perplexity": 144.97517197488295,
+      "probability": 4.7578717883271245e-05,
+      "normalized_probability": 0.006897732807471687,
+      "total_log_prob": -9.953125,
+      "num_target_tokens": 2
+    }
+  ]
+}

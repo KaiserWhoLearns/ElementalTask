@@ -1,0 +1,85 @@
+{
+  "task_name": "ignoring_context",
+  "model_id": "allenai/OLMo-2-1124-7B",
+  "backend": "transformers",
+  "checkpoint": "stage1-step150000-tokens630B",
+  "split": "test",
+  "eval_mode": "all",
+  "num_examples": 1,
+  "metrics": {
+    "exact_match": {
+      "accuracy": 1.0,
+      "correct": 1,
+      "total": 1
+    },
+    "continuous": {
+      "mean_loss": 8.8984375,
+      "mean_perplexity": 7320.526276004351,
+      "mean_probability": 0.000136602200756776,
+      "mean_normalized_probability": 0.000136602200756776,
+      "num_valid_examples": 1,
+      "num_total_examples": 1
+    }
+  },
+  "config": {
+    "model_config": {
+      "model_id": "allenai/OLMo-2-1124-7B",
+      "backend": "transformers",
+      "checkpoint": "stage1-step150000-tokens630B",
+      "local_path": null,
+      "api_key": null,
+      "temperature": 0.0,
+      "max_tokens": 50,
+      "top_p": 1.0,
+      "tensor_parallel_size": null,
+      "trust_remote_code": true,
+      "generation_kwargs": {}
+    },
+    "eval_config": {
+      "output_dir": "results/olmo2_continuous_7b_early_revised/OLMo-2-1124-7B_stage1-step150000-tokens630B",
+      "save_predictions": true,
+      "save_detailed_results": true,
+      "batch_size": 1,
+      "retry_attempts": 3,
+      "retry_delay": 1.0,
+      "eval_mode": "all",
+      "compute_loss": true,
+      "compute_perplexity": true
+    },
+    "task_config": {
+      "name": "ignoring_context",
+      "description": "Extract key information while ignoring irrelevant context",
+      "data_path": null,
+      "data_format": "memory",
+      "input_column": "input",
+      "output_column": "output",
+      "demonstrations_path": null,
+      "num_demonstrations": 3,
+      "prompt_template": null,
+      "evaluation_metrics": [
+        "accuracy"
+      ],
+      "metadata": {},
+      "in_memory_data": [
+        {
+          "input": "Some text here. X = 5. More text.\nQuestion: What is X?",
+          "output": "5"
+        }
+      ],
+      "in_memory_demonstrations": null
+    }
+  },
+  "predictions": [
+    " 5\n\nInput: Some text here. X = 5. More text.\nQuestion: What is X?\nOutput: 5\n\nInput: Some text here. X = 5. More text.\nQuestion: What is X?\nOutput:"
+  ],
+  "target_metrics": [
+    {
+      "loss": 8.8984375,
+      "perplexity": 7320.526276004351,
+      "probability": 0.000136602200756776,
+      "normalized_probability": 0.000136602200756776,
+      "total_log_prob": -8.8984375,
+      "num_target_tokens": 1
+    }
+  ]
+}

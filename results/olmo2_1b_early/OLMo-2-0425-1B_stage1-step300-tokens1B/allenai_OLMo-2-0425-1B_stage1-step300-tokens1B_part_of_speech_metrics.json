@@ -1,0 +1,360 @@
+{
+  "task_name": "part_of_speech",
+  "model_id": "allenai/OLMo-2-0425-1B",
+  "backend": "transformers",
+  "checkpoint": "stage1-step300-tokens1B",
+  "split": "test",
+  "eval_mode": "all",
+  "num_examples": 15,
+  "metrics": {
+    "exact_match": {
+      "accuracy": 0.0,
+      "correct": 0,
+      "total": 15
+    },
+    "continuous": {
+      "mean_loss": 10.61875,
+      "mean_perplexity": 219759.95251896,
+      "mean_probability": 2.6412211248296503e-06,
+      "mean_normalized_probability": 4.750579813561285e-05,
+      "num_valid_examples": 15,
+      "num_total_examples": 15
+    }
+  },
+  "config": {
+    "model_config": {
+      "model_id": "allenai/OLMo-2-0425-1B",
+      "backend": "transformers",
+      "checkpoint": "stage1-step300-tokens1B",
+      "local_path": null,
+      "api_key": null,
+      "temperature": 0.0,
+      "max_tokens": 50,
+      "top_p": 1.0,
+      "tensor_parallel_size": null,
+      "trust_remote_code": true,
+      "generation_kwargs": {}
+    },
+    "eval_config": {
+      "output_dir": "results/olmo2_continuous_1b_early_revised/OLMo-2-0425-1B_stage1-step300-tokens1B",
+      "save_predictions": true,
+      "save_detailed_results": true,
+      "batch_size": 1,
+      "retry_attempts": 3,
+      "retry_delay": 1.0,
+      "eval_mode": "all",
+      "compute_loss": true,
+      "compute_perplexity": true
+    },
+    "task_config": {
+      "name": "part_of_speech",
+      "description": "Identify the part of speech of the target word within a sentence.",
+      "data_path": null,
+      "data_format": "memory",
+      "input_column": "input",
+      "output_column": "output",
+      "demonstrations_path": null,
+      "num_demonstrations": 5,
+      "prompt_template": "{input}",
+      "evaluation_metrics": [
+        "accuracy"
+      ],
+      "metadata": {
+        "task_type": "classification",
+        "labels": [
+          "adjective",
+          "adverb",
+          "auxiliary verb",
+          "conjunction",
+          "determiner",
+          "interjection",
+          "noun",
+          "numeral",
+          "particle",
+          "preposition",
+          "pronoun",
+          "proper noun",
+          "verb"
+        ],
+        "prompt_format": "{sentence} The part of speech for \"{target_word}\" is _"
+      },
+      "in_memory_data": [
+        {
+          "sentence": "The cat is in the house.",
+          "target_word": "cat",
+          "answer": "noun",
+          "word": "cat",
+          "prompt": "The cat is in the house. The part of speech for \"cat\" is _",
+          "input": "The cat is in the house. The part of speech for \"cat\" is _",
+          "output": "noun"
+        },
+        {
+          "sentence": "Alex arrived before noon.",
+          "target_word": "Alex",
+          "answer": "proper noun",
+          "word": "Alex",
+          "prompt": "Alex arrived before noon. The part of speech for \"Alex\" is _",
+          "input": "Alex arrived before noon. The part of speech for \"Alex\" is _",
+          "output": "proper noun"
+        },
+        {
+          "sentence": "They run every morning.",
+          "target_word": "run",
+          "answer": "verb",
+          "word": "run",
+          "prompt": "They run every morning. The part of speech for \"run\" is _",
+          "input": "They run every morning. The part of speech for \"run\" is _",
+          "output": "verb"
+        },
+        {
+          "sentence": "The happy child waved.",
+          "target_word": "happy",
+          "answer": "adjective",
+          "word": "happy",
+          "prompt": "The happy child waved. The part of speech for \"happy\" is _",
+          "input": "The happy child waved. The part of speech for \"happy\" is _",
+          "output": "adjective"
+        },
+        {
+          "sentence": "She moved quietly through the hallway.",
+          "target_word": "quietly",
+          "answer": "adverb",
+          "word": "quietly",
+          "prompt": "She moved quietly through the hallway. The part of speech for \"quietly\" is _",
+          "input": "She moved quietly through the hallway. The part of speech for \"quietly\" is _",
+          "output": "adverb"
+        },
+        {
+          "sentence": "The keys are under the table.",
+          "target_word": "under",
+          "answer": "preposition",
+          "word": "under",
+          "prompt": "The keys are under the table. The part of speech for \"under\" is _",
+          "input": "The keys are under the table. The part of speech for \"under\" is _",
+          "output": "preposition"
+        },
+        {
+          "sentence": "I called, but no one answered.",
+          "target_word": "but",
+          "answer": "conjunction",
+          "word": "but",
+          "prompt": "I called, but no one answered. The part of speech for \"but\" is _",
+          "input": "I called, but no one answered. The part of speech for \"but\" is _",
+          "output": "conjunction"
+        },
+        {
+          "sentence": "Hey, can you help me?",
+          "target_word": "Hey",
+          "answer": "interjection",
+          "word": "Hey",
+          "prompt": "Hey, can you help me? The part of speech for \"Hey\" is _",
+          "input": "Hey, can you help me? The part of speech for \"Hey\" is _",
+          "output": "interjection"
+        },
+        {
+          "sentence": "Those apples look fresh.",
+          "target_word": "Those",
+          "answer": "determiner",
+          "word": "Those",
+          "prompt": "Those apples look fresh. The part of speech for \"Those\" is _",
+          "input": "Those apples look fresh. The part of speech for \"Those\" is _",
+          "output": "determiner"
+        },
+        {
+          "sentence": "We were planning a trip.",
+          "target_word": "were",
+          "answer": "auxiliary verb",
+          "word": "were",
+          "prompt": "We were planning a trip. The part of speech for \"were\" is _",
+          "input": "We were planning a trip. The part of speech for \"were\" is _",
+          "output": "auxiliary verb"
+        },
+        {
+          "sentence": "She won first place.",
+          "target_word": "first",
+          "answer": "numeral",
+          "word": "first",
+          "prompt": "She won first place. The part of speech for \"first\" is _",
+          "input": "She won first place. The part of speech for \"first\" is _",
+          "output": "numeral"
+        },
+        {
+          "sentence": "Please sit down.",
+          "target_word": "down",
+          "answer": "particle",
+          "word": "down",
+          "prompt": "Please sit down. The part of speech for \"down\" is _",
+          "input": "Please sit down. The part of speech for \"down\" is _",
+          "output": "particle"
+        },
+        {
+          "sentence": "It seems cold today.",
+          "target_word": "It",
+          "answer": "pronoun",
+          "word": "It",
+          "prompt": "It seems cold today. The part of speech for \"It\" is _",
+          "input": "It seems cold today. The part of speech for \"It\" is _",
+          "output": "pronoun"
+        },
+        {
+          "sentence": "We met during lunch.",
+          "target_word": "during",
+          "answer": "preposition",
+          "word": "during",
+          "prompt": "We met during lunch. The part of speech for \"during\" is _",
+          "input": "We met during lunch. The part of speech for \"during\" is _",
+          "output": "preposition"
+        },
+        {
+          "sentence": "Bravo! That was amazing.",
+          "target_word": "Bravo",
+          "answer": "interjection",
+          "word": "Bravo",
+          "prompt": "Bravo! That was amazing. The part of speech for \"Bravo\" is _",
+          "input": "Bravo! That was amazing. The part of speech for \"Bravo\" is _",
+          "output": "interjection"
+        }
+      ],
+      "in_memory_demonstrations": null
+    }
+  },
+  "predictions": [
+    "\" is the \"the \"The \"the \"and\"\" is the \"and\"\" is the \"and\"\" is the \"and\"\" is the \"and\"\" is the \"and\" and \"and\" is the \"and",
+    "\" is the \"and\"\" is the \"and\"\" is the \"and\"\" is the \"and\"\" is the \"and\"\" is the \"and\"\" is the \"and\"\" is the \"and\"\" is",
+    "\": \"I don't \"and\": \"I think that is the \"and\"\" is the \"and\"\" is the \"and\"\"\" is the \"and\"\"\" is the \"and\"\" is the \"and",
+    "\": \"I don't \"I don't \"I think that \"I don't \"I don't \"I think that \"I think that \"I think that \"I think that \"I think that \"I think that \"I think that",
+    "\": \"The \"The \"The \"The \"The \"The \"The \"The \"The \"The \"The \"\"\" is the \"and\"\"\" is the \"and\"\" is the \"and\"\" \"and\"\"",
+    "\" is the \"and\" is the \"and\" is the \"and\" is the \"and\" is the \"and\" is the \"and\" is the \"and\"\" is the \"and\" is the \"and\" is the \"",
+    "  1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. ",
+    "\": \"I don't \"I don't \"I don't \"I don't \"I don't \"I don't \"I don't \"I don't \"I don't \"I don't \"I don't \"I don't",
+    "  \u2022  \u2022  \u2022  \u2022  \u2022  \u2022  \u2022  \u2022  \u2022  \u2022  \u2022  \u2022  \u2022  \u2022  \u2022  \u2022  \u2022  \u2022  \u2022  \u2022  \u2022  \u2022  \u2022  \u2022  \u2022",
+    "\": \"The \"The \"The \"The \"The \"The \"The \"The \"The \"The \"The \"The \"The \"The \"The \"The \"The \"The \"The \"The \"\"\"\" is the \"and",
+    "\" is the \"the \"The \"The \"The \"The \"The \"The \"The \"The \"The \"The \"The \"The \"The \"The \"The \"The \"\"\"\" is the \"and\"\" \"The \"",
+    "\" is the \"and\"\" is the \"and\"\"\" is the \"and\"\"\" is the \"and\"\"\" is the \"and\"\"\" is the \"and\"\"\" is the \"and\"\"\" is",
+    "\": \"The \"The \"and\"\" is the \"and\"\" is the \"and\"\"\" is the \"and\"\"\" is the \"and\"\"\" is the \"and\"\"\" is the \"and\"\"",
+    "\": \"The \"The \"The \"The \"and\" is the \"and\"\" is the \"and\"\"\" is the \"and\"\"\" is the \"and\"\"\" is the \"and\"\"\" is the \"",
+    "  \u2022 \"The \"The \"The \"The \"The \"The \"and\"\" is the \"and\"\"\" is the \"and\"\"\" is the \"and\"\"\"\" is the \"and\"\"\" is the \""
+  ],
+  "target_metrics": [
+    {
+      "loss": 11.0,
+      "perplexity": 59874.14171519782,
+      "probability": 1.670170079024566e-05,
+      "normalized_probability": 1.670170079024566e-05,
+      "total_log_prob": -11.0,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 12.34375,
+      "perplexity": 229521.044167983,
+      "probability": 1.898256859952468e-11,
+      "normalized_probability": 4.3568989659532705e-06,
+      "total_log_prob": -24.6875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 10.703125,
+      "perplexity": 44494.683984685835,
+      "probability": 2.2474594950358106e-05,
+      "normalized_probability": 2.2474594950358106e-05,
+      "total_log_prob": -10.703125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 10.2109375,
+      "perplexity": 27199.054754297606,
+      "probability": 1.3517375472854614e-09,
+      "normalized_probability": 3.6765983562057217e-05,
+      "total_log_prob": -20.421875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 9.953125,
+      "perplexity": 21017.800489146885,
+      "probability": 2.263734395415915e-09,
+      "normalized_probability": 4.7578717883271245e-05,
+      "total_log_prob": -19.90625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 8.71875,
+      "perplexity": 6116.528646774525,
+      "probability": 2.6729446876368918e-08,
+      "normalized_probability": 0.00016349142753174832,
+      "total_log_prob": -17.4375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 10.921875,
+      "perplexity": 55374.528907639564,
+      "probability": 3.261218602374328e-10,
+      "normalized_probability": 1.8058844377130914e-05,
+      "total_log_prob": -21.84375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 10.2421875,
+      "perplexity": 28062.445432953682,
+      "probability": 1.269839909415411e-09,
+      "normalized_probability": 3.5634813166556813e-05,
+      "total_log_prob": -20.484375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 9.2265625,
+      "perplexity": 10163.544211331155,
+      "probability": 9.450864406622024e-13,
+      "normalized_probability": 9.813498131112976e-05,
+      "total_log_prob": -27.6875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 11.3671875,
+      "perplexity": 86438.41724442679,
+      "probability": 1.5605313853756058e-15,
+      "normalized_probability": 1.1599096702787911e-05,
+      "total_log_prob": -34.09375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 10.40625,
+      "perplexity": 33065.6414636259,
+      "probability": 9.146313756209837e-10,
+      "normalized_probability": 3.0242873137666396e-05,
+      "total_log_prob": -20.8125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 14.78125,
+      "perplexity": 2626729.252563041,
+      "probability": 3.8070158887683083e-07,
+      "normalized_probability": 3.8070158887683083e-07,
+      "total_log_prob": -14.78125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 10.2421875,
+      "perplexity": 28062.445432953682,
+      "probability": 1.269839909415411e-09,
+      "normalized_probability": 3.5634813166556813e-05,
+      "total_log_prob": -20.484375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 8.7265625,
+      "perplexity": 6164.501175517202,
+      "probability": 2.631504521291054e-08,
+      "normalized_probability": 0.00016221912714877535,
+      "total_log_prob": -17.453125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 10.4375,
+      "perplexity": 34115.257594825,
+      "probability": 8.592166619174109e-10,
+      "normalized_probability": 2.9312397751078144e-05,
+      "total_log_prob": -20.875,
+      "num_target_tokens": 2
+    }
+  ]
+}

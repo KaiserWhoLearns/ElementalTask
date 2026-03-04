@@ -1,0 +1,252 @@
+{
+  "task_name": "basic_arithmetic",
+  "model_id": "LLM360/Amber",
+  "backend": "transformers",
+  "checkpoint": "ckpt_130",
+  "split": "test",
+  "eval_mode": "all",
+  "num_examples": 10,
+  "metrics": {
+    "exact_match": {
+      "accuracy": 1.0,
+      "correct": 10,
+      "total": 10,
+      "detailed_results": [
+        {
+          "question": "What is 5 + 3?",
+          "prediction": "8\nInput: What is 10 - 2?\\Output: 8\nInput: What is 10 - 2?\\Output: 8\nInput: What is 10 - 2?\\Output",
+          "expected": "8",
+          "pred_number": 8.0,
+          "expected_number": 8.0,
+          "correct": true
+        },
+        {
+          "question": "What is 12 - 7?",
+          "prediction": "5\nInput: What is 12 - 7?\\Output: 5\nInput: What is 12 - 7?\\Output: 5\nInput: What is 12 - 7?\\Output",
+          "expected": "5",
+          "pred_number": 5.0,
+          "expected_number": 5.0,
+          "correct": true
+        },
+        {
+          "question": "What is 4 \u00d7 6?",
+          "prediction": "24\nInput: What is 10 - 2?\\Output: 8\nInput: What is 10 - 2?\\Output: 8\nInput: What is 10 - 2?\\",
+          "expected": "24",
+          "pred_number": 24.0,
+          "expected_number": 24.0,
+          "correct": true
+        },
+        {
+          "question": "What is 15 \u00f7 3?",
+          "prediction": "5\nInput: What is 15 \u00f7 3?\\Output: 5\nInput: What is 15 \u00f7 3?\\Output: 5\nInput: What is 15 \u00f7 3",
+          "expected": "5",
+          "pred_number": 5.0,
+          "expected_number": 5.0,
+          "correct": true
+        },
+        {
+          "question": "What is 2 + 2?",
+          "prediction": "4\nInput: What is 10 - 2?\\Output: 8\nInput: What is 10 - 2?\\Output: 8\nInput: What is 10 - 2?\\Output",
+          "expected": "4",
+          "pred_number": 4.0,
+          "expected_number": 4.0,
+          "correct": true
+        },
+        {
+          "question": "What is 10 - 4?",
+          "prediction": "6\nInput: What is 10 - 4?\\Output: 6\nInput: What is 10 - 4?\\Output: 6\nInput: What is 10 - 4?\\Output",
+          "expected": "6",
+          "pred_number": 6.0,
+          "expected_number": 6.0,
+          "correct": true
+        },
+        {
+          "question": "What is 3 \u00d7 7?",
+          "prediction": "21\nInput: What is 2 \u00d7 3?\\Output: 6\nInput: What is 2 \u00d7 2?\\Output: 4\nInput: What is 2 \u00d7 1?\\Output:",
+          "expected": "21",
+          "pred_number": 21.0,
+          "expected_number": 21.0,
+          "correct": true
+        },
+        {
+          "question": "What is 20 \u00f7 4?",
+          "prediction": "5\nInput: What is 10 \u00f7 2?\\Output: 5\nInput: What is 10 \u00f7 2?\\Output: 5\nInput: What is 10 \u00f7 2",
+          "expected": "5",
+          "pred_number": 5.0,
+          "expected_number": 5.0,
+          "correct": true
+        },
+        {
+          "question": "What is 8 + 9?",
+          "prediction": "17\nInput: What is 10 - 2?\\Output: 8\nInput: What is 10 - 2?\\Output: 8\nInput: What is 10 - 2?\\",
+          "expected": "17",
+          "pred_number": 17.0,
+          "expected_number": 17.0,
+          "correct": true
+        },
+        {
+          "question": "What is 25 - 13?",
+          "prediction": "12\nInput: What is 12 - 13?\\Output: 9\nInput: What is 12 - 13?\\Output: 9\nInput: What is 12 - 1",
+          "expected": "12",
+          "pred_number": 12.0,
+          "expected_number": 12.0,
+          "correct": true
+        }
+      ]
+    },
+    "continuous": {
+      "mean_loss": 4.40703125,
+      "mean_perplexity": 267.22570723007345,
+      "mean_probability": 0.008813264773752456,
+      "mean_normalized_probability": 0.03994936467569058,
+      "num_valid_examples": 10,
+      "num_total_examples": 10
+    }
+  },
+  "config": {
+    "model_config": {
+      "model_id": "LLM360/Amber",
+      "backend": "transformers",
+      "checkpoint": "ckpt_130",
+      "local_path": null,
+      "api_key": null,
+      "temperature": 0.0,
+      "max_tokens": 50,
+      "top_p": 1.0,
+      "tensor_parallel_size": null,
+      "trust_remote_code": true,
+      "quantization": null,
+      "generation_kwargs": {}
+    },
+    "eval_config": {
+      "output_dir": "results/amber/Amber_ckpt_130",
+      "save_predictions": true,
+      "save_detailed_results": true,
+      "batch_size": 1,
+      "retry_attempts": 3,
+      "retry_delay": 1.0,
+      "eval_mode": "all",
+      "compute_loss": true,
+      "compute_perplexity": true
+    },
+    "task_config": {
+      "name": "basic_arithmetic",
+      "description": "Basic arithmetic evaluation task",
+      "data_path": null,
+      "data_format": "memory",
+      "input_column": "question",
+      "output_column": "answer",
+      "demonstrations_path": null,
+      "num_demonstrations": 5,
+      "prompt_template": null,
+      "evaluation_metrics": [
+        "accuracy"
+      ],
+      "metadata": {
+        "task_type": "arithmetic"
+      },
+      "in_memory_data": null,
+      "in_memory_demonstrations": [
+        "Input: What is 7 + 5?\nOutput: 12",
+        "Input: What is 18 - 9?\nOutput: 9",
+        "Input: What is 6 - 4?\nOutput: 2",
+        "Input: What is 16 + 2?\nOutput: 18",
+        "Input: What is 11 + 3?\nOutput: 14"
+      ]
+    }
+  },
+  "predictions": [
+    "8\nInput: What is 10 - 2?\\Output: 8\nInput: What is 10 - 2?\\Output: 8\nInput: What is 10 - 2?\\Output",
+    "5\nInput: What is 12 - 7?\\Output: 5\nInput: What is 12 - 7?\\Output: 5\nInput: What is 12 - 7?\\Output",
+    "24\nInput: What is 10 - 2?\\Output: 8\nInput: What is 10 - 2?\\Output: 8\nInput: What is 10 - 2?\\",
+    "5\nInput: What is 15 \u00f7 3?\\Output: 5\nInput: What is 15 \u00f7 3?\\Output: 5\nInput: What is 15 \u00f7 3",
+    "4\nInput: What is 10 - 2?\\Output: 8\nInput: What is 10 - 2?\\Output: 8\nInput: What is 10 - 2?\\Output",
+    "6\nInput: What is 10 - 4?\\Output: 6\nInput: What is 10 - 4?\\Output: 6\nInput: What is 10 - 4?\\Output",
+    "21\nInput: What is 2 \u00d7 3?\\Output: 6\nInput: What is 2 \u00d7 2?\\Output: 4\nInput: What is 2 \u00d7 1?\\Output: ",
+    "5\nInput: What is 10 \u00f7 2?\\Output: 5\nInput: What is 10 \u00f7 2?\\Output: 5\nInput: What is 10 \u00f7 2",
+    "17\nInput: What is 10 - 2?\\Output: 8\nInput: What is 10 - 2?\\Output: 8\nInput: What is 10 - 2?\\",
+    "12\nInput: What is 12 - 13?\\Output: 9\nInput: What is 12 - 13?\\Output: 9\nInput: What is 12 - 1"
+  ],
+  "target_metrics": [
+    {
+      "loss": 5.80859375,
+      "perplexity": 333.1503034969411,
+      "probability": 0.0030016481735223206,
+      "normalized_probability": 0.0030016481735223206,
+      "total_log_prob": -5.80859375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.95703125,
+      "perplexity": 386.4611130887752,
+      "probability": 0.00258758246594991,
+      "normalized_probability": 0.00258758246594991,
+      "total_log_prob": -5.95703125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 2.583984375,
+      "perplexity": 13.249825400173327,
+      "probability": 0.005696127334776817,
+      "normalized_probability": 0.07547269264294747,
+      "total_log_prob": -5.16796875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 6.4140625,
+      "perplexity": 610.368272250772,
+      "probability": 0.0016383551463322891,
+      "normalized_probability": 0.0016383551463322891,
+      "total_log_prob": -6.4140625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.060546875,
+      "perplexity": 21.33922385967176,
+      "probability": 0.04686206052179173,
+      "normalized_probability": 0.04686206052179173,
+      "total_log_prob": -3.060546875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.55859375,
+      "perplexity": 705.279198037542,
+      "probability": 0.0014178782002681016,
+      "normalized_probability": 0.0014178782002681016,
+      "total_log_prob": -6.55859375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 2.701171875,
+      "perplexity": 14.89717913158109,
+      "probability": 0.004506007601502624,
+      "normalized_probability": 0.06712680240785066,
+      "total_log_prob": -5.40234375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 6.33984375,
+      "perplexity": 566.7077563764824,
+      "probability": 0.001764577930596855,
+      "normalized_probability": 0.001764577930596855,
+      "total_log_prob": -6.33984375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 2.12890625,
+      "perplexity": 8.405668082337122,
+      "probability": 0.014153228760049095,
+      "normalized_probability": 0.1189673432503605,
+      "total_log_prob": -4.2578125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.517578125,
+      "perplexity": 12.398532576458457,
+      "probability": 0.006505181602734825,
+      "normalized_probability": 0.08065470601728597,
+      "total_log_prob": -5.03515625,
+      "num_target_tokens": 2
+    }
+  ]
+}

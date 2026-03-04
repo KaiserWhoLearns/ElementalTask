@@ -1,0 +1,85 @@
+{
+  "task_name": "ignoring_context",
+  "model_id": "allenai/OLMo-2-0425-1B",
+  "backend": "transformers",
+  "checkpoint": "stage1-step140000-tokens294B",
+  "split": "test",
+  "eval_mode": "all",
+  "num_examples": 1,
+  "metrics": {
+    "exact_match": {
+      "accuracy": 1.0,
+      "correct": 1,
+      "total": 1
+    },
+    "continuous": {
+      "mean_loss": 7.92578125,
+      "mean_perplexity": 2767.7257968528634,
+      "mean_probability": 0.0003613074680797802,
+      "mean_normalized_probability": 0.0003613074680797802,
+      "num_valid_examples": 1,
+      "num_total_examples": 1
+    }
+  },
+  "config": {
+    "model_config": {
+      "model_id": "allenai/OLMo-2-0425-1B",
+      "backend": "transformers",
+      "checkpoint": "stage1-step140000-tokens294B",
+      "local_path": null,
+      "api_key": null,
+      "temperature": 0.0,
+      "max_tokens": 50,
+      "top_p": 1.0,
+      "tensor_parallel_size": null,
+      "trust_remote_code": true,
+      "generation_kwargs": {}
+    },
+    "eval_config": {
+      "output_dir": "results/olmo2_continuous_1b_early_revised/OLMo-2-0425-1B_stage1-step140000-tokens294B",
+      "save_predictions": true,
+      "save_detailed_results": true,
+      "batch_size": 1,
+      "retry_attempts": 3,
+      "retry_delay": 1.0,
+      "eval_mode": "all",
+      "compute_loss": true,
+      "compute_perplexity": true
+    },
+    "task_config": {
+      "name": "ignoring_context",
+      "description": "Extract key information while ignoring irrelevant context",
+      "data_path": null,
+      "data_format": "memory",
+      "input_column": "input",
+      "output_column": "output",
+      "demonstrations_path": null,
+      "num_demonstrations": 3,
+      "prompt_template": null,
+      "evaluation_metrics": [
+        "accuracy"
+      ],
+      "metadata": {},
+      "in_memory_data": [
+        {
+          "input": "Some text here. X = 5. More text.\nQuestion: What is X?",
+          "output": "5"
+        }
+      ],
+      "in_memory_demonstrations": null
+    }
+  },
+  "predictions": [
+    " 5\n\nInput: Then came a. Y = 4. Then came a.\nQuestion: What is Y?\nOutput: 4\n\nInput: Then came a. Y = 3. Then came a.\nQuestion: What is Y?\n"
+  ],
+  "target_metrics": [
+    {
+      "loss": 7.92578125,
+      "perplexity": 2767.7257968528634,
+      "probability": 0.0003613074680797802,
+      "normalized_probability": 0.0003613074680797802,
+      "total_log_prob": -7.92578125,
+      "num_target_tokens": 1
+    }
+  ]
+}

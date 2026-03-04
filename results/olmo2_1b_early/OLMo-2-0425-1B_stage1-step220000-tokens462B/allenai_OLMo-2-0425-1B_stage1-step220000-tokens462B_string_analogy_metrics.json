@@ -1,0 +1,257 @@
+{
+  "task_name": "string_analogy",
+  "model_id": "allenai/OLMo-2-0425-1B",
+  "backend": "transformers",
+  "checkpoint": "stage1-step220000-tokens462B",
+  "split": "test",
+  "eval_mode": "all",
+  "num_examples": 10,
+  "metrics": {
+    "exact_match": {
+      "accuracy": 0.0,
+      "correct": 0,
+      "total": 10,
+      "accuracy_successor_last": 0.0,
+      "accuracy_delete_middle": 0.0,
+      "accuracy_append_successor": 0.0,
+      "accuracy_successor_all": 0.0,
+      "accuracy_double_string": 0.0,
+      "accuracy_reverse": 0.0
+    },
+    "continuous": {
+      "mean_loss": 7.631944444444445,
+      "mean_perplexity": 72731.18664176275,
+      "mean_probability": 0.000917850982478647,
+      "mean_normalized_probability": 0.01754778645854711,
+      "num_valid_examples": 9,
+      "num_total_examples": 10
+    }
+  },
+  "config": {
+    "model_config": {
+      "model_id": "allenai/OLMo-2-0425-1B",
+      "backend": "transformers",
+      "checkpoint": "stage1-step220000-tokens462B",
+      "local_path": null,
+      "api_key": null,
+      "temperature": 0.0,
+      "max_tokens": 50,
+      "top_p": 1.0,
+      "tensor_parallel_size": null,
+      "trust_remote_code": true,
+      "generation_kwargs": {}
+    },
+    "eval_config": {
+      "output_dir": "results/olmo2_continuous_1b_early_revised/OLMo-2-0425-1B_stage1-step220000-tokens462B",
+      "save_predictions": true,
+      "save_detailed_results": true,
+      "batch_size": 1,
+      "retry_attempts": 3,
+      "retry_delay": 1.0,
+      "eval_mode": "all",
+      "compute_loss": true,
+      "compute_perplexity": true
+    },
+    "task_config": {
+      "name": "string_analogy",
+      "description": "String analogy task (Melanie Mitchell): identify transformation and apply to query",
+      "data_path": null,
+      "data_format": "memory",
+      "input_column": "input",
+      "output_column": "output",
+      "demonstrations_path": null,
+      "num_demonstrations": 5,
+      "prompt_template": null,
+      "evaluation_metrics": [
+        "accuracy"
+      ],
+      "metadata": {},
+      "in_memory_data": [
+        {
+          "input": "abc -> abd, ijk -> ?",
+          "output": "ijl",
+          "source": "abc",
+          "target": "abd",
+          "query": "ijk",
+          "answer": "ijl",
+          "transformation": "successor_last"
+        },
+        {
+          "input": "abc -> abd, xyz -> ?",
+          "output": "xya",
+          "source": "abc",
+          "target": "abd",
+          "query": "xyz",
+          "answer": "xya",
+          "transformation": "successor_last"
+        },
+        {
+          "input": "abc -> abd, mrrjjj -> ?",
+          "output": "mrrjjk",
+          "source": "abc",
+          "target": "abd",
+          "query": "mrrjjj",
+          "answer": "mrrjjk",
+          "transformation": "successor_last"
+        },
+        {
+          "input": "abc -> ac, pqr -> ?",
+          "output": "pr",
+          "source": "abc",
+          "target": "ac",
+          "query": "pqr",
+          "answer": "pr",
+          "transformation": "delete_middle"
+        },
+        {
+          "input": "abc -> abcd, pqr -> ?",
+          "output": "pqrs",
+          "source": "abc",
+          "target": "abcd",
+          "query": "pqr",
+          "answer": "pqrs",
+          "transformation": "append_successor"
+        },
+        {
+          "input": "a -> b, c -> ?",
+          "output": "d",
+          "source": "a",
+          "target": "b",
+          "query": "c",
+          "answer": "d",
+          "transformation": "successor_all"
+        },
+        {
+          "input": "a -> aa, b -> ?",
+          "output": "bb",
+          "source": "a",
+          "target": "aa",
+          "query": "b",
+          "answer": "bb",
+          "transformation": "double_string"
+        },
+        {
+          "input": "a -> ab, z -> ?",
+          "output": "za",
+          "source": "a",
+          "target": "ab",
+          "query": "z",
+          "answer": "za",
+          "transformation": "append_successor"
+        },
+        {
+          "input": "pqr -> rqp, abc -> ?",
+          "output": "cba",
+          "source": "pqr",
+          "target": "rqp",
+          "query": "abc",
+          "answer": "cba",
+          "transformation": "reverse"
+        },
+        {
+          "input": "abc -> abd, abcabc -> ?",
+          "output": "abdabd",
+          "source": "abc",
+          "target": "abd",
+          "query": "abcabc",
+          "answer": "abdabd",
+          "transformation": "successor_last"
+        }
+      ],
+      "in_memory_demonstrations": null
+    }
+  },
+  "predictions": [
+    " abc\n\nInput: abc -> abd, ijk -> ?\nOutput: abc\n\nInput: abc -> abd, ijk -> ?\nOutput: abc\n\nInput: abc -> abd, ijk -> ?\nOutput: abc\n\nInput: abc",
+    " abc\n\nInput: c -> c\nOutput: c\n\nInput: c -> c\nOutput: c\n\nInput: c -> c\nOutput: c\n\nInput: c -> c\nOutput: c\n\nInput: c -> c\nOutput:",
+    " mrrjjj\n\nInput: a\nOutput: a\n\nInput: a\nOutput: a\n\nInput: a\nOutput: a\n\nInput: a\nOutput: a\n\nInput: a\nOutput: a\n\nInput: a\nOutput",
+    " ac, pqr\n\nInput: abc -> ac, pqr -> ?\nOutput: ac, pqr\n\nInput: abc -> ac, pqr -> ?\nOutput: ac, pqr\n\nInput: abc -> ac, pqr -> ?\nOutput",
+    " pqr\n\nInput: pqr -> pqr\nOutput: pqr\n\nInput: pqr -> pqr\nOutput: pqr\n\nInput: pqr -> pqr\nOutput: pqr\n\nInput: pqr -> pqr\n",
+    " a -> b, c -> c\n\nInput: a -> b, c -> c\nOutput: a -> b, c -> c\n\nInput: a -> b, c -> c\nOutput: a -> b, c -> c\n\nInput:",
+    " a -> b\n\nInput: a -> b\nOutput: a -> b\n\nInput: a -> b\nOutput: a -> b\n\nInput: a -> b\nOutput: a -> b\n\nInput: a -> b\nOutput: a ->",
+    " z\n\nInput: a -> b, z -> ?\nOutput: z\n\nInput: a -> b, z -> ?\nOutput: z\n\nInput: a -> b, z -> ?\nOutput: z\n\nInput: a -> b, z -> ?\n",
+    " rqp\n\nInput: pqr -> rqp, abc -> ?\nOutput: rqp\n\nInput: pqr -> rqp, abc -> ?\nOutput: rqp\n\nInput: pqr -> rqp, abc -> ?\nOutput: rqp",
+    " abcabc\n\nInput: bct -> bct\nOutput: bct\n\nInput: bct -> bct\nOutput: bct\n\nInput: bct -> bct\nOutput: bct\n\nInput: bct -> bct\n"
+  ],
+  "target_metrics": [
+    {
+      "loss": 8.7734375,
+      "perplexity": 6460.341763862983,
+      "probability": 2.3960121326539115e-08,
+      "normalized_probability": 0.00015479057247306478,
+      "total_log_prob": -17.546875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 7.9765625,
+      "perplexity": 2911.9041696469935,
+      "probability": 1.1793585051615319e-07,
+      "normalized_probability": 0.000343417894868851,
+      "total_log_prob": -15.953125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.54296875,
+      "perplexity": 12.717369675355013,
+      "probability": 0.000488095243523415,
+      "normalized_probability": 0.07873506526686186,
+      "total_log_prob": -7.625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 13.2265625,
+      "perplexity": 554910.711718753,
+      "probability": 1.8020917219324338e-06,
+      "normalized_probability": 1.8020917219324338e-06,
+      "total_log_prob": -13.2265625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 2.59765625,
+      "perplexity": 13.432219349369987,
+      "probability": 0.005542484018079121,
+      "normalized_probability": 0.07444786107121629,
+      "total_log_prob": -5.1953125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": Infinity,
+      "perplexity": Infinity,
+      "probability": 0.0,
+      "normalized_probability": 0.0,
+      "num_target_tokens": 0
+    },
+    {
+      "loss": 11.046875,
+      "perplexity": 62747.56177099603,
+      "probability": 1.5936874227075268e-05,
+      "normalized_probability": 1.5936874227075268e-05,
+      "total_log_prob": -11.046875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 10.1875,
+      "perplexity": 26568.989329532407,
+      "probability": 3.763786373644493e-05,
+      "normalized_probability": 3.763786373644493e-05,
+      "total_log_prob": -10.1875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.1328125,
+      "perplexity": 460.7301436924908,
+      "probability": 0.002170467927246017,
+      "normalized_probability": 0.002170467927246017,
+      "total_log_prob": -6.1328125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.203125,
+      "perplexity": 494.29129035606036,
+      "probability": 4.092927801975028e-06,
+      "normalized_probability": 0.00202309856457243,
+      "total_log_prob": -12.40625,
+      "num_target_tokens": 2
+    }
+  ]
+}

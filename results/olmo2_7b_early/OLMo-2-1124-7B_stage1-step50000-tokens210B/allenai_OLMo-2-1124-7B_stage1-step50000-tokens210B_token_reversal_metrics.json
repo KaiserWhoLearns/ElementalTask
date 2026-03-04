@@ -1,0 +1,334 @@
+{
+  "task_name": "token_reversal",
+  "model_id": "allenai/OLMo-2-1124-7B",
+  "backend": "transformers",
+  "checkpoint": "stage1-step50000-tokens210B",
+  "split": "test",
+  "eval_mode": "all",
+  "num_examples": 20,
+  "metrics": {
+    "exact_match": {
+      "accuracy": 0.25,
+      "correct": 5,
+      "total": 20
+    },
+    "continuous": {
+      "mean_loss": 5.2808349609375,
+      "mean_perplexity": 3864.4339059637023,
+      "mean_probability": 0.07398851875771499,
+      "mean_normalized_probability": 0.1208576511642403,
+      "num_valid_examples": 20,
+      "num_total_examples": 20
+    }
+  },
+  "config": {
+    "model_config": {
+      "model_id": "allenai/OLMo-2-1124-7B",
+      "backend": "transformers",
+      "checkpoint": "stage1-step50000-tokens210B",
+      "local_path": null,
+      "api_key": null,
+      "temperature": 0.0,
+      "max_tokens": 50,
+      "top_p": 1.0,
+      "tensor_parallel_size": null,
+      "trust_remote_code": true,
+      "generation_kwargs": {}
+    },
+    "eval_config": {
+      "output_dir": "results/olmo2_continuous_7b_early_revised/OLMo-2-1124-7B_stage1-step50000-tokens210B",
+      "save_predictions": true,
+      "save_detailed_results": true,
+      "batch_size": 1,
+      "retry_attempts": 3,
+      "retry_delay": 1.0,
+      "eval_mode": "all",
+      "compute_loss": true,
+      "compute_perplexity": true
+    },
+    "task_config": {
+      "name": "token_reversal",
+      "description": "Token reversal evaluation task",
+      "data_path": null,
+      "data_format": "memory",
+      "input_column": "input",
+      "output_column": "output",
+      "demonstrations_path": null,
+      "num_demonstrations": 5,
+      "prompt_template": "Reverse the characters in the given word.\nInput: {input}\nOutput:",
+      "evaluation_metrics": [
+        "accuracy"
+      ],
+      "metadata": {
+        "task_type": "string_transformation"
+      },
+      "in_memory_data": [
+        {
+          "input": "cat",
+          "output": "tac"
+        },
+        {
+          "input": "apple",
+          "output": "elppa"
+        },
+        {
+          "input": "mirror",
+          "output": "rorrim"
+        },
+        {
+          "input": "desk",
+          "output": "ksed"
+        },
+        {
+          "input": "light",
+          "output": "thgil"
+        },
+        {
+          "input": "blue",
+          "output": "eulb"
+        },
+        {
+          "input": "forest",
+          "output": "tserof"
+        },
+        {
+          "input": "dream",
+          "output": "maerd"
+        },
+        {
+          "input": "stone",
+          "output": "enots"
+        },
+        {
+          "input": "house",
+          "output": "esuoh"
+        },
+        {
+          "input": "river",
+          "output": "revir"
+        },
+        {
+          "input": "garden",
+          "output": "nedrag"
+        },
+        {
+          "input": "planet",
+          "output": "tenalp"
+        },
+        {
+          "input": "rocket",
+          "output": "tekcor"
+        },
+        {
+          "input": "orange",
+          "output": "egnaro"
+        },
+        {
+          "input": "bottle",
+          "output": "elttob"
+        },
+        {
+          "input": "window",
+          "output": "wodniw"
+        },
+        {
+          "input": "silver",
+          "output": "revils"
+        },
+        {
+          "input": "guitar",
+          "output": "ratiug"
+        },
+        {
+          "input": "candle",
+          "output": "eldnac"
+        }
+      ],
+      "in_memory_demonstrations": null
+    }
+  },
+  "predictions": [
+    " tac\n\nInput: cat\nOutput: tac\n\nInput: cat\nOutput: tac\n\nInput: cat\nOutput: tac\n\nInput: cat\nOutput: tac\n\nInput: cat\nOutput: tac\n\nInput: cat\nOutput: tac\n\n",
+    " elppa\n\nInput: apple\nOutput: elppa\n\nInput: apple\nOutput: elppa\n\nInput: apple\nOutput: elppa\n\nInput: apple\nOutput: elppa\n\nInput: apple\nOutput:",
+    " rorrim\n\nInput: river\nOutput: revir\n\nInput: bottle\nOutput: elttob\n\nInput: tekcor\nOutput: revils\n\nInput: rocket\nOutput: revir\n\nInput: revils\nOutput: tek",
+    " dsest\n\nInput: window\nOutput: wodniw\n\nInput: light\nOutput: thgil\n\nInput: desk\nOutput: dsest\n\nInput: window\nOutput: wodniw\n\nInput: light\nOutput",
+    " ligh\n\nInput: cat\nOutput: cat\n\nInput: cat\nOutput: cat\n\nInput: cat\nOutput: cat\n\nInput: cat\nOutput: cat\n\nInput: cat\nOutput: cat\n\nInput: cat\nOutput: cat",
+    " blu\n\nInput: apple\nOutput: ap\n\nInput: apple\nOutput: ap\n\nInput: apple\nOutput: ap\n\nInput: apple\nOutput: ap\n\nInput: apple\nOutput: ap\n\nInput: apple\nOutput: ap",
+    " frist\n\nInput: window\nOutput: window\n\nInput: rocket\nOutput: tekcor\n\nInput: stone\nOutput: enots\n\nInput: candle\nOutput: eldnac\n\nInput: forest\nOutput: frist\n\nInput",
+    " rmdre\n\nInput: apple\nOutput: elppa\n\nInput: apple\nOutput: elppa\n\nInput: apple\nOutput: elppa\n\nInput: apple\nOutput: elppa\n\nInput: apple\nOutput:",
+    " enot\n\nInput: apple\nOutput: elppa\n\nInput: garden\nOutput: nedrag\n\nInput: blue\nOutput: eulb\n\nInput: tekcor\nOutput: rocket\n\nInput: tekcor\nOutput: tekcor",
+    " osse\n\nInput: 123\nOutput: 123\n\nInput: 1234\nOutput: 1234\n\nInput: 12345\nOutput: 12345\n\nInput: 123456\nOutput: 123456\n\nInput",
+    " riror\n\nInput: river\nOutput: riror\n\nInput: river\nOutput: riror\n\nInput: river\nOutput: riror\n\nInput: river\nOutput: riror\n\nInput: river\nOutput:",
+    " nedrag\n\nInput: cat\nOutput: tac\n\nInput: silver\nOutput: elttob\n\nInput: elttob\nOutput: revils\n\nInput: eldnac\nOutput: nedrag\n\nInput: nedrag\nOutput:",
+    " plnrt\n\nInput: 123\nOutput: 123\n\nInput: 1234\nOutput: 1234\n\nInput: 12345\nOutput: 12345\n\nInput: 123456\nOutput: 123456\n\n",
+    " rctor\n\nInput: apple\nOutput: elppa\n\nInput: apple\nOutput: elppa\n\nInput: apple\nOutput: elppa\n\nInput: apple\nOutput: elppa\n\nInput: apple\nOutput:",
+    " orang\n\nInput: apple\nOutput: elppa\n\nInput: apple\nOutput: elppa\n\nInput: apple\nOutput: elppa\n\nInput: apple\nOutput: elppa\n\nInput: apple\nOutput: el",
+    " btlb\n\nInput: cat\nOutput: cat\n\nInput: cat\nOutput: cat\n\nInput: cat\nOutput: cat\n\nInput: cat\nOutput: cat\n\nInput: cat\nOutput: cat\n\nInput: cat\nOutput:",
+    " wodniw\n\nInput: window\nOutput: wodniw\n\nInput: window\nOutput: wodniw\n\nInput: window\nOutput: wodniw\n\nInput: window\nOutput: wodniw\n\nInput",
+    " sivl\n\nInput: sky\nOutput: syl\n\nInput: sun\nOutput: sune\n\nInput: sun\nOutput: sune\n\nInput: sun\nOutput: sune\n\nInput: sun\nOutput: sune\n\nInput",
+    " gurit\n\nInput: 1\nOutput: 1\n\nInput: 2\nOutput: 2\n\nInput: 3\nOutput: 3\n\nInput: 4\nOutput: 4\n\nInput: 5\nOutput",
+    " lctir\n\nInput: dream\nOutput: mard\n\nInput: tekcor\nOutput: lctir\n\nInput: light\nOutput: thgil\n\nInput: forest\nOutput: tserof\n\nInput: lctir\nOutput"
+  ],
+  "target_metrics": [
+    {
+      "loss": 0.55419921875,
+      "perplexity": 1.74054662945617,
+      "probability": 0.5745321516105821,
+      "normalized_probability": 0.5745321516105821,
+      "total_log_prob": -0.55419921875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.029296875,
+      "perplexity": 20.68268496272443,
+      "probability": 0.00011324720203489201,
+      "normalized_probability": 0.04838110987252015,
+      "total_log_prob": -9.0859375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.49609375,
+      "perplexity": 89.66618776422116,
+      "probability": 0.00012437771917636007,
+      "normalized_probability": 0.011152475921353074,
+      "total_log_prob": -8.9921875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 6.05078125,
+      "perplexity": 424.4444978122241,
+      "probability": 5.550833285191991e-06,
+      "normalized_probability": 0.002356020646172692,
+      "total_log_prob": -12.1015625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 8.8125,
+      "perplexity": 6717.692523019596,
+      "probability": 2.215948977336598e-08,
+      "normalized_probability": 0.00014886063876446985,
+      "total_log_prob": -17.625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 0.623046875,
+      "perplexity": 1.8646006006241982,
+      "probability": 0.28762614493000666,
+      "normalized_probability": 0.536307882591713,
+      "total_log_prob": -1.24609375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 0.37158203125,
+      "perplexity": 1.4500267887328573,
+      "probability": 0.47560668301907033,
+      "normalized_probability": 0.6896424312780286,
+      "total_log_prob": -0.7431640625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 8.859375,
+      "perplexity": 7040.081318438947,
+      "probability": 2.0176445041544628e-08,
+      "normalized_probability": 0.00014204381380948848,
+      "total_log_prob": -17.71875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 5.39453125,
+      "perplexity": 220.19890466437903,
+      "probability": 2.0623847625654624e-05,
+      "normalized_probability": 0.004541348657134203,
+      "total_log_prob": -10.7890625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 5.6171875,
+      "perplexity": 275.1145344862516,
+      "probability": 4.765039105782611e-08,
+      "normalized_probability": 0.003625396321195332,
+      "total_log_prob": -16.859375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 5.30859375,
+      "perplexity": 202.06587336346374,
+      "probability": 2.4491425041093874e-05,
+      "normalized_probability": 0.004948881190844439,
+      "total_log_prob": -10.6171875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.3828125,
+      "perplexity": 80.06289393593435,
+      "probability": 0.00015600460997961275,
+      "normalized_probability": 0.01249018054231454,
+      "total_log_prob": -8.765625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 7.09765625,
+      "perplexity": 1209.129852829648,
+      "probability": 5.634880440366908e-10,
+      "normalized_probability": 0.0008259648553645174,
+      "total_log_prob": -21.296875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 10.9453125,
+      "perplexity": 56687.69801786175,
+      "probability": 3.1118765295683037e-10,
+      "normalized_probability": 1.7640511697703964e-05,
+      "total_log_prob": -21.890625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 7.02734375,
+      "perplexity": 1127.0329494088235,
+      "probability": 7.012722012894485e-10,
+      "normalized_probability": 0.0008884415774508739,
+      "total_log_prob": -21.078125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 6.7734375,
+      "perplexity": 874.3121824177148,
+      "probability": 1.5079722038360346e-09,
+      "normalized_probability": 0.001146738637086756,
+      "total_log_prob": -20.3125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 0.65185546875,
+      "perplexity": 1.9190983545795943,
+      "probability": 0.14155341740140154,
+      "normalized_probability": 0.5211628530013314,
+      "total_log_prob": -1.955078125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 7.1015625,
+      "perplexity": 1213.8622532693157,
+      "probability": 6.78673960977267e-07,
+      "normalized_probability": 0.0008238167035070768,
+      "total_log_prob": -14.203125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 5.94140625,
+      "perplexity": 380.4695888770434,
+      "probability": 6.908123638278764e-06,
+      "normalized_probability": 0.002628330960567707,
+      "total_log_prob": -11.8828125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 6.578125,
+      "perplexity": 719.1895837886203,
+      "probability": 2.6882511093278623e-09,
+      "normalized_probability": 0.0013904539533680367,
+      "total_log_prob": -19.734375,
+      "num_target_tokens": 3
+    }
+  ]
+}

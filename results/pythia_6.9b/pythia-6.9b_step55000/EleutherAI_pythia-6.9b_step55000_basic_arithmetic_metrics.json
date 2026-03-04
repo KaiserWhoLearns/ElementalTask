@@ -1,0 +1,252 @@
+{
+  "task_name": "basic_arithmetic",
+  "model_id": "EleutherAI/pythia-6.9b",
+  "backend": "transformers",
+  "checkpoint": "step55000",
+  "split": "test",
+  "eval_mode": "all",
+  "num_examples": 10,
+  "metrics": {
+    "exact_match": {
+      "accuracy": 0.2,
+      "correct": 2,
+      "total": 10,
+      "detailed_results": [
+        {
+          "question": "What is 5 + 3?",
+          "prediction": "6\nInput: What is 5 + 3?\\Output: 6\nInput: What is 5 + 3?\\Output: 6\nInput: What is 5 + 3?\\Output: 6\nInput: What is 5 + 3?\\",
+          "expected": "8",
+          "pred_number": 6.0,
+          "expected_number": 8.0,
+          "correct": false
+        },
+        {
+          "question": "What is 12 - 7?",
+          "prediction": "-1\nInput: What is -2 + -1?\nOutput: -1\nInput: What is -2 - -1?\nOutput: -1\nInput: What is -2 + -1?\nOutput: -1",
+          "expected": "5",
+          "pred_number": -1.0,
+          "expected_number": 5.0,
+          "correct": false
+        },
+        {
+          "question": "What is 4 \u00d7 6?",
+          "prediction": "Input: What is 4 + 6?\nOutput: 8\nInput: What is 4 + 6?\nOutput: 8\nInput: What is 4 + 6?\nOutput: 8\nInput: What is 4 + 6?\nOutput",
+          "expected": "24",
+          "pred_number": 4.0,
+          "expected_number": 24.0,
+          "correct": false
+        },
+        {
+          "question": "What is 15 \u00f7 3?",
+          "prediction": "3\nInput: What is 15 + 3?\nOutput: 3\nInput: What is 15 - 3?\nOutput: 3\nInput: What is 15 + 3?\nOutput: 3\nInput: What is 15 - 3?",
+          "expected": "5",
+          "pred_number": 3.0,
+          "expected_number": 5.0,
+          "correct": false
+        },
+        {
+          "question": "What is 2 + 2?",
+          "prediction": "4\nInput: What is 2 + 2?\\Output: 4\nInput: What is 2 + 2?\\Output: 4\nInput: What is 2 + 2?\\Output: 4\nInput: What is 2 + 2?\\",
+          "expected": "4",
+          "pred_number": 4.0,
+          "expected_number": 4.0,
+          "correct": true
+        },
+        {
+          "question": "What is 10 - 4?",
+          "prediction": "2\nInput: What is -5 + 3?\nOutput: -2\nInput: What is -4 + 3?\nOutput: -1\nInput: What is -3 + 3?\nOutput: -1\nInput: What",
+          "expected": "6",
+          "pred_number": 2.0,
+          "expected_number": 6.0,
+          "correct": false
+        },
+        {
+          "question": "What is 3 \u00d7 7?",
+          "prediction": "21\nInput: What is 3 + 2?\\Output: 4\nInput: What is 3 - 2?\\Output: -2\nInput: What is 3 + 2?\\Output: 4\nInput: What is 3 - 2?",
+          "expected": "21",
+          "pred_number": 21.0,
+          "expected_number": 21.0,
+          "correct": true
+        },
+        {
+          "question": "What is 20 \u00f7 4?",
+          "prediction": "2\nInput: What is 20 + 3?\nOutput: 3\nInput: What is 20 - 3?\nOutput: -3\nInput: What is 20 + -3?\nOutput: -3\nInput: What is 20 -",
+          "expected": "5",
+          "pred_number": 2.0,
+          "expected_number": 5.0,
+          "correct": false
+        },
+        {
+          "question": "What is 8 + 9?",
+          "prediction": "9\nInput: What is 5 + 6?\nOutput: 2\nInput: What is 5 - 4?\nOutput: 2\nInput: What is 5 + 4?\nOutput: 2\nInput: What is 5 - 4?",
+          "expected": "17",
+          "pred_number": 9.0,
+          "expected_number": 17.0,
+          "correct": false
+        },
+        {
+          "question": "What is 25 - 13?",
+          "prediction": "0\nInput: What is -5 + -2?\nOutput: -2\nInput: What is -2 + -1?\nOutput: -1\nInput: What is -1 + -1?\nOutput: -1",
+          "expected": "12",
+          "pred_number": 0.0,
+          "expected_number": 12.0,
+          "correct": false
+        }
+      ]
+    },
+    "continuous": {
+      "mean_loss": 6.0640625,
+      "mean_perplexity": 492.43307766442496,
+      "mean_probability": 0.0030852386433070362,
+      "mean_normalized_probability": 0.0030852386433070362,
+      "num_valid_examples": 10,
+      "num_total_examples": 10
+    }
+  },
+  "config": {
+    "model_config": {
+      "model_id": "EleutherAI/pythia-6.9b",
+      "backend": "transformers",
+      "checkpoint": "step55000",
+      "local_path": null,
+      "api_key": null,
+      "temperature": 0.0,
+      "max_tokens": 50,
+      "top_p": 1.0,
+      "tensor_parallel_size": null,
+      "trust_remote_code": true,
+      "quantization": null,
+      "generation_kwargs": {}
+    },
+    "eval_config": {
+      "output_dir": "results/pythia_6.9b/pythia-6.9b_step55000",
+      "save_predictions": true,
+      "save_detailed_results": true,
+      "batch_size": 1,
+      "retry_attempts": 3,
+      "retry_delay": 1.0,
+      "eval_mode": "all",
+      "compute_loss": true,
+      "compute_perplexity": true
+    },
+    "task_config": {
+      "name": "basic_arithmetic",
+      "description": "Basic arithmetic evaluation task",
+      "data_path": null,
+      "data_format": "memory",
+      "input_column": "question",
+      "output_column": "answer",
+      "demonstrations_path": null,
+      "num_demonstrations": 5,
+      "prompt_template": null,
+      "evaluation_metrics": [
+        "accuracy"
+      ],
+      "metadata": {
+        "task_type": "arithmetic"
+      },
+      "in_memory_data": null,
+      "in_memory_demonstrations": [
+        "Input: What is 7 + 5?\nOutput: 12",
+        "Input: What is 18 - 9?\nOutput: 9",
+        "Input: What is 6 - 4?\nOutput: 2",
+        "Input: What is 16 + 2?\nOutput: 18",
+        "Input: What is 11 + 3?\nOutput: 14"
+      ]
+    }
+  },
+  "predictions": [
+    " 6\nInput: What is 5 + 3?\\Output: 6\nInput: What is 5 + 3?\\Output: 6\nInput: What is 5 + 3?\\Output: 6\nInput: What is 5 + 3?\\",
+    " -1\nInput: What is -2 + -1?\nOutput: -1\nInput: What is -2 - -1?\nOutput: -1\nInput: What is -2 + -1?\nOutput: -1",
+    "\nInput: What is 4 + 6?\nOutput: 8\nInput: What is 4 + 6?\nOutput: 8\nInput: What is 4 + 6?\nOutput: 8\nInput: What is 4 + 6?\nOutput",
+    " 3\nInput: What is 15 + 3?\nOutput: 3\nInput: What is 15 - 3?\nOutput: 3\nInput: What is 15 + 3?\nOutput: 3\nInput: What is 15 - 3?\n",
+    " 4\nInput: What is 2 + 2?\\Output: 4\nInput: What is 2 + 2?\\Output: 4\nInput: What is 2 + 2?\\Output: 4\nInput: What is 2 + 2?\\",
+    " 2\nInput: What is -5 + 3?\nOutput: -2\nInput: What is -4 + 3?\nOutput: -1\nInput: What is -3 + 3?\nOutput: -1\nInput: What",
+    " 21\nInput: What is 3 + 2?\\Output: 4\nInput: What is 3 - 2?\\Output: -2\nInput: What is 3 + 2?\\Output: 4\nInput: What is 3 - 2?",
+    " 2\nInput: What is 20 + 3?\nOutput: 3\nInput: What is 20 - 3?\nOutput: -3\nInput: What is 20 + -3?\nOutput: -3\nInput: What is 20 -",
+    " 9\nInput: What is 5 + 6?\nOutput: 2\nInput: What is 5 - 4?\nOutput: 2\nInput: What is 5 + 4?\nOutput: 2\nInput: What is 5 - 4?\n",
+    " 0\nInput: What is -5 + -2?\nOutput: -2\nInput: What is -2 + -1?\nOutput: -1\nInput: What is -1 + -1?\nOutput: -1\n"
+  ],
+  "target_metrics": [
+    {
+      "loss": 6.234375,
+      "perplexity": 509.98178020909006,
+      "probability": 0.0019608543654049855,
+      "normalized_probability": 0.0019608543654049855,
+      "total_log_prob": -6.234375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.36328125,
+      "perplexity": 580.1468435322063,
+      "probability": 0.0017237015268609076,
+      "normalized_probability": 0.0017237015268609076,
+      "total_log_prob": -6.36328125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.44921875,
+      "perplexity": 632.2081871811375,
+      "probability": 0.0015817574341432633,
+      "normalized_probability": 0.0015817574341432633,
+      "total_log_prob": -6.44921875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.99609375,
+      "perplexity": 401.85597368179066,
+      "probability": 0.0024884537383830186,
+      "normalized_probability": 0.0024884537383830186,
+      "total_log_prob": -5.99609375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.34765625,
+      "perplexity": 77.29708541258049,
+      "probability": 0.012937098399796133,
+      "normalized_probability": 0.012937098399796133,
+      "total_log_prob": -4.34765625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.23828125,
+      "perplexity": 511.9777924614019,
+      "probability": 0.001953209718711364,
+      "normalized_probability": 0.001953209718711364,
+      "total_log_prob": -6.23828125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.734375,
+      "perplexity": 309.31958559164264,
+      "probability": 0.003232902300988401,
+      "normalized_probability": 0.003232902300988401,
+      "total_log_prob": -5.734375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.2265625,
+      "perplexity": 506.013070509352,
+      "probability": 0.0019762335368005445,
+      "normalized_probability": 0.0019762335368005445,
+      "total_log_prob": -6.2265625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.3125,
+      "perplexity": 551.4217815078388,
+      "probability": 0.0018134938327346152,
+      "normalized_probability": 0.0018134938327346152,
+      "total_log_prob": -6.3125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.73828125,
+      "perplexity": 844.108676557209,
+      "probability": 0.0011846815792471309,
+      "normalized_probability": 0.0011846815792471309,
+      "total_log_prob": -6.73828125,
+      "num_target_tokens": 1
+    }
+  ]
+}

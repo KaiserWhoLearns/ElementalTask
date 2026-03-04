@@ -1,0 +1,434 @@
+{
+  "task_name": "multistep_arithmetic",
+  "model_id": "LLM360/Amber",
+  "backend": "transformers",
+  "checkpoint": "ckpt_163",
+  "split": "test",
+  "eval_mode": "all",
+  "num_examples": 40,
+  "metrics": {
+    "exact_match": {
+      "accuracy": 0.025,
+      "correct": 1,
+      "total": 40,
+      "accuracy_two_step": 0.05,
+      "accuracy_three_step": 0.0
+    },
+    "continuous": {
+      "mean_loss": 8.07783203125,
+      "mean_perplexity": 37146.65017032745,
+      "mean_probability": 1.5159399940309255e-05,
+      "mean_normalized_probability": 0.0017034239628366803,
+      "num_valid_examples": 40,
+      "num_total_examples": 40
+    }
+  },
+  "config": {
+    "model_config": {
+      "model_id": "LLM360/Amber",
+      "backend": "transformers",
+      "checkpoint": "ckpt_163",
+      "local_path": null,
+      "api_key": null,
+      "temperature": 0.0,
+      "max_tokens": 50,
+      "top_p": 1.0,
+      "tensor_parallel_size": null,
+      "trust_remote_code": true,
+      "quantization": null,
+      "generation_kwargs": {}
+    },
+    "eval_config": {
+      "output_dir": "results/amber/Amber_ckpt_163",
+      "save_predictions": true,
+      "save_detailed_results": true,
+      "batch_size": 1,
+      "retry_attempts": 3,
+      "retry_delay": 1.0,
+      "eval_mode": "all",
+      "compute_loss": true,
+      "compute_perplexity": true
+    },
+    "task_config": {
+      "name": "multistep_arithmetic",
+      "description": null,
+      "data_path": null,
+      "data_format": "csv",
+      "input_column": "input",
+      "output_column": "output",
+      "demonstrations_path": null,
+      "num_demonstrations": 5,
+      "prompt_template": null,
+      "evaluation_metrics": [
+        "accuracy"
+      ],
+      "metadata": {},
+      "in_memory_data": null,
+      "in_memory_demonstrations": null
+    }
+  },
+  "predictions": [
+    "6\n\nInput: 10 - 2, then subtract 1\nOutput: 8\n\nInput: 100 / 3, then divide by 3\nOutput: 33\n\nInput: ",
+    "7\n\nInput: 100 / 3, then divide by 3\nOutput: 33\n\nInput: 100 * 3, then divide by 3\nOutput: 33\n\n",
+    "2\n\nInput: 10 - 1, then multiply by 2\nOutput: 20\n\nInput: 100 / 3, then divide by 3\nOutput: 33.33",
+    "42\n\nInput: 100 - 20, then subtract 10\nOutput: 80\n\nInput: 100 - 20, then subtract 10\nOutput: 8",
+    "2\n\nInput: 10 - 2, then subtract 1\nOutput: 8\n\nInput: 10 - 2, then subtract 1\nOutput: 8\n\nInput: 10 -",
+    "4\n\nInput: 10 / 0, then throw an error\nOutput: NaN\n\nInput: 10 / 0, then throw an error\nOutput: NaN\n\nInput: 10 / 0",
+    "17\n\nInput: 100 / 3, then divide by 3\nOutput: 33\n\nInput: 100 % 3, then multiply by 3\nOutput: 300",
+    "3\n\nInput: 100 / 3, then divide by 3\nOutput: 33\n\nInput: 100 % 3, then multiply by 3\nOutput: 300\n",
+    "1\n\nInput: 10 - 1, then multiply by 2\nOutput: 20\n\nInput: 10 - 1, then divide by 2\nOutput: 5\n\nInput: ",
+    "3\n\nInput: 10 - 1, then subtract 1\nOutput: 9\n\nInput: 100 / 3, then divide by 3\nOutput: 33\n\nInput: ",
+    "70\n\nInput: 100 / 3, then divide by 3\nOutput: 33\n\nInput: 100 % 3, then multiply by 3\nOutput: 300",
+    "3\n\nInput: 10 - 1, then subtract 1\nOutput: 9\n\nInput: 10 * 10, then multiply by 10\nOutput: 100\n\nInput",
+    "4\n\nInput: 10 - 1, then multiply by 10\nOutput: 100\n\nInput: 100 - 1, then divide by 10\nOutput: 1\n",
+    "9\n\nInput: 100 / 3, then divide by 3\nOutput: 33\n\nInput: 100 % 3, then multiply by 3\nOutput: 300\n",
+    "10\n\nInput: 10 * 10, then divide by 5\nOutput: 20\n\nInput: 100 / 3, then divide by 3\nOutput: 33\n",
+    "60\n\nInput: 100 - 20, then subtract 10\nOutput: 80\n\nInput: 100 - 20, then subtract 10\nOutput: 8",
+    "15\n\nInput: 10 - 2, then subtract 1\nOutput: 8\n\nInput: 10 - 2, then subtract 1\nOutput: 8\n\nInput: 10",
+    "10\n\nInput: 10 * 10, then multiply by 10\nOutput: 100\n\nInput: 10 / 10, then divide by 10\nOutput: ",
+    "2\n\nInput: 100 / 3, then divide by 3\nOutput: 33\n\nInput: 100 % 3, then multiply by 3\nOutput: 300\n",
+    "32\n\nInput: 100 - 20, then subtract 10\nOutput: 80\n\nInput: 100 * 2, then divide by 5\nOutput: 20",
+    "30\n\nInput: Start with 10, subtract 3, then multiply by 4\nOutput: 30\n\nInput: Start with 10, subtract 3, then multiply by 4\nOutput:",
+    "4\n\nInput: Start with 1, subtract 2, then multiply by 3\nOutput: 1\n\nInput: Start with 1, multiply by 2, then add 3\nOutput: 3\n\n",
+    "1\n\nInput: Start with 1, subtract 1, then multiply by 3\nOutput: 0\n\nInput: Start with 1, multiply by 3, then add 1\nOutput: 3\n\n",
+    "4\n\nInput: Start with 10, subtract 5, then divide by 3\nOutput: 5\n\nInput: Start with 10, divide by 2, then subtract 5\nOutput: 5",
+    "27\n\nInput: Start with 1, subtract 1, then multiply by 2\nOutput: 2\n\nInput: Start with 1, multiply by 3, then add 2\nOutput: 4\n",
+    "5\n\nInput: Start with 10, multiply by 2, then add 5\nOutput: 20\n\nInput: Start with 10, multiply by 2, then add 5\nOutput: ",
+    "1\n\nInput: Start with 12, divide by 2, then multiply by 3\nOutput: 6\n\nInput: Start with 12, divide by 2, then multiply by 3\nOutput:",
+    "5\n\nInput: Start with 10, subtract 1, then divide by 2\nOutput: 5\n\nInput: Start with 10, divide by 2, then subtract 5\nOutput: 5",
+    "1\n\nInput: Start with 1, multiply by 2, then add 3\nOutput: 3\n\nInput: Start with 1, multiply by 3, then add 2\nOutput: 4\n\n",
+    "4\n\nInput: Start with 10, divide by 11, then multiply by 2\nOutput: 2\n\nInput: Start with 10, divide by 11, then multiply by 2\n",
+    "5\n\nInput: Start with 12, subtract 2, then divide by 5\nOutput: 6\n\nInput: Start with 4, multiply by 3, then add 8\nOutput: 20",
+    "2\n\nInput: Start with 1, multiply by 11, then add 1\nOutput: 11\n\nInput: Start with 1, divide by 11, then multiply by 1\nOutput:",
+    "18\n\nInput: Start with 1, multiply by 10, then add 5\nOutput: 105\n\nInput: Start with 1, multiply by 10, then add 5\nOutput",
+    "8\n\nInput: Start with 10, subtract 5, then divide by 3\nOutput: 5\n\nInput: Start with 10, divide by 2, then subtract 5\nOutput: 5",
+    "0\n\nInput: Start with 1, multiply by 1, then add 1\nOutput: 1\n\nInput: Start with 1, multiply by 1, then add 1\nOutput: 1\n\n",
+    "5\n\nInput: Start with 10, subtract 1, then divide by 2\nOutput: 5\n\nInput: Start with 10, subtract 1, then divide by 2\nOutput: 5",
+    "22\n\nInput: Start with 1, subtract 1, then multiply by 10\nOutput: 1\n\nInput: Start with 1, multiply by 10, then add 1\nOutput: ",
+    "45\n\nInput: Start with 10, subtract 5, then divide by 3\nOutput: 5\n\nInput: Start with 10, multiply by 2, then add 5\nOutput: ",
+    "2\n\nInput: Start with 10, divide by 11, then multiply by 2\nOutput: 2\n\nInput: Start with 10, divide by 10, then multiply by 10",
+    "2\n\nInput: Start with 10, multiply by 2, then add 5\nOutput: 20\n\nInput: Start with 10, multiply by 2, then add 5\nOutput: "
+  ],
+  "target_metrics": [
+    {
+      "loss": 6.796875,
+      "perplexity": 895.045898320867,
+      "probability": 1.2482724531808141e-06,
+      "normalized_probability": 0.001117261139206414,
+      "total_log_prob": -13.59375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 6.7265625,
+      "perplexity": 834.2745126010524,
+      "probability": 1.436752786663464e-06,
+      "normalized_probability": 0.0011986462308218651,
+      "total_log_prob": -13.453125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 5.390625,
+      "perplexity": 219.3404304920078,
+      "probability": 2.0785602467353605e-05,
+      "normalized_probability": 0.004559122993225079,
+      "total_log_prob": -10.78125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 5.51953125,
+      "perplexity": 249.51804818745066,
+      "probability": 1.6061868680805156e-05,
+      "normalized_probability": 0.004007726123477645,
+      "total_log_prob": -11.0390625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 11.375,
+      "perplexity": 87116.36215324633,
+      "probability": 1.147889989071055e-05,
+      "normalized_probability": 1.147889989071055e-05,
+      "total_log_prob": -11.375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.796875,
+      "perplexity": 329.26898489707213,
+      "probability": 9.223555183302818e-06,
+      "normalized_probability": 0.003037030652348247,
+      "total_log_prob": -11.59375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 6.5234375,
+      "perplexity": 680.9150123157852,
+      "probability": 2.1568213874275043e-06,
+      "normalized_probability": 0.001468612061583148,
+      "total_log_prob": -13.046875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 6.3828125,
+      "perplexity": 591.5892147353535,
+      "probability": 2.8573241013644035e-06,
+      "normalized_probability": 0.001690362121370567,
+      "total_log_prob": -12.765625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 11.109375,
+      "perplexity": 66794.43181583138,
+      "probability": 1.4971307829329922e-05,
+      "normalized_probability": 1.4971307829329922e-05,
+      "total_log_prob": -11.109375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 11.625,
+      "perplexity": 111859.62321414231,
+      "probability": 8.93977622368364e-06,
+      "normalized_probability": 8.93977622368364e-06,
+      "total_log_prob": -11.625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.19921875,
+      "perplexity": 492.3642312408232,
+      "probability": 4.125029032584891e-06,
+      "normalized_probability": 0.0020310167484747367,
+      "total_log_prob": -12.3984375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 5.578125,
+      "perplexity": 264.57506218047985,
+      "probability": 1.4285721729023311e-05,
+      "normalized_probability": 0.0037796457147493746,
+      "total_log_prob": -11.15625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 9.7578125,
+      "perplexity": 17288.771093343905,
+      "probability": 5.784101105861684e-05,
+      "normalized_probability": 5.784101105861684e-05,
+      "total_log_prob": -9.7578125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 9.6328125,
+      "perplexity": 15257.286939370084,
+      "probability": 6.554245220489287e-05,
+      "normalized_probability": 6.554245220489287e-05,
+      "total_log_prob": -9.6328125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.78515625,
+      "perplexity": 884.6182977561233,
+      "probability": 1.277874381341546e-06,
+      "normalized_probability": 0.0011304310599685174,
+      "total_log_prob": -13.5703125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 6.1171875,
+      "perplexity": 453.58718488624703,
+      "probability": 4.8604720263733385e-06,
+      "normalized_probability": 0.002204647823661035,
+      "total_log_prob": -12.234375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 7.46875,
+      "perplexity": 1752.4147974336688,
+      "probability": 3.2563132514430866e-07,
+      "normalized_probability": 0.0005706411526908208,
+      "total_log_prob": -14.9375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 11.1328125,
+      "perplexity": 68378.41611918662,
+      "probability": 1.4624497856998555e-05,
+      "normalized_probability": 1.4624497856998555e-05,
+      "total_log_prob": -11.1328125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.7734375,
+      "perplexity": 321.64147707721304,
+      "probability": 9.666202838705227e-06,
+      "normalized_probability": 0.003109051758769099,
+      "total_log_prob": -11.546875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 12.5,
+      "perplexity": 268337.2865208745,
+      "probability": 3.726653172078671e-06,
+      "normalized_probability": 3.726653172078671e-06,
+      "total_log_prob": -12.5,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.40625,
+      "perplexity": 4474.947952880096,
+      "probability": 4.993718107117558e-08,
+      "normalized_probability": 0.00022346628620705983,
+      "total_log_prob": -16.8125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 10.8125,
+      "perplexity": 49637.40690795877,
+      "probability": 2.014609670997261e-05,
+      "normalized_probability": 2.014609670997261e-05,
+      "total_log_prob": -10.8125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 11.96875,
+      "perplexity": 157747.3529135639,
+      "probability": 6.339250589820928e-06,
+      "normalized_probability": 6.339250589820928e-06,
+      "total_log_prob": -11.96875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.03125,
+      "perplexity": 153.12429849019884,
+      "probability": 4.264928706969257e-05,
+      "normalized_probability": 0.006530642163653784,
+      "total_log_prob": -10.0625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 7.50390625,
+      "perplexity": 1815.118892385283,
+      "probability": 3.035217697573458e-07,
+      "normalized_probability": 0.0005509280985367745,
+      "total_log_prob": -15.0078125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 10.6953125,
+      "perplexity": 44148.42360682606,
+      "probability": 2.265086538322931e-05,
+      "normalized_probability": 2.265086538322931e-05,
+      "total_log_prob": -10.6953125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 11.96875,
+      "perplexity": 157747.3529135639,
+      "probability": 6.339250589820928e-06,
+      "normalized_probability": 6.339250589820928e-06,
+      "total_log_prob": -11.96875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.28515625,
+      "perplexity": 197.38502244855516,
+      "probability": 2.5666793069631218e-05,
+      "normalized_probability": 0.005066240526231578,
+      "total_log_prob": -10.5703125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 9.8828125,
+      "perplexity": 19590.744219849108,
+      "probability": 5.10445131015907e-05,
+      "normalized_probability": 5.10445131015907e-05,
+      "total_log_prob": -9.8828125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.29296875,
+      "perplexity": 198.9331323667161,
+      "probability": 2.5268866326407045e-05,
+      "normalized_probability": 0.005026814729667988,
+      "total_log_prob": -10.5859375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.67578125,
+      "perplexity": 107.31637526839133,
+      "probability": 8.68296417307572e-05,
+      "normalized_probability": 0.009318242416397912,
+      "total_log_prob": -9.3515625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 11.6953125,
+      "perplexity": 120007.85764554761,
+      "probability": 8.332787699231966e-06,
+      "normalized_probability": 8.332787699231966e-06,
+      "total_log_prob": -11.6953125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.59375,
+      "perplexity": 730.5151717727034,
+      "probability": 1.8738788950667307e-06,
+      "normalized_probability": 0.0013688969629109165,
+      "total_log_prob": -13.1875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 6.3671875,
+      "perplexity": 582.4174740777829,
+      "probability": 2.948025304671021e-06,
+      "normalized_probability": 0.0017169814514638826,
+      "total_log_prob": -12.734375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 6.05859375,
+      "perplexity": 427.7734572673073,
+      "probability": 5.464775591682541e-06,
+      "normalized_probability": 0.0023376859480440356,
+      "total_log_prob": -12.1171875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 11.0078125,
+      "perplexity": 60343.740428822755,
+      "probability": 1.6571727123537028e-05,
+      "normalized_probability": 1.6571727123537028e-05,
+      "total_log_prob": -11.0078125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.44921875,
+      "perplexity": 1718.5200270175208,
+      "probability": 3.3860300246327335e-07,
+      "normalized_probability": 0.0005818960409413982,
+      "total_log_prob": -14.8984375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 12.3125,
+      "perplexity": 222459.42401932197,
+      "probability": 4.495201785261944e-06,
+      "normalized_probability": 4.495201785261944e-06,
+      "total_log_prob": -12.3125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 5.86328125,
+      "perplexity": 351.87684773779097,
+      "probability": 8.076414773931293e-06,
+      "normalized_probability": 0.002841903371673867,
+      "total_log_prob": -11.7265625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 6.05078125,
+      "perplexity": 424.4444978122241,
+      "probability": 5.550833285191991e-06,
+      "normalized_probability": 0.002356020646172692,
+      "total_log_prob": -12.1015625,
+      "num_target_tokens": 2
+    }
+  ]
+}

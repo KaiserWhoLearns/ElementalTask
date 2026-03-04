@@ -1,0 +1,615 @@
+{
+  "task_name": "fact_extraction",
+  "model_id": "EleutherAI/pythia-6.9b",
+  "backend": "transformers",
+  "checkpoint": "step33000",
+  "split": "test",
+  "eval_mode": "all",
+  "num_examples": 60,
+  "metrics": {
+    "exact_match": {
+      "accuracy": 0.8,
+      "correct": 48,
+      "total": 60,
+      "accuracy_extract_entity": 0.9,
+      "accuracy_extract_number": 1.0,
+      "accuracy_extract_location": 0.5
+    },
+    "continuous": {
+      "mean_loss": 5.065266927083333,
+      "mean_perplexity": 1272.347298252661,
+      "mean_probability": 0.00041668478763052554,
+      "mean_normalized_probability": 0.026230075162659867,
+      "num_valid_examples": 60,
+      "num_total_examples": 60
+    }
+  },
+  "config": {
+    "model_config": {
+      "model_id": "EleutherAI/pythia-6.9b",
+      "backend": "transformers",
+      "checkpoint": "step33000",
+      "local_path": null,
+      "api_key": null,
+      "temperature": 0.0,
+      "max_tokens": 50,
+      "top_p": 1.0,
+      "tensor_parallel_size": null,
+      "trust_remote_code": true,
+      "quantization": null,
+      "generation_kwargs": {}
+    },
+    "eval_config": {
+      "output_dir": "results/pythia_6.9b/pythia-6.9b_step33000",
+      "save_predictions": true,
+      "save_detailed_results": true,
+      "batch_size": 1,
+      "retry_attempts": 3,
+      "retry_delay": 1.0,
+      "eval_mode": "all",
+      "compute_loss": true,
+      "compute_perplexity": true
+    },
+    "task_config": {
+      "name": "fact_extraction",
+      "description": null,
+      "data_path": null,
+      "data_format": "csv",
+      "input_column": "input",
+      "output_column": "output",
+      "demonstrations_path": null,
+      "num_demonstrations": 5,
+      "prompt_template": null,
+      "evaluation_metrics": [
+        "accuracy"
+      ],
+      "metadata": {},
+      "in_memory_data": null,
+      "in_memory_demonstrations": null
+    }
+  },
+  "predictions": [
+    " Bob\n\nPassage: \"The book was written by Charles Dickens in 1859.\"\nQuestion: Who wrote the book?\nAnswer: Charles Dickens\n\nPassage: \"The book was written by Charles Dickens in 1859",
+    " Dr. Smith\n\nPassage: \"The house was sold to Mr. and Mrs. Thompson.\"\nQuestion: Who bought the house?\nAnswer: Mr. and Mrs. Thompson\n\nPassage: \"The house was sold to Mr",
+    " Leonardo\n\nPassage: \"The painting was created by Leonardo in 1503.\"\nQuestion: Who created the painting?\nAnswer: Leonardo\n\nPassage: \"The painting was created by Leonardo in 1503.\"\n",
+    " Mary\n\nPassage: \"The meeting was held at the home of Mr. and Mrs. Thompson.\"\nQuestion: Who was the host?\nAnswer: Mr. and Mrs. Thompson\n\nPassage: \"The meeting was held at",
+    " Professor Chen\n\nPassage: \"The award was given to Professor Chen for her research.\"\nQuestion: Who received the award?\nAnswer: Professor Chen\n\nPassage: \"The award was given to Professor Chen for her research.\"\n",
+    " Emma\n\nPassage: \"The house was sold to Mr. and Mrs. Thompson.\"\nQuestion: Who bought the house?\nAnswer: Mr. and Mrs. Thompson\n\nPassage: \"The house was sold to Mr. and",
+    " Sarah\n\nPassage: \"The house was sold to Mr. and Mrs. Thompson.\"\nQuestion: Who bought the house?\nAnswer: Mr. and Mrs. Thompson\n\nPassage: \"The house was sold to Mr. and",
+    " Queen Victoria\n\nPassage: \"The letter was written by Queen Victoria in 1887.\"\nQuestion: Who wrote the letter?\nAnswer: Queen Victoria\n\nPassage: \"The letter was written by Queen Victoria in 1887.\"\nQuestion:",
+    " Coach Martinez\n\nPassage: \"The team was led by Coach Martinez.\"\nQuestion: Who led the team?\nAnswer: Coach Martinez\n\nPassage: \"The team was led by Coach Martinez.\"\nQuestion: Who led the team",
+    " Dr. Park and her team\n\nPassage: \"The vaccine was developed by Dr. Park and her team.\"\nQuestion: Who developed the vaccine?\nAnswer: Dr. Park and her team\n\nPassage: \"The vaccine was",
+    " Kevin\n\nPassage: \"The house was sold to Mr. and Mrs. Thompson.\"\nQuestion: Who sold the house?\nAnswer: Mr. and Mrs. Thompson\n\nPassage: \"The house was sold to Mr. and",
+    " Helen\n\nPassage: \"The novel was dedicated to the author's father, Charles.\"\nQuestion: Who was the novel dedicated to?\nAnswer: Charles\n\nPassage: \"The novel was dedicated to the author's brother, Charles",
+    " Officer Wilson\n\nPassage: \"The police arrived at the scene of the accident.\"\nQuestion: Who arrived at the scene of the accident?\nAnswer: The police\n\nPassage: \"The police arrived at the scene of the accident",
+    " Grandma Rose\n\nPassage: \"The cake was baked by Aunt Martha for the birthday.\"\nQuestion: Who baked the cake?\nAnswer: Aunt Martha\n\nPassage: \"The cake was baked by Aunt Martha for the birthday.\"",
+    " Daniel\n\nPassage: \"The house was sold to Mr. and Mrs. Thompson.\"\nQuestion: Who bought the house?\nAnswer: Mr. and Mrs. Thompson\n\nPassage: \"The house was sold to Mr. and",
+    " Clara Nguyen\n\nPassage: \"The bridge was designed by engineer Clara Nguyen.\"\nQuestion: Who designed the bridge?\nAnswer: Clara Nguyen\n\nPassage: \"The bridge was designed by engineer Clara Nguyen.\"\nQuestion: Who designed",
+    " Principal Adams\n\nPassage: \"The new policy was announced by Principal Adams.\"\nQuestion: Who announced the policy?\nAnswer: Principal Adams\n\nPassage: \"The new policy was announced by Principal Adams.\"\nQuestion: Who announced",
+    " Marcus\n\nPassage: \"The statue was placed in the garden of the house.\"\nQuestion: Who placed the statue in the garden?\nAnswer: Marcus\n\nPassage: \"The statue was placed in the garden of the house.\"",
+    " Lisa\n\nPassage: \"The house was sold to Mr. and Mrs. Thompson.\"\nQuestion: Who bought the house?\nAnswer: Mr. and Mrs. Thompson\n\nPassage: \"The house was sold to Mr. and",
+    " Yuki Tanaka\n\nPassage: \"The discovery was made by researcher Yuki Tanaka.\"\nQuestion: Who made the discovery?\nAnswer: Yuki Tanaka\n\nPassage: \"The discovery was made by researcher Yuki",
+    " 5\n\nPassage: \"The train departed at 9 AM with 150 passengers.\"\nQuestion: How many passengers were on the train?\nAnswer: 150\n\nPassage: \"The train departed at 9 AM with 150 passengers.\"\nQuestion",
+    " 14\n\nPassage: \"The project took 14 months to complete.\"\nQuestion: How many months did the project take?\nAnswer: 14\n\nPassage: \"The project took 14 months to complete.\"\nQuestion: How many months",
+    " 32\n\nPassage: \"The teacher was a man.\"\nQuestion: How many men were there?\nAnswer: 1\n\nPassage: \"The teacher was a woman.\"\nQuestion: How many women were there?\nAnswer:",
+    " 97\n\nPassage: \"The movie was a hit.\"\nQuestion: How many movies were a hit?\nAnswer: 1\n\nPassage: \"The movie was a hit.\"\nQuestion: How many movies were a hit?\n",
+    " 3\n\nPassage: \"The recipe calls for 2 cups of flour.\"\nQuestion: How many cups of flour are needed?\nAnswer: 2\n\nPassage: \"The recipe calls for 2 cups of flour.\"\nQuestion: How",
+    " 26\n\nPassage: \"The train departed at 9 AM with 150 passengers.\"\nQuestion: How many passengers were on the train?\nAnswer: 150\n\nPassage: \"She bought 4 tickets for the movie.\"\nQuestion: How",
+    " 12000\n\nPassage: \"The library has 12000 books in its collection.\"\nQuestion: How many books does the library have?\nAnswer: 12000\n\nPassage: \"The library has 12000 books in its collection.\"",
+    " 8\n\nPassage: \"The flight lasted 8 hours and arrived at noon.\"\nQuestion: How many hours did the flight last?\nAnswer: 8\n\nPassage: \"The flight lasted 8 hours and arrived at noon.\"\nQuestion",
+    " 50\n\nPassage: \"The train departed at 9 AM with 150 passengers.\"\nQuestion: How many passengers were on the train?\nAnswer: 150\n\nPassage: \"The train departed at 9 AM with 150 passengers.\"\nQuestion",
+    " 15\n\nPassage: \"The building has a total of 15 floors.\"\nQuestion: How many floors does the building have?\nAnswer: 15\n\nPassage: \"The building has a total of 15 floors.\"\nQuestion: How",
+    " 200\n\nPassage: \"He saved 200 dollars each month for a year.\"\nQuestion: How much did he save each month?\nAnswer: 200\n\nPassage: \"He saved 200 dollars each month for a year.\"\nQuestion",
+    " 4500\n\nPassage: \"The concert was attended by 4500 fans.\"\nQuestion: How many fans attended?\nAnswer: 4500\n\nPassage: \"The concert was attended by 4500 fans.\"\nQuestion: How many",
+    " 6\n\nPassage: \"The train departed at 9 AM with 150 passengers.\"\nQuestion: How many passengers were on the train?\nAnswer: 150\n\nPassage: \"She bought 4 tickets for the movie.\"\nQuestion: How",
+    " 480\n\nPassage: \"The bridge spans 480 meters across the river.\"\nQuestion: How many meters does the bridge span?\nAnswer: 480\n\nPassage: \"The bridge spans 480 meters across the river.\"\nQuestion: How",
+    " 7\n\nPassage: \"The candidates were asked to write a letter to the people of the town.\"\nQuestion: How many candidates were asked to write a letter to the people of the town?\nAnswer: 7\n\nPassage:",
+    " 42\n\nPassage: \"He bought a new car last year.\"\nQuestion: How many cars did he buy?\nAnswer: 1\n\nPassage: \"He bought a new car last year.\"\nQuestion: How many cars did",
+    " 18\n\nPassage: \"The team won 18 games this season.\"\nQuestion: How many games did the team win?\nAnswer: 18\n\nPassage: \"The team won 18 games this season.\"\nQuestion: How many games",
+    " 3\n\nPassage: \"The train departed at 9 AM with 150 passengers.\"\nQuestion: How many passengers were on the train?\nAnswer: 150\n\nPassage: \"He bought 4 tickets for the movie.\"\nQuestion: How",
+    " 120\n\nPassage: \"The experiment used 120 subjects.\"\nQuestion: How many subjects were used?\nAnswer: 120\n\nPassage: \"The experiment used 120 subjects.\"\nQuestion: How many subjects were used?\nAnswer:",
+    " 4\n\nPassage: \"The cake needs 4 eggs and 2 cups of sugar.\"\nQuestion: How many eggs does the cake need?\nAnswer: 4\n\nPassage: \"The cake needs 4 eggs and 2 cups of sugar.\"",
+    " the kitchen\n\nPassage: \"The dog was sleeping under the porch.\"\nQuestion: Where was the dog?\nAnswer: under the porch\n\nPassage: \"She put the groceries on the counter.\"\nQuestion: Where are",
+    " on the table\n\nPassage: \"The dog was sleeping under the porch.\"\nQuestion: Where was the dog?\nAnswer: under the porch\n\nPassage: \"She put the groceries on the counter.\"\nQuestion: Where",
+    " Conference Room B\n\nPassage: \"The meeting will be held in Conference Room B.\"\nQuestion: Where will the meeting be held?\nAnswer: Conference Room B\n\nPassage: \"The meeting will be held in Conference Room B",
+    " in the underground garage\n\nPassage: \"The dog was sleeping under the porch.\"\nQuestion: Where was the dog?\nAnswer: under the porch\n\nPassage: \"He put the groceries on the counter.\"\nQuestion:",
+    " in the backyard\n\nPassage: \"The dog was sleeping under the porch.\"\nQuestion: Where was the dog?\nAnswer: under the porch\n\nPassage: \"She put the groceries on the counter.\"\nQuestion: Where",
+    " Fifth Avenue\n\nPassage: \"The museum is located on Fifth Avenue.\"\nQuestion: Where is the museum?\nAnswer: Fifth Avenue\n\nPassage: \"The museum is located on Fifth Avenue.\"\nQuestion: Where is the museum",
+    " under the sofa cushion\n\nPassage: \"The dog was sleeping under the porch.\"\nQuestion: Where was the dog?\nAnswer: under the porch\n\nPassage: \"She put the groceries on the counter.\"\nQuestion:",
+    " Madison Square Garden\n\nPassage: \"The dog was sleeping under the porch.\"\nQuestion: Where was the dog?\nAnswer: under the porch\n\nPassage: \"She put the groceries on the counter.\"\nQuestion: Where",
+    " in the filing cabinet\n\nPassage: \"The dog was sleeping under the porch.\"\nQuestion: Where was the dog?\nAnswer: under the porch\n\nPassage: \"He put the groceries on the counter.\"\nQuestion:",
+    " in the old oak tree\n\nPassage: \"The dog was sleeping under the porch.\"\nQuestion: Where was the dog?\nAnswer: under the porch\n\nPassage: \"She put the groceries on the counter.\"\nQuestion",
+    " the town square\n\nPassage: \"The dog was sleeping under the porch.\"\nQuestion: Where was the dog?\nAnswer: under the porch\n\nPassage: \"She put the groceries on the counter.\"\nQuestion: Where",
+    " the fireplace\n\nPassage: \"The dog was sleeping under the porch.\"\nQuestion: Where was the dog?\nAnswer: under the porch\n\nPassage: \"She put the groceries on the counter.\"\nQuestion: Where are",
+    " on a remote island\n\nPassage: \"The dog was sleeping under the porch.\"\nQuestion: Where was the dog?\nAnswer: under the porch\n\nPassage: \"She put the groceries on the counter.\"\nQuestion:",
+    " in the shed behind the house\n\nPassage: \"The dog was sleeping under the porch.\"\nQuestion: Where was the dog?\nAnswer: under the porch\n\nPassage: \"She put the groceries on the counter.\"\n",
+    " along the fence\n\nPassage: \"The dog was sleeping under the porch.\"\nQuestion: Where was the dog?\nAnswer: under the porch\n\nPassage: \"She put the groceries on the counter.\"\nQuestion: Where",
+    " the library\n\nPassage: \"The dog was sleeping under the porch.\"\nQuestion: Where was the dog?\nAnswer: under the porch\n\nPassage: \"She put the groceries on the counter.\"\nQuestion: Where are",
+    " in a garden by the lake\n\nPassage: \"The dog was sleeping under the porch.\"\nQuestion: Where was the dog?\nAnswer: under the porch\n\nPassage: \"The dog was sleeping under the porch.\"\nQuestion",
+    " at the restaurant\n\nPassage: \"The dog was sleeping under the porch.\"\nQuestion: Where was the dog?\nAnswer: under the porch\n\nPassage: \"She put the groceries on the counter.\"\nQuestion: Where",
+    " Tokyo\n\nPassage: \"The conference is being held in Tokyo this year.\"\nQuestion: Where is the conference?\nAnswer: Tokyo\n\nPassage: \"The conference is being held in Tokyo this year.\"\nQuestion: Where is",
+    " the window sill\n\nPassage: \"The dog was sleeping under the porch.\"\nQuestion: Where was the dog?\nAnswer: under the porch\n\nPassage: \"She put the groceries on the counter.\"\nQuestion: Where"
+  ],
+  "target_metrics": [
+    {
+      "loss": 8.5625,
+      "perplexity": 5231.744197360583,
+      "probability": 0.00019114084371795175,
+      "normalized_probability": 0.00019114084371795175,
+      "total_log_prob": -8.5625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 2.931640625,
+      "perplexity": 18.758380733362646,
+      "probability": 0.0001512048527237606,
+      "normalized_probability": 0.05327481003931149,
+      "total_log_prob": -8.796875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.1171875,
+      "perplexity": 61.38635013907805,
+      "probability": 0.00026537278092783216,
+      "normalized_probability": 0.016290266447416758,
+      "total_log_prob": -8.234375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 8.4296875,
+      "perplexity": 4581.0682854137685,
+      "probability": 0.000218289695262571,
+      "normalized_probability": 0.000218289695262571,
+      "total_log_prob": -8.4296875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.12890625,
+      "perplexity": 62.10995300937982,
+      "probability": 0.00025922542707870625,
+      "normalized_probability": 0.01610047909469486,
+      "total_log_prob": -8.2578125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 5.71875,
+      "perplexity": 304.5240299109616,
+      "probability": 1.0783428504061669e-05,
+      "normalized_probability": 0.003283813104313592,
+      "total_log_prob": -11.4375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 8.9140625,
+      "perplexity": 7435.807790500043,
+      "probability": 0.00013448437993214345,
+      "normalized_probability": 0.00013448437993214345,
+      "total_log_prob": -8.9140625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.671875,
+      "perplexity": 39.32557222442699,
+      "probability": 0.0006466211394278742,
+      "normalized_probability": 0.025428746320412147,
+      "total_log_prob": -7.34375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.85546875,
+      "perplexity": 17.382583384208317,
+      "probability": 0.00019114084371795175,
+      "normalized_probability": 0.05760380429537002,
+      "total_log_prob": -8.5625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.638671875,
+      "perplexity": 13.994604675279588,
+      "probability": 0.0003641412376733455,
+      "normalized_probability": 0.0714096034438365,
+      "total_log_prob": -7.91796875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 10.0625,
+      "perplexity": 23447.050788115514,
+      "probability": 4.264928706969257e-05,
+      "normalized_probability": 4.264928706969257e-05,
+      "total_log_prob": -10.0625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.95703125,
+      "perplexity": 142.1710983175922,
+      "probability": 4.947403853572487e-05,
+      "normalized_probability": 0.007033778396830886,
+      "total_log_prob": -9.9140625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.7421875,
+      "perplexity": 15.520899957093135,
+      "probability": 0.0002674541254445945,
+      "normalized_probability": 0.0644292536363521,
+      "total_log_prob": -8.2265625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.58203125,
+      "perplexity": 13.223972090529857,
+      "probability": 0.00043242841921281946,
+      "normalized_probability": 0.07562024429226787,
+      "total_log_prob": -7.74609375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 7.90234375,
+      "perplexity": 2703.611497823697,
+      "probability": 0.0003698756277686204,
+      "normalized_probability": 0.0003698756277686204,
+      "total_log_prob": -7.90234375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.48828125,
+      "perplexity": 32.72964525738904,
+      "probability": 2.863337678852056e-05,
+      "normalized_probability": 0.030593149529655618,
+      "total_log_prob": -10.4609375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.8359375,
+      "perplexity": 46.33684810653952,
+      "probability": 0.00046574373499789687,
+      "normalized_probability": 0.02158109670516994,
+      "total_log_prob": -7.671875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.24609375,
+      "perplexity": 69.83209724580306,
+      "probability": 0.0002050641912072321,
+      "normalized_probability": 0.014320062542015384,
+      "total_log_prob": -8.4921875,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.4765625,
+      "perplexity": 87.93188669987823,
+      "probability": 0.00012933236424347565,
+      "normalized_probability": 0.011372438799284682,
+      "total_log_prob": -8.953125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.078125,
+      "perplexity": 7.9894745966477085,
+      "probability": 0.0002454297015009895,
+      "normalized_probability": 0.1251646760876602,
+      "total_log_prob": -8.3125,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 7.3046875,
+      "perplexity": 1487.2551219966645,
+      "probability": 0.0006723795972929537,
+      "normalized_probability": 0.0006723795972929537,
+      "total_log_prob": -7.3046875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.03515625,
+      "perplexity": 1135.8723783859068,
+      "probability": 0.0008803805947117196,
+      "normalized_probability": 0.0008803805947117196,
+      "total_log_prob": -7.03515625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.69921875,
+      "perplexity": 811.7713809786618,
+      "probability": 0.0012318739283397897,
+      "normalized_probability": 0.0012318739283397897,
+      "total_log_prob": -6.69921875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.0859375,
+      "perplexity": 1195.0430633589979,
+      "probability": 0.0008367899288827503,
+      "normalized_probability": 0.0008367899288827503,
+      "total_log_prob": -7.0859375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.1484375,
+      "perplexity": 1272.1167191138777,
+      "probability": 0.0007860913900232152,
+      "normalized_probability": 0.0007860913900232152,
+      "total_log_prob": -7.1484375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.109375,
+      "perplexity": 3325.498943407423,
+      "probability": 0.0003007067561944148,
+      "normalized_probability": 0.0003007067561944148,
+      "total_log_prob": -8.109375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.845703125,
+      "perplexity": 46.7915731119465,
+      "probability": 0.0004567354357107468,
+      "normalized_probability": 0.021371369532876147,
+      "total_log_prob": -7.69140625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 8.53125,
+      "perplexity": 5070.780350360642,
+      "probability": 0.00019720830540981299,
+      "normalized_probability": 0.00019720830540981299,
+      "total_log_prob": -8.53125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.2578125,
+      "perplexity": 522.0756496064025,
+      "probability": 0.0019154312229538169,
+      "normalized_probability": 0.0019154312229538169,
+      "total_log_prob": -6.2578125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.7890625,
+      "perplexity": 888.0805958802181,
+      "probability": 0.0011260239269261967,
+      "normalized_probability": 0.0011260239269261967,
+      "total_log_prob": -6.7890625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 8.2109375,
+      "perplexity": 3680.9917789410038,
+      "probability": 0.0002716659150724029,
+      "normalized_probability": 0.0002716659150724029,
+      "total_log_prob": -8.2109375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 3.123046875,
+      "perplexity": 22.715485556228362,
+      "probability": 0.0019380097200896599,
+      "normalized_probability": 0.04402283180452684,
+      "total_log_prob": -6.24609375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 8.3046875,
+      "perplexity": 4042.7785724061737,
+      "probability": 0.00024735463050721125,
+      "normalized_probability": 0.00024735463050721125,
+      "total_log_prob": -8.3046875,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.7265625,
+      "perplexity": 834.2745126010524,
+      "probability": 0.0011986462308218651,
+      "normalized_probability": 0.0011986462308218651,
+      "total_log_prob": -6.7265625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.7265625,
+      "perplexity": 834.2745126010524,
+      "probability": 0.0011986462308218651,
+      "normalized_probability": 0.0011986462308218651,
+      "total_log_prob": -6.7265625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.609375,
+      "perplexity": 742.0191118159325,
+      "probability": 0.001347674182613322,
+      "normalized_probability": 0.001347674182613322,
+      "total_log_prob": -6.609375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.1484375,
+      "perplexity": 1272.1167191138777,
+      "probability": 0.0007860913900232152,
+      "normalized_probability": 0.0007860913900232152,
+      "total_log_prob": -7.1484375,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.50390625,
+      "perplexity": 1815.118892385283,
+      "probability": 0.0005509280985367745,
+      "normalized_probability": 0.0005509280985367745,
+      "total_log_prob": -7.50390625,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 6.45703125,
+      "perplexity": 637.1666574479115,
+      "probability": 0.0015694481001334417,
+      "normalized_probability": 0.0015694481001334417,
+      "total_log_prob": -6.45703125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 7.2578125,
+      "perplexity": 1419.1487514060357,
+      "probability": 0.0007046477679025825,
+      "normalized_probability": 0.0007046477679025825,
+      "total_log_prob": -7.2578125,
+      "num_target_tokens": 1
+    },
+    {
+      "loss": 4.3046875,
+      "perplexity": 74.04607243930377,
+      "probability": 0.00018238786721464442,
+      "normalized_probability": 0.013505105227825677,
+      "total_log_prob": -8.609375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.9375,
+      "perplexity": 51.290215346585704,
+      "probability": 7.411334799450557e-06,
+      "normalized_probability": 0.019496896108597995,
+      "total_log_prob": -11.8125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.4765625,
+      "perplexity": 11.900286792057758,
+      "probability": 4.9862068229156115e-05,
+      "normalized_probability": 0.08403158826957005,
+      "total_log_prob": -9.90625,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 3.10546875,
+      "perplexity": 22.319678873017494,
+      "probability": 9.028854143505791e-05,
+      "normalized_probability": 0.04486188789312613,
+      "total_log_prob": -9.3125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 5.51171875,
+      "perplexity": 247.5762833312724,
+      "probability": 1.631480630814809e-05,
+      "normalized_probability": 0.004039159109040902,
+      "total_log_prob": -11.0234375,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.19140625,
+      "perplexity": 24.322607071104724,
+      "probability": 6.922662603870115e-05,
+      "normalized_probability": 0.04106051465164747,
+      "total_log_prob": -9.578125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.23828125,
+      "perplexity": 9.37720036577433,
+      "probability": 0.00012933236424347565,
+      "normalized_probability": 0.10664163726839851,
+      "total_log_prob": -8.953125,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 2.5859375,
+      "perplexity": 13.275729253905588,
+      "probability": 3.2193370876801656e-05,
+      "normalized_probability": 0.07532542889919286,
+      "total_log_prob": -10.34375,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 3.09765625,
+      "perplexity": 22.145985754016134,
+      "probability": 9.171037907429409e-05,
+      "normalized_probability": 0.04509615309529618,
+      "total_log_prob": -9.296875,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 2.380859375,
+      "perplexity": 10.814192318320675,
+      "probability": 7.31178891159098e-05,
+      "normalized_probability": 0.09247107602348328,
+      "total_log_prob": -9.5234375,
+      "num_target_tokens": 4
+    },
+    {
+      "loss": 2.88671875,
+      "perplexity": 17.934365811960372,
+      "probability": 0.00017403571868811687,
+      "normalized_probability": 0.055831521555343815,
+      "total_log_prob": -8.65625,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.494140625,
+      "perplexity": 32.92198346312245,
+      "probability": 2.797008532961901e-05,
+      "normalized_probability": 0.030355071751202237,
+      "total_log_prob": -10.484375,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 3.73046875,
+      "perplexity": 41.698649825700315,
+      "probability": 1.3738444323952124e-05,
+      "normalized_probability": 0.023950386120027974,
+      "total_log_prob": -11.1953125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.25390625,
+      "perplexity": 70.37979717263202,
+      "probability": 0.0002018849656009158,
+      "normalized_probability": 0.014208622931196246,
+      "total_log_prob": -8.5078125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.5859375,
+      "perplexity": 13.275729253905588,
+      "probability": 0.000427390475530988,
+      "normalized_probability": 0.07532542889919286,
+      "total_log_prob": -7.7578125,
+      "num_target_tokens": 3
+    },
+    {
+      "loss": 4.515625,
+      "perplexity": 91.43469485205186,
+      "probability": 0.00011961288358102437,
+      "normalized_probability": 0.010936767510604966,
+      "total_log_prob": -9.03125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 2.27734375,
+      "perplexity": 9.750745562159219,
+      "probability": 1.1300936043146307e-05,
+      "normalized_probability": 0.10247616951201168,
+      "total_log_prob": -11.390625,
+      "num_target_tokens": 5
+    },
+    {
+      "loss": 4.5390625,
+      "perplexity": 93.6030061542134,
+      "probability": 0.00011413541084880993,
+      "normalized_probability": 0.01068341756409483,
+      "total_log_prob": -9.078125,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 4.14453125,
+      "perplexity": 63.08804244970428,
+      "probability": 0.0002512498991460061,
+      "normalized_probability": 0.015850864302807154,
+      "total_log_prob": -8.2890625,
+      "num_target_tokens": 2
+    },
+    {
+      "loss": 3.443359375,
+      "perplexity": 31.291903031786116,
+      "probability": 3.2700342699792625e-05,
+      "normalized_probability": 0.03197796096401794,
+      "total_log_prob": -10.328125,
+      "num_target_tokens": 3
+    }
+  ]
+}
