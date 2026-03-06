@@ -84,7 +84,7 @@ class SyllogismVerifyTask(BaseTask):
 
     CATEGORY_DEMOS: Dict[str, List[Dict[str, str]]] = {
         "consistent": [
-            {"input": "All prime ministers are politicians. Winston Churchill was a prime minister. Therefore, Winston Churchill was a politician.", "output": "Valid"},
+            {"input": "All prime ministers are politicians. Churchill was a prime minister. Therefore, Churchill was a politician.", "output": "Valid"},
             {"input": "All triangles have three sides. A shape has three sides. Therefore, the shape is a triangle.", "output": "Invalid"},
             {"input": "All even numbers are divisible by two. Six is an even number. Therefore, six is divisible by two.", "output": "Valid"},
             {"input": "No amphibians have scales. Frogs are amphibians. Therefore, frogs do not have scales.", "output": "Valid"},
@@ -93,9 +93,9 @@ class SyllogismVerifyTask(BaseTask):
         "violate": [
             {"input": "All fish live only in saltwater. Trout are fish. Therefore, trout live only in saltwater.", "output": "Valid"},
             {"input": "All flying animals are birds. Bats are flying animals. Therefore, bats are birds.", "output": "Valid"},
-            {"input": "All trees lose their leaves. Oak trees lose their leaves. Therefore, all plants lose their leaves.", "output": "Invalid"},
+            {"input": "All trees lose their leaves. Some oaks lose their leaves. Therefore, all oaks are trees.", "output": "Invalid"},
             {"input": "No countries in Africa speak French. Senegal is a country in Africa. Therefore, Senegal does not speak French.", "output": "Valid"},
-            {"input": "All elements are gases at room temperature. Helium is a gas. Therefore, helium is an element.", "output": "Invalid"},
+            {"input": "All elements are gases at room temperature. Helium is not a gas at room temperature. Therefore, helium is an element.", "output": "Invalid"},
         ],
         "nonce": [
             {"input": "All wugs are blickets. Daxes are wugs. Therefore, daxes are blickets.", "output": "Valid"},

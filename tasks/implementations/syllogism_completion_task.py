@@ -82,7 +82,7 @@ class SyllogismCompletionTask(BaseTask):
 
     CATEGORY_DEMOS: Dict[str, List[Dict[str, str]]] = {
         "consistent": [
-            {"input": "All prime ministers are politicians. Winston Churchill was a prime minister.", "output": "Winston Churchill was a politician."},
+            {"input": "All prime ministers are politicians. Churchill was a prime minister.", "output": "Churchill was a politician."},
             {"input": "No carnivores are herbivores. Tigers are carnivores.", "output": "Tigers are not herbivores."},
             {"input": "All triangles have three sides. Some polygons are triangles.", "output": "Some polygons have three sides."},
             {"input": "All even numbers are divisible by two. Six is an even number.", "output": "Six is divisible by two."},
