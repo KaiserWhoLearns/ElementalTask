@@ -45,6 +45,18 @@ def load_lookup_tables() -> Dict[str, Dict[str, str]]:
         cat_data = df[df["category_name"] == category]
         if not cat_data.empty:
             lookup_tables[category] = dict(zip(cat_data["question"], cat_data["answer"]))
+
+    # Backfill eng->sp from sp->eng when simple.csv lacks translate_eng_sp rows.
+    # Keep the first observed Spanish form for each English token.
+    if "translate_eng_sp" not in lookup_tables and "translate_sp_eng" in lookup_tables:
+        sp_to_eng = lookup_tables["translate_sp_eng"]
+        eng_to_sp: Dict[str, str] = {}
+        for sp, eng in sp_to_eng.items():
+            eng_norm = str(eng).strip().lower()
+            if eng_norm and eng_norm not in eng_to_sp:
+                eng_to_sp[eng_norm] = str(sp)
+        if eng_to_sp:
+            lookup_tables["translate_eng_sp"] = eng_to_sp
     
     return lookup_tables
 
