@@ -320,6 +320,29 @@ def get_lookup_inputs(lookup_name: str) -> List[str]:
     return []
 
 
+def build_lookup_example(input_str: str, operations: List[str]) -> tuple[str, str]:
+    """Build a lookup-based example input/output pair for a composition.
+
+    For lookup chains ending with lowercase (and no uppercase op), expose an
+    uppercase input so the lowercase step is not a no-op while preserving lookup
+    validity via the original key.
+    """
+    display_input = input_str
+
+    if "lowercase" in operations and "uppercase" not in operations:
+        display_input = input_str.upper()
+
+        # Keep lookup domain valid with the original key, then force lowercase
+        # to do real work by uppercasing the intermediate string first.
+        result = get_operation(operations[0])(input_str)
+        result = result.upper()
+        for op_name in operations[1:]:
+            result = get_operation(op_name)(result)
+        return display_input, result
+
+    return display_input, apply_composition(input_str, operations)
+
+
 # =============================================================================
 # Compositional Task Implementation
 # =============================================================================
@@ -418,16 +441,16 @@ class CompositionalTask(BaseTask):
             valid_inputs = get_lookup_inputs(source_lookup)
             for input_str in valid_inputs:
                 try:
-                    output = apply_composition(input_str, ops)
+                    display_input, output = build_lookup_example(input_str, ops)
                     # Skip if lookup returned original (meaning lookup failed)
                     if ops[0] in LOOKUP_TABLES and output == input_str:
                         continue
                     
                     if self.spaced:
                         examples.append({
-                            "input": add_spaces(input_str),
+                            "input": add_spaces(display_input),
                             "output": add_spaces(output),
-                            "original_input": input_str,
+                            "original_input": display_input,
                             "original_output": output,
                             "category_name": comp_name,
                             "operations": "+".join(ops),
@@ -435,7 +458,7 @@ class CompositionalTask(BaseTask):
                         })
                     else:
                         examples.append({
-                            "input": input_str,
+                            "input": display_input,
                             "output": output,
                             "category_name": comp_name,
                             "operations": "+".join(ops),
@@ -636,13 +659,13 @@ def generate_compositional_csv(output_path: str = None, spaced: bool = False, st
         valid_inputs = get_lookup_inputs(source_lookup)
         for input_str in valid_inputs:
             try:
-                output = apply_composition(input_str, ops)
+                display_input, output = build_lookup_example(input_str, ops)
                 
                 if spaced:
                     examples.append({
-                        "input": add_spaces(input_str),
+                        "input": add_spaces(display_input),
                         "output": add_spaces(output),
-                        "original_input": input_str,
+                        "original_input": display_input,
                         "original_output": output,
                         "category_name": comp_name,
                         "operations": "+".join(ops),
@@ -650,7 +673,7 @@ def generate_compositional_csv(output_path: str = None, spaced: bool = False, st
                     })
                 else:
                     examples.append({
-                        "input": input_str,
+                        "input": display_input,
                         "output": output,
                         "category_name": comp_name,
                         "operations": "+".join(ops),
