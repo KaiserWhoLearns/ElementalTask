@@ -108,8 +108,17 @@ class TextFRCTTask(BaseTask):
             elif category.startswith('MA'):  # Memory/lookup — table in `additional`, answer is a number
                 if additional:
                     table = additional.replace('<br>', '\n').strip()
-                    return f"{table}\n\nQuestion: What number corresponds to '{question}'?\nAnswer:"
-                return f"Question: What number corresponds to '{question}'?\nAnswer:"
+                    if category == 'MA3':
+                        return (
+                            "FIRST AND LAST NAMES TEST\n"
+                            "Learn and use first/last name pairings from the list below. "
+                            "Given a last name, return the matching first name only.\n\n"
+                            f"{table}\n\nLast name: {question_text}\nFirst name:"
+                        )
+                    return f"{table}\n\nQuestion: What number corresponds to '{question_text}'?\nAnswer:"
+                if category == 'MA3':
+                    return f"Last name: {question_text}\nFirst name:"
+                return f"Question: What number corresponds to '{question_text}'?\nAnswer:"
 
             elif category == 'RL1':  # Nonsense Syllogisms — answer is G (good/valid) or P (poor/invalid)
                 return (f"Does the following syllogism follow logically, regardless of whether "
@@ -133,6 +142,22 @@ class TextFRCTTask(BaseTask):
                         f"{question_text}\n\nAnswer (number):"
                     )
 
+                if category == 'RL4' and choices:
+                    reference = additional.replace('<br>', '\n').strip() if additional else ''
+                    choice_text = '\n'.join(f"{i+1}. {c}" for i, c in enumerate(choices))
+                    if reference:
+                        return (
+                            "DECIPHERING LANGUAGES\n"
+                            "Reason across the language fragments below to infer how the ancient language maps "
+                            "to the target language, then choose the best translation for the query.\n\n"
+                            f"Known pairs:\n{reference}\n\n"
+                            f"Query: {question_text}\n\n{choice_text}\n\nAnswer (number):"
+                        )
+                    return (
+                        "Choose the best translation for the query from the numbered options.\n\n"
+                        f"Query: {question_text}\n\n{choice_text}\n\nAnswer (number):"
+                    )
+
                 if choices:
                     choice_text = '\n'.join(f"{i+1}. {c}" for i, c in enumerate(choices))
                     return f"Statement: {question_text}\n\nWhich conclusion follows?\n{choice_text}\n\nAnswer (number):"
@@ -142,7 +167,19 @@ class TextFRCTTask(BaseTask):
                 choices = [c.strip() for c in choices_raw.split(';;')] if choices_raw else []
                 if choices:
                     choice_text = '\n'.join(f"{i+1}. {c}" for i, c in enumerate(choices))
-                    return f"Choose the best definition for '{question}':\n\n{choice_text}\n\nAnswer (number):"
+                    level_note = {
+                        'V1': 'V1 (easier)',
+                        'V2': 'V2',
+                        'V3': 'V3',
+                        'V4': 'V4',
+                        'V5': 'V5 (harder)',
+                    }.get(category, category)
+                    return (
+                        f"VOCABULARY TEST - {level_note}\n"
+                        "Test your knowledge of word meanings.\n"
+                        f"Choose the best definition for '{question_text}'. Respond with only the option number.\n\n"
+                        f"{choice_text}\n\nAnswer (number):"
+                    )
                 return f"What does '{question}' mean?"
 
             # Default format for other categories
