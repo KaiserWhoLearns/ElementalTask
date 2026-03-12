@@ -211,13 +211,57 @@ def load_atomic_operation_inputs() -> Dict[str, List[str]]:
     return operation_inputs
 
 
+def load_generic_string_inputs() -> List[str]:
+    """Load a broad in-domain word pool for pure string compositions.
+
+    This stays grounded in simple.csv rather than introducing synthetic strings.
+    Restrict to single-token alphabetic strings longer than one character so
+    reverse/first/last operations remain meaningful.
+    """
+    csv_path = Path(__file__).parent.parent.parent / "dataset" / "simple.csv"
+    if not csv_path.exists():
+        return []
+
+    df = pd.read_csv(csv_path)
+    questions = df["question"].dropna().astype(str)
+    values = {
+        value
+        for value in questions
+        if " " not in value and len(value) > 1 and all(ch.isalpha() for ch in value)
+    }
+    return sorted(values)
+
+
+def get_seed_string_inputs(operations: List[str], operation_inputs: Dict[str, List[str]]) -> List[str]:
+    """Choose a meaningful input pool for pure string compositions.
+
+    Using the first operation's atomic dataset directly makes chains like
+    lowercase+reverse collapse into one-character examples because the lowercase
+    task only contains A-Z. Use a richer in-domain word pool instead, and bias
+    its casing so case-conversion operations still do real work.
+    """
+    generic_inputs = load_generic_string_inputs()
+    first_op = operations[0]
+
+    if not generic_inputs:
+        return operation_inputs.get(first_op, [])
+
+    if "lowercase" in operations and "uppercase" not in operations:
+        return [value.upper() for value in generic_inputs]
+
+    if "uppercase" in operations and "lowercase" not in operations:
+        return [value.lower() for value in generic_inputs]
+
+    return generic_inputs
+
+
 def get_string_composition_inputs(operations: List[str], strict_chain: bool = False) -> List[str]:
     """Get input pool for a string composition.
     
     Args:
         operations: List of operation names in the composition
         strict_chain: If True, only use inputs where intermediate results are also 
-                     in-distribution (Approach B). If False, use first op's inputs (Approach A).
+                     in-distribution (Approach B). If False, use a broad in-domain string pool.
     
     Returns:
         List of valid input strings for this composition
@@ -225,14 +269,11 @@ def get_string_composition_inputs(operations: List[str], strict_chain: bool = Fa
     operation_inputs = load_atomic_operation_inputs()
     
     first_op = operations[0]
-    
-    # Get inputs for first operation (must exist, otherwise no examples)
-    if first_op not in operation_inputs:
+    inputs = get_seed_string_inputs(operations, operation_inputs)
+    if not inputs:
         return []
     
-    inputs = operation_inputs[first_op]
-    
-    # Approach A (default): Use all inputs valid for first operation
+    # Approach A (default): Use the richer seed inputs.
     if not strict_chain:
         return inputs
     
@@ -242,9 +283,9 @@ def get_string_composition_inputs(operations: List[str], strict_chain: bool = Fa
     
     second_op = operations[1]
     
-    # Get valid inputs for second operation (if not exists, no examples satisfy strict chain)
+    # If the next op has no atomic pool, keep the richer seed inputs.
     if second_op not in operation_inputs:
-        return []
+        return inputs
     
     valid_for_op2 = set(operation_inputs[second_op])
     
@@ -256,7 +297,7 @@ def get_string_composition_inputs(operations: List[str], strict_chain: bool = Fa
             intermediate = op_func(inp)
             if intermediate in valid_for_op2:
                 valid_inputs.append(inp)
-        except:
+        except Exception:
             continue
     
     return valid_inputs  # May return empty list if no inputs satisfy strict chain requirement
