@@ -100,24 +100,15 @@ STRING_COMPOSITIONS = {
     # 2-operation: case + manipulation
     "upper_reverse": ["uppercase", "reverse"],
     "lower_reverse": ["lowercase", "reverse"],
-    "reverse_upper": ["reverse", "uppercase"],
-    "reverse_lower": ["reverse", "lowercase"],
     "upper_first": ["uppercase", "first_letter"],
     "lower_first": ["lowercase", "first_letter"],
     "upper_last": ["uppercase", "last_letter"],
     "lower_last": ["lowercase", "last_letter"],
     "reverse_first": ["reverse", "first_letter"],
     "reverse_last": ["reverse", "last_letter"],
-    "first_upper": ["first_letter", "uppercase"],
-    "last_upper": ["last_letter", "uppercase"],
     
     # 3-operation chains
-    "upper_reverse_first": ["uppercase", "reverse", "first_letter"],
-    "lower_reverse_first": ["lowercase", "reverse", "first_letter"],
-    "upper_reverse_last": ["uppercase", "reverse", "last_letter"],
-    "lower_reverse_last": ["lowercase", "reverse", "last_letter"],
-    "reverse_upper_first": ["reverse", "uppercase", "first_letter"],
-    "reverse_lower_first": ["reverse", "lowercase", "first_letter"],
+
 }
 
 # Lookup-based compositions (require specific input domains)
@@ -157,18 +148,14 @@ LOOKUP_COMPOSITIONS = {
     "gerund_lower": (["present_to_gerund", "lowercase"], "present_to_gerund"),
     "gerund_reverse": (["present_to_gerund", "reverse"], "present_to_gerund"),
     "gerund_first": (["present_to_gerund", "first_letter"], "present_to_gerund"),
-    "gerund_last": (["present_to_gerund", "last_letter"], "present_to_gerund"),
     "plural_upper": (["singular_to_plural", "uppercase"], "singular_to_plural"),
     "plural_lower": (["singular_to_plural", "lowercase"], "singular_to_plural"),
     "plural_reverse": (["singular_to_plural", "reverse"], "singular_to_plural"),
     "plural_first": (["singular_to_plural", "first_letter"], "singular_to_plural"),
-    "plural_last": (["singular_to_plural", "last_letter"], "singular_to_plural"),
     
     # 3-operation chains with lookup
     "gerund_upper_reverse": (["present_to_gerund", "uppercase", "reverse"], "present_to_gerund"),
-    "gerund_reverse_first": (["present_to_gerund", "reverse", "first_letter"], "present_to_gerund"),
     "plural_upper_reverse": (["singular_to_plural", "uppercase", "reverse"], "singular_to_plural"),
-    "plural_reverse_first": (["singular_to_plural", "reverse", "first_letter"], "singular_to_plural"),
     "translate_eng_fr_upper_reverse": (["translate_eng_fr", "uppercase", "reverse"], "translate_eng_fr"),
     "translate_eng_sp_upper_reverse": (["translate_eng_sp", "uppercase", "reverse"], "translate_eng_sp"),
 }
