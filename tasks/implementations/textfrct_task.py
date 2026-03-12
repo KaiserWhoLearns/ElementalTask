@@ -75,6 +75,7 @@ class TextFRCTTask(BaseTask):
             category_name = instance.get('category_name', category)
             choices_raw = instance.get('choice', '') or ''
             additional = instance.get('additional', '') or ''
+            question_text = str(question).replace('<br>', '\n').strip()
 
             if category.startswith('CV'):  # Convergent Visual
                 if category == 'CV1':  # Scrambled Words
@@ -95,6 +96,12 @@ class TextFRCTTask(BaseTask):
                 if choices:
                     letters = 'ABCDE'
                     choice_text = '\n'.join(f"{letters[i]}. {c}" for i, c in enumerate(choices))
+                    if category == 'RG3':
+                        return (
+                            f"Identify which arithmetic operation(s) are needed to solve this problem. "
+                            f"Do not compute the final numeric result.\n\n"
+                            f"Problem: {question_text}\n\n{choice_text}\n\nAnswer (letter):"
+                        )
                     return f"Solve this problem: {question}\n\n{choice_text}\n\nAnswer (letter):"
                 return f"Solve this problem: {question}\nAnswer:"
 
@@ -111,9 +118,24 @@ class TextFRCTTask(BaseTask):
 
             elif category.startswith('RL') or category.startswith('I'):  # Inference — numbered choices, answer is 1-5
                 choices = [c.strip() for c in choices_raw.split(';;')] if choices_raw else []
+                if category == 'I1' and choices:
+                    choice_text = '\n'.join(f"{i+1}. {c}" for i, c in enumerate(choices))
+                    return (
+                        "Four options follow one letter-pattern rule and one does not. "
+                        "Pick the option that does NOT fit the same pattern.\n\n"
+                        f"{choice_text}\n\nAnswer (number):"
+                    )
+
+                if category == 'I2':
+                    return (
+                        "Each row marks one location with an 'x'. Use the pattern across rows to determine "
+                        "which numbered position (1-5) is correct.\n\n"
+                        f"{question_text}\n\nAnswer (number):"
+                    )
+
                 if choices:
                     choice_text = '\n'.join(f"{i+1}. {c}" for i, c in enumerate(choices))
-                    return f"Statement: {question}\n\nWhich conclusion follows?\n{choice_text}\n\nAnswer (number):"
+                    return f"Statement: {question_text}\n\nWhich conclusion follows?\n{choice_text}\n\nAnswer (number):"
                 return f"Task: {category_name}\nStatement: {question}\nAnswer:"
 
             elif category.startswith('V'):  # Vocabulary — numbered choices, answer is 1-5
