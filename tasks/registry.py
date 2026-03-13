@@ -274,6 +274,20 @@ class TaskRegistry:
             if hasattr(task, 'data') and task.data:
                 if isinstance(task.data, list):
                     task.data = [d for d in task.data if d.get('category_name') in categories]
+
+            # Fallback: support blended compositions via compositional:<category>
+            # so they remain discoverable under the compositional namespace.
+            if (not getattr(task, 'data', None)) and len(categories) == 1:
+                blended_category = categories[0]
+                try:
+                    return self._import_and_call(
+                        'tasks.implementations.blended_compositions_task',
+                        'create_blended_compositions_task',
+                        category=blended_category,
+                        name=f"compositional:{blended_category}",
+                    )
+                except Exception:
+                    pass
         
         return task
     
@@ -445,6 +459,14 @@ def list_all_tasks(include_compositional: bool = True, include_textfrct: bool = 
                 for comp_name in sorted(LOOKUP_COMPOSITIONS.keys()):
                     result["compositional_tasks"].append(f"compositional:{comp_name}")
                     result["compositional_tasks"].append(f"compositional:{comp_name} (spaced)")
+
+                # Add blended composition categories under compositional namespace
+                try:
+                    from tasks.implementations.blended_compositions_task import BlendedCompositionsTask
+                    for comp_name in sorted(BlendedCompositionsTask.CATEGORY_DATA.keys()):
+                        result["compositional_tasks"].append(f"compositional:{comp_name}")
+                except Exception:
+                    pass
                     
             except Exception as e:
                 print(f"Warning: Could not enumerate compositional tasks: {e}")
