@@ -45,6 +45,18 @@ def load_lookup_tables() -> Dict[str, Dict[str, str]]:
         cat_data = df[df["category_name"] == category]
         if not cat_data.empty:
             lookup_tables[category] = dict(zip(cat_data["question"], cat_data["answer"]))
+
+    # Backfill eng->sp from sp->eng when simple.csv lacks translate_eng_sp rows.
+    # Keep the first observed Spanish form for each English token.
+    if "translate_eng_sp" not in lookup_tables and "translate_sp_eng" in lookup_tables:
+        sp_to_eng = lookup_tables["translate_sp_eng"]
+        eng_to_sp: Dict[str, str] = {}
+        for sp, eng in sp_to_eng.items():
+            eng_norm = str(eng).strip().lower()
+            if eng_norm and eng_norm not in eng_to_sp:
+                eng_to_sp[eng_norm] = str(sp)
+        if eng_to_sp:
+            lookup_tables["translate_eng_sp"] = eng_to_sp
     
     return lookup_tables
 
@@ -100,24 +112,15 @@ STRING_COMPOSITIONS = {
     # 2-operation: case + manipulation
     "upper_reverse": ["uppercase", "reverse"],
     "lower_reverse": ["lowercase", "reverse"],
-    "reverse_upper": ["reverse", "uppercase"],
-    "reverse_lower": ["reverse", "lowercase"],
     "upper_first": ["uppercase", "first_letter"],
     "lower_first": ["lowercase", "first_letter"],
     "upper_last": ["uppercase", "last_letter"],
     "lower_last": ["lowercase", "last_letter"],
     "reverse_first": ["reverse", "first_letter"],
     "reverse_last": ["reverse", "last_letter"],
-    "first_upper": ["first_letter", "uppercase"],
-    "last_upper": ["last_letter", "uppercase"],
     
     # 3-operation chains
-    "upper_reverse_first": ["uppercase", "reverse", "first_letter"],
-    "lower_reverse_first": ["lowercase", "reverse", "first_letter"],
-    "upper_reverse_last": ["uppercase", "reverse", "last_letter"],
-    "lower_reverse_last": ["lowercase", "reverse", "last_letter"],
-    "reverse_upper_first": ["reverse", "uppercase", "first_letter"],
-    "reverse_lower_first": ["reverse", "lowercase", "first_letter"],
+
 }
 
 # Lookup-based compositions (require specific input domains)
@@ -157,18 +160,14 @@ LOOKUP_COMPOSITIONS = {
     "gerund_lower": (["present_to_gerund", "lowercase"], "present_to_gerund"),
     "gerund_reverse": (["present_to_gerund", "reverse"], "present_to_gerund"),
     "gerund_first": (["present_to_gerund", "first_letter"], "present_to_gerund"),
-    "gerund_last": (["present_to_gerund", "last_letter"], "present_to_gerund"),
     "plural_upper": (["singular_to_plural", "uppercase"], "singular_to_plural"),
     "plural_lower": (["singular_to_plural", "lowercase"], "singular_to_plural"),
     "plural_reverse": (["singular_to_plural", "reverse"], "singular_to_plural"),
     "plural_first": (["singular_to_plural", "first_letter"], "singular_to_plural"),
-    "plural_last": (["singular_to_plural", "last_letter"], "singular_to_plural"),
     
     # 3-operation chains with lookup
     "gerund_upper_reverse": (["present_to_gerund", "uppercase", "reverse"], "present_to_gerund"),
-    "gerund_reverse_first": (["present_to_gerund", "reverse", "first_letter"], "present_to_gerund"),
     "plural_upper_reverse": (["singular_to_plural", "uppercase", "reverse"], "singular_to_plural"),
-    "plural_reverse_first": (["singular_to_plural", "reverse", "first_letter"], "singular_to_plural"),
     "translate_eng_fr_upper_reverse": (["translate_eng_fr", "uppercase", "reverse"], "translate_eng_fr"),
     "translate_eng_sp_upper_reverse": (["translate_eng_sp", "uppercase", "reverse"], "translate_eng_sp"),
 }
@@ -211,13 +210,57 @@ def load_atomic_operation_inputs() -> Dict[str, List[str]]:
     return operation_inputs
 
 
+def load_generic_string_inputs() -> List[str]:
+    """Load a broad in-domain word pool for pure string compositions.
+
+    This stays grounded in simple.csv rather than introducing synthetic strings.
+    Restrict to single-token alphabetic strings longer than one character so
+    reverse/first/last operations remain meaningful.
+    """
+    csv_path = Path(__file__).parent.parent.parent / "dataset" / "simple.csv"
+    if not csv_path.exists():
+        return []
+
+    df = pd.read_csv(csv_path)
+    questions = df["question"].dropna().astype(str)
+    values = {
+        value
+        for value in questions
+        if " " not in value and len(value) > 1 and all(ch.isalpha() for ch in value)
+    }
+    return sorted(values)
+
+
+def get_seed_string_inputs(operations: List[str], operation_inputs: Dict[str, List[str]]) -> List[str]:
+    """Choose a meaningful input pool for pure string compositions.
+
+    Using the first operation's atomic dataset directly makes chains like
+    lowercase+reverse collapse into one-character examples because the lowercase
+    task only contains A-Z. Use a richer in-domain word pool instead, and bias
+    its casing so case-conversion operations still do real work.
+    """
+    generic_inputs = load_generic_string_inputs()
+    first_op = operations[0]
+
+    if not generic_inputs:
+        return operation_inputs.get(first_op, [])
+
+    if "lowercase" in operations and "uppercase" not in operations:
+        return [value.upper() for value in generic_inputs]
+
+    if "uppercase" in operations and "lowercase" not in operations:
+        return [value.lower() for value in generic_inputs]
+
+    return generic_inputs
+
+
 def get_string_composition_inputs(operations: List[str], strict_chain: bool = False) -> List[str]:
     """Get input pool for a string composition.
     
     Args:
         operations: List of operation names in the composition
         strict_chain: If True, only use inputs where intermediate results are also 
-                     in-distribution (Approach B). If False, use first op's inputs (Approach A).
+                     in-distribution (Approach B). If False, use a broad in-domain string pool.
     
     Returns:
         List of valid input strings for this composition
@@ -225,14 +268,11 @@ def get_string_composition_inputs(operations: List[str], strict_chain: bool = Fa
     operation_inputs = load_atomic_operation_inputs()
     
     first_op = operations[0]
-    
-    # Get inputs for first operation (must exist, otherwise no examples)
-    if first_op not in operation_inputs:
+    inputs = get_seed_string_inputs(operations, operation_inputs)
+    if not inputs:
         return []
     
-    inputs = operation_inputs[first_op]
-    
-    # Approach A (default): Use all inputs valid for first operation
+    # Approach A (default): Use the richer seed inputs.
     if not strict_chain:
         return inputs
     
@@ -242,9 +282,9 @@ def get_string_composition_inputs(operations: List[str], strict_chain: bool = Fa
     
     second_op = operations[1]
     
-    # Get valid inputs for second operation (if not exists, no examples satisfy strict chain)
+    # If the next op has no atomic pool, keep the richer seed inputs.
     if second_op not in operation_inputs:
-        return []
+        return inputs
     
     valid_for_op2 = set(operation_inputs[second_op])
     
@@ -256,7 +296,7 @@ def get_string_composition_inputs(operations: List[str], strict_chain: bool = Fa
             intermediate = op_func(inp)
             if intermediate in valid_for_op2:
                 valid_inputs.append(inp)
-        except:
+        except Exception:
             continue
     
     return valid_inputs  # May return empty list if no inputs satisfy strict chain requirement
@@ -290,6 +330,29 @@ def get_lookup_inputs(lookup_name: str) -> List[str]:
     if lookup_name in LOOKUP_TABLES:
         return list(LOOKUP_TABLES[lookup_name].keys())
     return []
+
+
+def build_lookup_example(input_str: str, operations: List[str]) -> tuple[str, str]:
+    """Build a lookup-based example input/output pair for a composition.
+
+    For lookup chains ending with lowercase (and no uppercase op), expose an
+    uppercase input so the lowercase step is not a no-op while preserving lookup
+    validity via the original key.
+    """
+    display_input = input_str
+
+    if "lowercase" in operations and "uppercase" not in operations:
+        display_input = input_str.upper()
+
+        # Keep lookup domain valid with the original key, then force lowercase
+        # to do real work by uppercasing the intermediate string first.
+        result = get_operation(operations[0])(input_str)
+        result = result.upper()
+        for op_name in operations[1:]:
+            result = get_operation(op_name)(result)
+        return display_input, result
+
+    return display_input, apply_composition(input_str, operations)
 
 
 # =============================================================================
@@ -390,16 +453,16 @@ class CompositionalTask(BaseTask):
             valid_inputs = get_lookup_inputs(source_lookup)
             for input_str in valid_inputs:
                 try:
-                    output = apply_composition(input_str, ops)
+                    display_input, output = build_lookup_example(input_str, ops)
                     # Skip if lookup returned original (meaning lookup failed)
                     if ops[0] in LOOKUP_TABLES and output == input_str:
                         continue
                     
                     if self.spaced:
                         examples.append({
-                            "input": add_spaces(input_str),
+                            "input": add_spaces(display_input),
                             "output": add_spaces(output),
-                            "original_input": input_str,
+                            "original_input": display_input,
                             "original_output": output,
                             "category_name": comp_name,
                             "operations": "+".join(ops),
@@ -407,7 +470,7 @@ class CompositionalTask(BaseTask):
                         })
                     else:
                         examples.append({
-                            "input": input_str,
+                            "input": display_input,
                             "output": output,
                             "category_name": comp_name,
                             "operations": "+".join(ops),
@@ -608,13 +671,13 @@ def generate_compositional_csv(output_path: str = None, spaced: bool = False, st
         valid_inputs = get_lookup_inputs(source_lookup)
         for input_str in valid_inputs:
             try:
-                output = apply_composition(input_str, ops)
+                display_input, output = build_lookup_example(input_str, ops)
                 
                 if spaced:
                     examples.append({
-                        "input": add_spaces(input_str),
+                        "input": add_spaces(display_input),
                         "output": add_spaces(output),
-                        "original_input": input_str,
+                        "original_input": display_input,
                         "original_output": output,
                         "category_name": comp_name,
                         "operations": "+".join(ops),
@@ -622,7 +685,7 @@ def generate_compositional_csv(output_path: str = None, spaced: bool = False, st
                     })
                 else:
                     examples.append({
-                        "input": input_str,
+                        "input": display_input,
                         "output": output,
                         "category_name": comp_name,
                         "operations": "+".join(ops),

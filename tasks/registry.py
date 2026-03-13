@@ -159,6 +159,11 @@ class TaskRegistry:
             'logical_ops': lambda: self._import_and_call('tasks.implementations.logical_ops_task', 'create_logical_ops_task', category=subtask_specs),
             'fact_extraction': lambda: self._import_and_call('tasks.implementations.fact_extraction_task', 'create_fact_extraction_task', category=subtask_specs),
             'coreference': lambda: self._import_and_call('tasks.implementations.coreference_task', 'create_coreference_task', category=subtask_specs),
+            'word_problem_single_step': lambda: self._import_and_call('tasks.implementations.math_word_problem_tasks', 'create_word_problem_single_step_task', category=subtask_specs),
+            'quantity_comparison': lambda: self._import_and_call('tasks.implementations.math_word_problem_tasks', 'create_quantity_comparison_task', category=subtask_specs),
+            'rate_unit': lambda: self._import_and_call('tasks.implementations.math_word_problem_tasks', 'create_rate_unit_task', category=subtask_specs),
+            'multi_entity_tracking': lambda: self._import_and_call('tasks.implementations.math_word_problem_tasks', 'create_multi_entity_tracking_task', category=subtask_specs),
+            'benchmark': lambda: self._create_benchmark_task(subtask_specs),
         }
         
         if base_name in factory_map:
@@ -311,6 +316,18 @@ class TaskRegistry:
             
         return task
     
+    def _create_benchmark_task(self, task_name: str):
+        """Create a benchmark task (ARC-Challenge, BoolQ, WinoGrande, GSM8K) by name.
+
+        Supports:
+            benchmark:arc_challenge
+            benchmark:boolq
+            benchmark:winogrande
+            benchmark:gsm8k
+        """
+        from tasks.benchmarks.lmeval_tasks import make_benchmark_task
+        return make_benchmark_task(task_name)
+
     def list_tasks(self) -> List[str]:
         """List all available task names."""
         if not self._discovered:

@@ -156,16 +156,23 @@ class StringAnalogyTask(BaseTask):
         if seed is not None:
             random.seed(seed)
         
-        # Generate random input string
-        input_str = ''.join(random.choices(string.ascii_lowercase, k=source_length))
-        
-        # Apply transformation to get output
-        output_str = self._apply_transformation(transformation, input_str)
-        
+        # Generate source/query strings and apply the same transformation to both,
+        # so examples match the task's analogy format.
+        source = ''.join(random.choices(string.ascii_lowercase, k=source_length))
+        query_length = random.randint(2, 5)
+        query = ''.join(random.choices(string.ascii_lowercase, k=query_length))
+
+        target = self._apply_transformation(transformation, source)
+        answer = self._apply_transformation(transformation, query)
+
         return {
-            "input": input_str,
-            "output": output_str,
-            "transformation": transformation
+            "input": f"{source} -> {target}, {query} -> ?",
+            "output": answer,
+            "source": source,
+            "target": target,
+            "query": query,
+            "answer": answer,
+            "transformation": transformation,
         }
     
     def generate_examples(
@@ -262,6 +269,43 @@ class StringAnalogyTask(BaseTask):
                 seed=seed,
                 fresh=fresh
             )
+
+    def build_prompt(self, instance: Dict[str, str], num_shots: int = 5) -> str:
+        """Build prompt with analogy-formatted demonstrations.
+
+        If transformation metadata is available, prefer demonstrations that use the
+        same transformation to keep few-shot context coherent.
+        """
+        prompt = ""
+
+        if num_shots > 0:
+            transformation = instance.get("transformation")
+
+            if self.use_generator and transformation:
+                icl_examples = self.get_icl_examples(
+                    num_examples=num_shots,
+                    seed=42,
+                    transformations=[transformation],
+                    same_transformation=True,
+                )
+            else:
+                rows = self.get_split("test")
+                if transformation:
+                    rows = [r for r in rows if r.get("transformation") == transformation]
+
+                # Avoid leaking the exact query row into demonstrations.
+                rows = [r for r in rows if r.get("input") != instance.get("input")]
+
+                rng = random.Random(42)
+                rng.shuffle(rows)
+                icl_examples = rows[:num_shots]
+
+            if icl_examples:
+                prompt += self._format_icl_examples(icl_examples)
+                prompt += "\n\n"
+
+        prompt += f"Input: {instance.get(self.config.input_column, '')}\nOutput:"
+        return prompt
     
     def evaluate(self, predictions: List[str], split: str = "test", **kwargs) -> Dict[str, float]:
         """Evaluate predictions with exact match accuracy."""

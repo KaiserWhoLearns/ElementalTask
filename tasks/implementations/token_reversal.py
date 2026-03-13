@@ -76,7 +76,7 @@ def create_token_reversal_task(
         in_memory_data=examples if examples is not None else default_examples,
         input_column="input",
         output_column="output",
-        prompt_template="Reverse the characters in the given word.\nInput: {input}\nOutput:",
+        prompt_template="Input: {input}\nOutput:",
         evaluation_metrics=["accuracy"],
         metadata={"task_type": "string_transformation"},
     )

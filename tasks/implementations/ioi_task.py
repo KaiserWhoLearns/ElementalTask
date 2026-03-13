@@ -64,22 +64,32 @@ class IOITask(BaseTask):
         Returns:
             Formatted prompt string
         """
-        # The mib-bench/ioi dataset typically has these fields:
-        # - 'prompt': the incomplete sentence
-        # - 'choices': list of possible completions 
-        # - 'answer_index': index of correct choice
-        
         prompt_text = instance.get('prompt', '')
-        
-        # For IOI, we want the model to complete the sentence with the correct name
-        # The prompt should be the incomplete sentence ending with the preposition
-        prompt = f"""Complete the following sentence by identifying who should be referenced:
 
-Sentence: {prompt_text}
+        sections = [
+            "Complete the following sentence by identifying who should be referenced.",
+            "Answer with only the name of the person who should be referenced.",
+        ]
 
-Answer with only the name of the person who should be referenced."""
-        
-        return prompt
+        if num_shots > 0:
+            icl_examples = self.get_icl_examples(
+                num_examples=num_shots,
+                shuffle=True,
+                seed=42,
+                fresh=False,
+            )
+            if icl_examples:
+                demo_lines = []
+                for ex in icl_examples:
+                    demo_lines.append(f"Sentence: {ex.get('input', '')}")
+                    demo_lines.append(f"Answer: {ex.get('output', '')}")
+                    demo_lines.append("")
+                sections.append("\n".join(demo_lines).strip())
+                sections.append("Now answer the next one.")
+
+        sections.append(f"Sentence: {prompt_text}")
+        sections.append("Answer:")
+        return "\n\n".join(sections)
     
     def evaluate(self, predictions: List[str], split: str = "test", **kwargs) -> Dict[str, float]:
         """Evaluate indirect object identification predictions."""

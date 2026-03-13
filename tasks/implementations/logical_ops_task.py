@@ -1,15 +1,15 @@
 """Logical operators — elemental reasoning primitives.
 
-Tests the model's capacity for basic logical operations:
-  - negation:     Negate an adjective / statement ("happy" → "not happy")
-  - conjunction:  Evaluate AND of truth values ("True AND False" → "False")
-  - conditional:  Modus ponens — given a rule and a fact, derive the conclusion
+Tests the model's capacity for basic logical operations in text form:
+    - negation:     Verify whether a candidate is a correct logical negation
+    - conjunction:  Evaluate conjunction/disjunction statements from text facts
+    - conditional:  Decide whether a conclusion follows from a rule + fact
 
 These are building blocks for reasoning-heavy benchmarks.
 
 Format (ICL):
-    Input: happy
-    Output: not happy
+    Input: [text logic problem]
+    Output: True or False
     (varies by category — see demos)
 """
 
@@ -26,96 +26,72 @@ class LogicalOpsTask(BaseTask):
 
     CATEGORY_DATA: Dict[str, List[Dict[str, str]]] = {
         "negation": [
-            {"input": "happy", "output": "not happy"},
-            {"input": "tall", "output": "not tall"},
-            {"input": "fast", "output": "not fast"},
-            {"input": "warm", "output": "not warm"},
-            {"input": "light", "output": "not light"},
-            {"input": "clean", "output": "not clean"},
-            {"input": "loud", "output": "not loud"},
-            {"input": "sharp", "output": "not sharp"},
-            {"input": "thick", "output": "not thick"},
-            {"input": "smooth", "output": "not smooth"},
-            {"input": "dry", "output": "not dry"},
-            {"input": "heavy", "output": "not heavy"},
-            {"input": "bright", "output": "not bright"},
-            {"input": "deep", "output": "not deep"},
-            {"input": "wide", "output": "not wide"},
-            {"input": "soft", "output": "not soft"},
-            {"input": "new", "output": "not new"},
-            {"input": "full", "output": "not full"},
-            {"input": "rich", "output": "not rich"},
-            {"input": "safe", "output": "not safe"},
+            {"input": "Statement: All robots can move.\nCandidate negation: Some robots cannot move.\nIs the candidate a correct logical negation?", "output": "True"},
+            {"input": "Statement: All apples are red.\nCandidate negation: No apples are red.\nIs the candidate a correct logical negation?", "output": "False"},
+            {"input": "Statement: Some birds can swim.\nCandidate negation: No birds can swim.\nIs the candidate a correct logical negation?", "output": "True"},
+            {"input": "Statement: Some books are heavy.\nCandidate negation: Some books are not heavy.\nIs the candidate a correct logical negation?", "output": "False"},
+            {"input": "Statement: The lamp is on.\nCandidate negation: The lamp is not on.\nIs the candidate a correct logical negation?", "output": "True"},
+            {"input": "Statement: The lamp is on.\nCandidate negation: The lamp is off and broken.\nIs the candidate a correct logical negation?", "output": "False"},
+            {"input": "Statement: Everyone passed the test.\nCandidate negation: Not everyone passed the test.\nIs the candidate a correct logical negation?", "output": "True"},
+            {"input": "Statement: Everyone passed the test.\nCandidate negation: No one passed the test.\nIs the candidate a correct logical negation?", "output": "False"},
+            {"input": "Statement: No cars are electric.\nCandidate negation: Some cars are electric.\nIs the candidate a correct logical negation?", "output": "True"},
+            {"input": "Statement: No cars are electric.\nCandidate negation: All cars are electric.\nIs the candidate a correct logical negation?", "output": "False"},
+            {"input": "Statement: The gate is closed.\nCandidate negation: The gate is open.\nIs the candidate a correct logical negation?", "output": "False"},
+            {"input": "Statement: The gate is closed.\nCandidate negation: The gate is not closed.\nIs the candidate a correct logical negation?", "output": "True"},
         ],
 
         "conjunction": [
-            {"input": "True AND True", "output": "True"},
-            {"input": "True AND False", "output": "False"},
-            {"input": "False AND True", "output": "False"},
-            {"input": "False AND False", "output": "False"},
-            {"input": "True OR True", "output": "True"},
-            {"input": "True OR False", "output": "True"},
-            {"input": "False OR True", "output": "True"},
-            {"input": "False OR False", "output": "False"},
-            {"input": "NOT True", "output": "False"},
-            {"input": "NOT False", "output": "True"},
-            {"input": "True AND True AND True", "output": "True"},
-            {"input": "True AND True AND False", "output": "False"},
-            {"input": "False OR False OR True", "output": "True"},
-            {"input": "False OR False OR False", "output": "False"},
-            {"input": "True AND (True OR False)", "output": "True"},
-            {"input": "False AND (True OR True)", "output": "False"},
-            {"input": "(True OR False) AND True", "output": "True"},
-            {"input": "(False AND True) OR True", "output": "True"},
-            {"input": "(False AND False) OR False", "output": "False"},
-            {"input": "NOT (True AND False)", "output": "True"},
+            {"input": "Fact A is True. Fact B is True.\nClaim: A AND B.\nIs the claim true?", "output": "True"},
+            {"input": "Fact A is True. Fact B is False.\nClaim: A AND B.\nIs the claim true?", "output": "False"},
+            {"input": "Fact A is False. Fact B is True.\nClaim: A OR B.\nIs the claim true?", "output": "True"},
+            {"input": "Fact A is False. Fact B is False.\nClaim: A OR B.\nIs the claim true?", "output": "False"},
+            {"input": "Fact A is True. Fact B is False.\nClaim: NOT B.\nIs the claim true?", "output": "True"},
+            {"input": "Fact A is True. Fact B is False.\nClaim: NOT A.\nIs the claim true?", "output": "False"},
+            {"input": "Fact A is True. Fact B is True. Fact C is False.\nClaim: A AND B AND C.\nIs the claim true?", "output": "False"},
+            {"input": "Fact A is True. Fact B is True. Fact C is False.\nClaim: A AND (B OR C).\nIs the claim true?", "output": "True"},
+            {"input": "Fact A is False. Fact B is False. Fact C is True.\nClaim: (A OR B) AND C.\nIs the claim true?", "output": "False"},
+            {"input": "Fact A is False. Fact B is False. Fact C is True.\nClaim: A OR (B OR C).\nIs the claim true?", "output": "True"},
+            {"input": "Fact A is True. Fact B is False.\nClaim: (A AND B) OR A.\nIs the claim true?", "output": "True"},
+            {"input": "Fact A is True. Fact B is False.\nClaim: (A OR B) AND B.\nIs the claim true?", "output": "False"},
         ],
 
         "conditional": [
-            {"input": 'Rule: "If it rains, the ground gets wet."\nFact: "It rains."', "output": "The ground gets wet."},
-            {"input": 'Rule: "If the light is green, cars may go."\nFact: "The light is green."', "output": "Cars may go."},
-            {"input": 'Rule: "If the temperature drops below 0, water freezes."\nFact: "The temperature drops below 0."', "output": "Water freezes."},
-            {"input": 'Rule: "If you study hard, you pass the exam."\nFact: "You study hard."', "output": "You pass the exam."},
-            {"input": 'Rule: "If the alarm rings, everyone evacuates."\nFact: "The alarm rings."', "output": "Everyone evacuates."},
-            {"input": 'Rule: "If the power goes out, the lights turn off."\nFact: "The power goes out."', "output": "The lights turn off."},
-            {"input": 'Rule: "If a number is even, it is divisible by 2."\nFact: "The number is even."', "output": "It is divisible by 2."},
-            {"input": 'Rule: "If the store closes, no one can buy anything."\nFact: "The store closes."', "output": "No one can buy anything."},
-            {"input": 'Rule: "If the dog barks, the cat hides."\nFact: "The dog barks."', "output": "The cat hides."},
-            {"input": 'Rule: "If it snows, schools close."\nFact: "It snows."', "output": "Schools close."},
-            {"input": 'Rule: "If you press the button, the door opens."\nFact: "You press the button."', "output": "The door opens."},
-            {"input": 'Rule: "If the battery dies, the phone turns off."\nFact: "The battery dies."', "output": "The phone turns off."},
-            {"input": 'Rule: "If the bridge is closed, drivers must detour."\nFact: "The bridge is closed."', "output": "Drivers must detour."},
-            {"input": 'Rule: "If the cake is done, the timer beeps."\nFact: "The cake is done."', "output": "The timer beeps."},
-            {"input": 'Rule: "If the sun sets, it gets dark."\nFact: "The sun sets."', "output": "It gets dark."},
-            {"input": 'Rule: "If the key fits, the lock opens."\nFact: "The key fits."', "output": "The lock opens."},
-            {"input": 'Rule: "If you water the plant, it grows."\nFact: "You water the plant."', "output": "It grows."},
-            {"input": 'Rule: "If the wind blows, the leaves scatter."\nFact: "The wind blows."', "output": "The leaves scatter."},
-            {"input": 'Rule: "If demand increases, prices rise."\nFact: "Demand increases."', "output": "Prices rise."},
-            {"input": 'Rule: "If the code compiles, the program runs."\nFact: "The code compiles."', "output": "The program runs."},
+            {"input": 'Rule: If it rains, the ground gets wet.\nFact: It rains.\nConclusion: The ground gets wet.\nDoes the conclusion logically follow?', "output": "True"},
+            {"input": 'Rule: If it rains, the ground gets wet.\nFact: It does not rain.\nConclusion: The ground gets wet.\nDoes the conclusion logically follow?', "output": "False"},
+            {"input": 'Rule: If the switch is on, the lamp lights up.\nFact: The switch is on.\nConclusion: The lamp lights up.\nDoes the conclusion logically follow?', "output": "True"},
+            {"input": 'Rule: If the switch is on, the lamp lights up.\nFact: The lamp lights up.\nConclusion: The switch is on.\nDoes the conclusion logically follow?', "output": "False"},
+            {"input": 'Rule: If a number is even, it is divisible by 2.\nFact: 14 is even.\nConclusion: 14 is divisible by 2.\nDoes the conclusion logically follow?', "output": "True"},
+            {"input": 'Rule: If a number is even, it is divisible by 2.\nFact: 15 is not even.\nConclusion: 15 is not divisible by 2.\nDoes the conclusion logically follow?', "output": "False"},
+            {"input": 'Rule: If a file is deleted, it is unavailable.\nFact: The file is deleted.\nConclusion: The file is unavailable.\nDoes the conclusion logically follow?', "output": "True"},
+            {"input": 'Rule: If a file is deleted, it is unavailable.\nFact: The file is unavailable.\nConclusion: The file is deleted.\nDoes the conclusion logically follow?', "output": "False"},
+            {"input": 'Rule: If a student studies, they pass this quiz.\nFact: Mina studies.\nConclusion: Mina passes this quiz.\nDoes the conclusion logically follow?', "output": "True"},
+            {"input": 'Rule: If a student studies, they pass this quiz.\nFact: Leo does not pass this quiz.\nConclusion: Leo did not study.\nDoes the conclusion logically follow?', "output": "False"},
+            {"input": 'Rule: If the alarm rings, everyone evacuates.\nFact: The alarm rings.\nConclusion: Everyone evacuates.\nDoes the conclusion logically follow?', "output": "True"},
+            {"input": 'Rule: If the alarm rings, everyone evacuates.\nFact: Everyone evacuates.\nConclusion: The alarm rings.\nDoes the conclusion logically follow?', "output": "False"},
         ],
     }
 
     CATEGORY_DEMOS: Dict[str, List[str]] = {
         "negation": [
-            "Input: cold\nOutput: not cold",
-            "Input: old\nOutput: not old",
-            "Input: slow\nOutput: not slow",
-            "Input: dark\nOutput: not dark",
-            "Input: quiet\nOutput: not quiet",
+            "Input: Statement: All chairs are wooden.\nCandidate negation: Some chairs are not wooden.\nIs the candidate a correct logical negation?\nOutput: True",
+            "Input: Statement: Some cups are clean.\nCandidate negation: No cups are clean.\nIs the candidate a correct logical negation?\nOutput: True",
+            "Input: Statement: The window is open.\nCandidate negation: The window is not open.\nIs the candidate a correct logical negation?\nOutput: True",
+            "Input: Statement: Everyone arrived early.\nCandidate negation: No one arrived early.\nIs the candidate a correct logical negation?\nOutput: False",
+            "Input: Statement: The road is clear.\nCandidate negation: The road is blocked.\nIs the candidate a correct logical negation?\nOutput: False",
         ],
         "conjunction": [
-            "Input: True AND True\nOutput: True",
-            "Input: True AND False\nOutput: False",
-            "Input: False OR True\nOutput: True",
-            "Input: NOT True\nOutput: False",
-            "Input: False OR False\nOutput: False",
+            "Input: Fact A is True. Fact B is True.\nClaim: A AND B.\nIs the claim true?\nOutput: True",
+            "Input: Fact A is True. Fact B is False.\nClaim: A AND B.\nIs the claim true?\nOutput: False",
+            "Input: Fact A is False. Fact B is True.\nClaim: A OR B.\nIs the claim true?\nOutput: True",
+            "Input: Fact A is True. Fact B is False.\nClaim: NOT B.\nIs the claim true?\nOutput: True",
+            "Input: Fact A is False. Fact B is False.\nClaim: A OR B.\nIs the claim true?\nOutput: False",
         ],
         "conditional": [
-            'Input: Rule: "If the bell rings, class starts."\nFact: "The bell rings."\nOutput: Class starts.',
-            'Input: Rule: "If traffic is heavy, arrive early."\nFact: "Traffic is heavy."\nOutput: Arrive early.',
-            'Input: Rule: "If you eat too much, you feel sick."\nFact: "You eat too much."\nOutput: You feel sick.',
-            'Input: Rule: "If the match is lit, it burns."\nFact: "The match is lit."\nOutput: It burns.',
-            'Input: Rule: "If the door is locked, use the key."\nFact: "The door is locked."\nOutput: Use the key.',
+            "Input: Rule: If the bell rings, class starts.\nFact: The bell rings.\nConclusion: Class starts.\nDoes the conclusion logically follow?\nOutput: True",
+            "Input: Rule: If traffic is heavy, travel time increases.\nFact: Travel time increased.\nConclusion: Traffic was heavy.\nDoes the conclusion logically follow?\nOutput: False",
+            "Input: Rule: If the key fits, the lock opens.\nFact: The key fits.\nConclusion: The lock opens.\nDoes the conclusion logically follow?\nOutput: True",
+            "Input: Rule: If a file is saved, it can be reopened.\nFact: The file can be reopened.\nConclusion: The file was saved.\nDoes the conclusion logically follow?\nOutput: False",
+            "Input: Rule: If the sensor triggers, the alarm sounds.\nFact: The sensor triggers.\nConclusion: The alarm sounds.\nDoes the conclusion logically follow?\nOutput: True",
         ],
     }
 
