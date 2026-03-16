@@ -9,12 +9,11 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 # 109 final tasks x 1 config = 109 array jobs
-#SBATCH --array=0-10
+#SBATCH --array=90-100
 #SBATCH --mail-user=emmy@cmu.edu
 #SBATCH --mail-type=ALL
 
-
-# done: 0-10 (of 108)
+# currently on:  90-100 (out of 108)
 source /data/user_data/mengyan3/tir3/ElementalTask/scripts/slurm_scripts/final/eval_tasks_final_lists.sh
 
 CONFIG="/data/user_data/mengyan3/tir3/ElementalTask/eval_configs/amber_checkpoints_0b_1t_main.json"
@@ -31,10 +30,36 @@ echo "Config: $CONFIG"
 cd /data/user_data/mengyan3/tir3/ElementalTask || exit 1
 
 TASK_SANITIZED=$(echo "$TASK" | tr ':' '_')
-EXISTING=$(find "$OUTPUT_BASE" -name "*_${TASK_SANITIZED}_metrics.json" 2>/dev/null | wc -l)
-EXPECTED=$(python3 -c "import json; d=json.load(open('$CONFIG')); print(sum(len(v) for v in d.values()))")
+TASK_COMPLETE=$(python3 - <<PY
+import glob
+import json
+import os
+import re
 
-if [ "$EXISTING" -ge "$EXPECTED" ]; then
+config = "$CONFIG"
+output_base = "$OUTPUT_BASE"
+task_sanitized = "$TASK_SANITIZED"
+
+cfg = json.load(open(config))
+model_id = next(iter(cfg.keys()))
+checkpoints = cfg[model_id]
+model_safe = model_id.replace('/', '_')
+
+pattern = os.path.join(output_base, "**", f"*_{task_sanitized}_metrics.json")
+files = glob.glob(pattern, recursive=True)
+
+done = set()
+rx = re.compile(rf"^{re.escape(model_safe)}_(.+)_{re.escape(task_sanitized)}_metrics\\.json$")
+for path in files:
+    m = rx.match(os.path.basename(path))
+    if m:
+        done.add(m.group(1))
+
+print("1" if set(checkpoints).issubset(done) else "0")
+PY
+)
+
+if [ "$TASK_COMPLETE" = "1" ]; then
     echo "Task already complete for all checkpoints, skipping."
     exit 0
 fi

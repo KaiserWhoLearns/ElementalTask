@@ -23,9 +23,36 @@ TASK=${FINAL_TASKS[$TASK_IDX]}
 
 cd /data/user_data/mengyan3/tir3/ElementalTask || exit 1
 TASK_SANITIZED=$(echo "$TASK" | tr ':' '_')
-EXISTING=$(find "$OUTPUT_BASE" -name "*_${TASK_SANITIZED}_metrics.json" 2>/dev/null | wc -l)
-EXPECTED=$(python3 -c "import json; d=json.load(open('$CONFIG')); print(sum(len(v) for v in d.values()))")
-[ "$EXISTING" -ge "$EXPECTED" ] && exit 0
+TASK_COMPLETE=$(python3 - <<PY
+import glob
+import json
+import os
+import re
+
+config = "$CONFIG"
+output_base = "$OUTPUT_BASE"
+task_sanitized = "$TASK_SANITIZED"
+
+cfg = json.load(open(config))
+model_id = next(iter(cfg.keys()))
+checkpoints = cfg[model_id]
+model_safe = model_id.replace('/', '_')
+
+pattern = os.path.join(output_base, "**", f"*_{task_sanitized}_metrics.json")
+files = glob.glob(pattern, recursive=True)
+
+done = set()
+rx = re.compile(rf"^{re.escape(model_safe)}_(.+)_{re.escape(task_sanitized)}_metrics\\.json$")
+for path in files:
+  m = rx.match(os.path.basename(path))
+  if m:
+    done.add(m.group(1))
+
+print("1" if set(checkpoints).issubset(done) else "0")
+PY
+)
+
+[ "$TASK_COMPLETE" = "1" ] && exit 0
 
 source ~/.bashrc
 conda activate elemental_tasks
