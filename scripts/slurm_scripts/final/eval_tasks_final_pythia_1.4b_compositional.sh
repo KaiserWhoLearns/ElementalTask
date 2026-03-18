@@ -15,7 +15,7 @@
 
 source /u/glee4/ElementalTaskscripts/slurm_scripts/final/eval_tasks_final_lists.sh
 
-CONFIG="/u/glee4/ElementalTaskeval_configs/pythia_1.4b_checkpoints_main.json"
+CONFIG="/u/glee4/ElementalTask/eval_configs/pythia_1.4b_checkpoints_main.json"
 OUTPUT_BASE="results/pythia_1.4b_continuous_final_iteration"
 
 NUM_TASKS=${#COMPOSITIONAL_TASKS[@]}
