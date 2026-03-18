@@ -1,20 +1,21 @@
 #!/bin/bash
+#SBATCH --account=bfcu-delta-gpu
 #SBATCH --job-name=eval_final_pythia_1.4b_elemental
 #SBATCH --output=logs/eval_final_pythia_1.4b_elemental_%A_%a.out
 #SBATCH --error=logs/eval_final_pythia_1.4b_elemental_%A_%a.err
 #SBATCH --time=2-00:00:00
 #SBATCH --mem=50G
 #SBATCH --gres=gpu:1
-#SBATCH --partition=preempt
+#SBATCH --partition=gpuA100x4
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --array=0-62
 #SBATCH --mail-user=isabelle_lee@seas.harvard.edu
 #SBATCH --mail-type=ALL
 
-source /n/holylabs/dam_lab/Users/iglee/ElementalTask/scripts/slurm_scripts/final/eval_tasks_final_lists.sh
+source /u/glee4/ElementalTaskscripts/slurm_scripts/final/eval_tasks_final_lists.sh
 
-CONFIG="/n/holylabs/dam_lab/Users/iglee/ElementalTask/eval_configs/pythia_1.4b_checkpoints_main.json"
+CONFIG="/u/glee4/ElementalTaskeval_configs/pythia_1.4b_checkpoints_main.json"
 OUTPUT_BASE="results/pythia_1.4b_continuous_final_iteration"
 
 NUM_TASKS=${#ELEMENTAL_TASKS[@]}
