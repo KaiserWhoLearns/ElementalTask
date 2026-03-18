@@ -13,7 +13,7 @@
 #SBATCH --mail-user=isabelle_lee@seas.harvard.edu
 #SBATCH --mail-type=ALL
 
-source /u/glee4/ElementalTaskscripts/slurm_scripts/final/eval_tasks_final_lists.sh
+source /u/glee4/ElementalTask/scripts/slurm_scripts/final/eval_tasks_final_lists.sh
 
 CONFIG="/u/glee4/ElementalTask/eval_configs/pythia_1.4b_checkpoints_main.json"
 OUTPUT_BASE="results/pythia_1.4b_continuous_final_iteration_compositional"
