@@ -16,13 +16,13 @@
 source /u/glee4/ElementalTaskscripts/slurm_scripts/final/eval_tasks_final_lists.sh
 
 CONFIG="/u/glee4/ElementalTask/eval_configs/pythia_1.4b_checkpoints_main.json"
-OUTPUT_BASE="results/pythia_1.4b_continuous_final_iteration"
+OUTPUT_BASE="results/pythia_1.4b_continuous_final_iteration_compositional"
 
 NUM_TASKS=${#COMPOSITIONAL_TASKS[@]}
 TASK_IDX=$((SLURM_ARRAY_TASK_ID % NUM_TASKS))
 TASK=${COMPOSITIONAL_TASKS[$TASK_IDX]}
 
-cd /n/holylabs/dam_lab/Users/iglee/ElementalTask || exit 1
+cd /u/glee4/ElementalTask || exit 1
 TASK_SANITIZED=$(echo "$TASK" | tr ':' '_')
 EXISTING=$(find "$OUTPUT_BASE" -name "*_${TASK_SANITIZED}_metrics.json" 2>/dev/null | wc -l)
 EXPECTED=$(python3 -c "import json; d=json.load(open('$CONFIG')); print(sum(len(v) for v in d.values()))")
@@ -31,7 +31,7 @@ EXPECTED=$(python3 -c "import json; d=json.load(open('$CONFIG')); print(sum(len(
 source ~/.bashrc
 conda activate base
 mkdir -p logs
-export PYTHONPATH=/n/holylabs/dam_lab/Users/iglee/ElementalTask:$PYTHONPATH
+export PYTHONPATH=/u/glee4/ElementalTask:$PYTHONPATH
 
 python scripts/eval_across_checkpoints.py \
   --model_configs "$CONFIG" \

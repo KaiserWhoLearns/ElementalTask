@@ -16,7 +16,7 @@
 source /u/glee4/ElementalTask/scripts/slurm_scripts/final/eval_tasks_final_lists.sh
 
 CONFIG="/u/glee4/ElementalTask/eval_configs/pythia_1.4b_checkpoints_main.json"
-OUTPUT_BASE="results/pythia_1.4b_continuous_final_iteration"
+OUTPUT_BASE="results/pythia_1.4b_continuous_final_iteration_benchmark"
 
 NUM_TASKS=${#BENCHMARK_TASKS[@]}
 TASK_IDX=$((SLURM_ARRAY_TASK_ID % NUM_TASKS))
