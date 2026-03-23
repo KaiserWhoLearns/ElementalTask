@@ -10,6 +10,14 @@ from .base_task import BaseTask, TaskConfig
 
 class TaskRegistry:
     """Automatic task discovery and registration system."""
+
+    # Legacy compositional task names now backed by blended compositions data.
+    _COMPOSITIONAL_TO_BLENDED_ALIASES = {
+        "coref_tracking_query",
+        "decipher_apply_reason",
+        "extract_verify",
+        "opplan_solve",
+    }
     
     def __init__(self):
         self._tasks: Dict[str, Type[BaseTask]] = {}
@@ -250,6 +258,15 @@ class TaskRegistry:
             - compositional:upper_reverse,lower_first (multiple categories)
             - spaced=True for character-spaced input/output
         """
+        if category_filter:
+            categories = [c.strip() for c in category_filter.split(",") if c.strip()]
+            if categories and all(c in self._COMPOSITIONAL_TO_BLENDED_ALIASES for c in categories):
+                from tasks.implementations.blended_compositions_task import create_blended_compositions_task
+
+                # Keep incoming namespace stable while routing to blended data.
+                blended_name = f"blended_compositions:{','.join(categories)}"
+                return create_blended_compositions_task(name=blended_name)
+
         task_name = "compositional"
         if category_filter:
             task_name = f"compositional:{category_filter}"
