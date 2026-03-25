@@ -15,10 +15,17 @@ class SimpleICLTask(BaseTask):
         
         # Define hardcoded demonstrations for each category
         import string
+        import random
 
-        # Build full alphabet demonstrations for completeness
+        # Build full alphabet demonstrations for completeness.
+        # Shuffle with a fixed seed so the 5 shown demos are non-consecutive,
+        # which eliminates the "consecutive alphabetic shift" ambiguity that
+        # arises when the model always sees a->A, b->B, c->C, d->D, e->E.
+        _rng = random.Random(42)
         uppercase_demos = [f"{ch.lower()} -> {ch}" for ch in string.ascii_uppercase]
+        _rng.shuffle(uppercase_demos)
         lowercase_demos = [f"{ch} -> {ch.lower()}" for ch in string.ascii_uppercase]
+        _rng.shuffle(lowercase_demos)
 
         self.category_demonstrations = {
             "uppercase": uppercase_demos,
