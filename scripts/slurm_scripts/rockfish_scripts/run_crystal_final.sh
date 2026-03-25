@@ -4,13 +4,13 @@
 #SBATCH --error=logs/eval_final_crystal_%A_%a.err
 #SBATCH --mail-user=hsun74@jhu.edu
 #SBATCH --mail-type=FAIL,END
-#SBATCH -A mdredze80_gpu
-#SBATCH --partition=ica100
+#SBATCH -A mdredze1_gpu
+#SBATCH --partition=a100
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --mem=64G
 #SBATCH --gpus=1
-#SBATCH --time=3-00:00:00
+#SBATCH --time=12:00:00
 #SBATCH --array=0-108
 
 BASE_DIR="/scratch4/mdredze1/hsun74/ElementalTask"
