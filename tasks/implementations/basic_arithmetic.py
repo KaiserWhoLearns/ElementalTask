@@ -66,7 +66,7 @@ class BasicArithmeticTask(BaseTask):
         
         # Add instruction and current problem
         question = instance[self.config.input_column]
-        prompt += f"Input: {question}\Output:"
+        prompt += f"Input: {question}\nOutput:"
         
         return prompt
     
