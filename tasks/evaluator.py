@@ -167,8 +167,9 @@ class TaskEvaluator:
             model_path,
             revision=self.model_config.checkpoint,
             trust_remote_code=self.model_config.trust_remote_code,
-            torch_dtype=torch.float16,
-            device_map="auto"
+            torch_dtype=torch.bfloat16,  # avoid float16 overflow (NaN logits) at early checkpoints
+            device_map="auto",
+            use_safetensors=False,
         )
     
     def _load_openai_client(self):
