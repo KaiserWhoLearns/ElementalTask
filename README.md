@@ -1,3 +1,33 @@
+# ElementalTask
+
+Artifacts for [What Do Language Models Learn and When? The Implicit Curriculum Hypothesis](https://arxiv.org/abs/2604.08510), COLM 2026.
+
+## Artifact release v0.1
+
+The release contains 88 tasks, 19,863 reference examples, 38,889 observed accuracy measurements across 10 models, and 806 function vectors (one ZIP per model).
+
+- [Hugging Face datasets and downloads](https://huggingface.co/datasets/elemental-tasks/paper-artifacts)
+- [GitHub release and individual archives](https://github.com/KaiserWhoLearns/ElementalTask/releases/tag/artifacts-v0.1)
+- [Loading instructions, coverage, and reproducibility notes](https://huggingface.co/datasets/elemental-tasks/paper-artifacts/blob/v0.1/README.md)
+
+Some third-party task materials are omitted from the artifact release pending redistribution permission. Coverage is documented in the release manifest.
+
+Project code uses MIT; original project data and artifact documentation use CC BY 4.0, with third-party terms preserved. The release uses full-residual OLMo-2 13B vectors and documents the distinction from the paper's head-selection entry.
+
+## Citation
+
+If you use ElementalTask in your research, please cite:
+
+```bibtex
+@inproceedings{implicit-curriculum,
+  title = {What Do Language Models Learn and When? The Implicit Curriculum Hypothesis},
+  author = {Liu, Emmy and Sun, Kaiser and Li, Millicent and Lee, Isabelle and Tjuatja, Lindia and Huang, Jen-tse and Neubig, Graham},
+  booktitle = {Proceedings of the 3rd Conference on Language Modeling (COLM 2026)},
+  year = {2026},
+  url = {https://arxiv.org/abs/2604.08510}
+}
+```
+
 ## Project Structure
 
 ```
