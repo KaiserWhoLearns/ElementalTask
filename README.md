@@ -1,3 +1,7 @@
+## Task material availability
+
+Some third-party task materials are omitted pending redistribution permission. The public task snapshots, included-task manifest, and loading instructions are available in the [v0.1 artifact release](https://huggingface.co/datasets/elemental-tasks/paper-artifacts/tree/v0.1).
+
 ## Project Structure
 
 ```
